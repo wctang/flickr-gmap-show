@@ -232,7 +232,6 @@ function FlickrGmapShow(varName) {
 
 
     function Gmaps_onzoom(oldLevel, newLevel) {
-        document.title = newLevel;
         this.clearOverlays();
     
         delta = deltas[newLevel];
