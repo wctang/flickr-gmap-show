@@ -72,6 +72,7 @@ function FlickrGmapMarker(icon, photos) {
                 imglink.setAttribute("href", p_url);
                 imgspan.id="pic"+i;
                 imgspan.style.position = "absolute";
+                imgspan.style.display = "none";
 
                 imglink.appendChild(img);
                 imgspan.appendChild(imglink);
