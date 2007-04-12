@@ -27,6 +27,30 @@ function FlickrGmapMarker(icon, photos) {
 
 
     function refreshImgList(imagesDiv, currpos, info) {
+        if( currpos == 0) {
+            var to = imagesDiv.childNodes.length > 5 ? 5 : imagesDiv.childNodes.length;
+            for(var i = 0; i< to; ++i) {
+                var a = imagesDiv.childNodes[i].childNodes[0];
+                var img = a.childNodes[0];
+                if( !img.getAttribute("src")) {
+                    var url = a.getAttribute("href");
+                    img.setAttribute("src", url+"_s.jpg");
+                    a.setAttribute("href", url+".jpg");
+                }
+            }
+        } else {
+            var span = imagesDiv.childNodes[currpos+4];
+            if(span) {
+                var a = span.childNodes[0];
+                var img = a.childNodes[0];
+                if( !img.getAttribute("src")) {
+                    var url = a.getAttribute("href");
+                    img.setAttribute("src", url+"_s.jpg");
+                    a.setAttribute("href", url+".jpg");
+                }
+            }
+        }
+        
         for( var i = 0; i < imagesDiv.childNodes.length; i++ ) {
             var node = imagesDiv.childNodes[i];
             if(i == currpos) {
@@ -56,8 +80,7 @@ function FlickrGmapMarker(icon, photos) {
             this.imagesDiv = document.createElement("div");
             for(var i = 0, len = this.photos.length; i < len; ++i) {
                 var photo = this.photos[i];
-                t_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+"_s.jpg";
-                p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+".jpg";
+                p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret;
 
                 var imgspan = document.createElement("span");
                 var imglink = document.createElement("a");
@@ -66,7 +89,6 @@ function FlickrGmapMarker(icon, photos) {
                 img.setAttribute("alt", photo.title);
                 img.setAttribute("width", 75);
                 img.setAttribute("height", 75);
-                img.setAttribute("src", t_url);
                 imglink.setAttribute("rel", "lightbox[photo]");
                 imglink.setAttribute("title", photo.title);
                 imglink.setAttribute("href", p_url);
@@ -312,16 +334,4 @@ function FlickrGmapShow(varName) {
         
         loadGoogleMap();
     }
-
-//    this.cbPhotosetsGetInfo = function cbPhotosetsGetInfo(rsp){
-//        if( rsp.stat == "fail") {
-//            document.write(rsp.message);
-//            return;
-//        }
-//        
-//        document.getElementById('settitle').innerHTML = '<a href="http://www.flickr.com/photos/'+rsp.photoset.owner+'/sets/'+rsp.photoset.id+'/">'+rsp.photoset.title._content+'</a>';
-//        document.title = rsp.photoset.title._content;
-//    }
-
-    
 }
