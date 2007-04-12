@@ -63,7 +63,7 @@ width:100%; height:100%;
     if(!photosetid || photosetid.length == 0) {
         errorfun("not set the photoset_id");
     } else {
-        var fgs = new FlickrGmapShow_PhotoSet("fgs", "gmap", photosetid, errorfun);
+        new FlickrGmapShow_PhotoSet("gmap", photosetid, errorfun);
     }
     </script>
 </body>
