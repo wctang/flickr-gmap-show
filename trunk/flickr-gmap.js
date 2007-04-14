@@ -8,6 +8,7 @@ function runFlickrAPI(apimethod, callback, parms) {
     script.src = urlSrc;
     script.id = "flickrapiscript";
     script.type = 'text/javascript';
+    document.title = parms;
     document.getElementsByTagName('body').item(0).appendChild(script);
 }
 function clearFlickrScript() {
@@ -65,133 +66,8 @@ function FlickrGmapMarker(icon, photos) {
     this.photos = photos;
     this.currpos = 0;
 
-
-    function refreshImgList(imagesDiv, currpos, info) {
-        if( currpos == 0) {
-            var to = imagesDiv.childNodes.length > 5 ? 5 : imagesDiv.childNodes.length;
-            for(var i = 0; i< to; ++i) {
-                var a = imagesDiv.childNodes[i].childNodes[0];
-                var img = a.childNodes[0];
-                if( !img.getAttribute("src")) {
-                    var url = a.getAttribute("href");
-                    img.setAttribute("src", url+"_s.jpg");
-                    a.setAttribute("href", url+".jpg");
-                }
-            }
-        } else {
-            var span = imagesDiv.childNodes[currpos+4];
-            if(span) {
-                var a = span.childNodes[0];
-                var img = a.childNodes[0];
-                if( !img.getAttribute("src")) {
-                    var url = a.getAttribute("href");
-                    img.setAttribute("src", url+"_s.jpg");
-                    a.setAttribute("href", url+".jpg");
-                }
-            }
-        }
-        
-        for( var i = 0; i < imagesDiv.childNodes.length; i++ ) {
-            var node = imagesDiv.childNodes[i];
-            if(i == currpos) {
-                node.style.display = "inline";
-                node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "75px";
-                node.style.top =  "0px";
-                node.style.left = "80px";
-            } else if(i == currpos-1) {
-                node.style.display = "inline";
-                node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
-                node.style.top =  "15px";
-                node.style.left = "15px";
-            } else if(i == currpos+1) {
-                node.style.display = "inline";
-                node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
-                node.style.top =  "15px";
-                node.style.left = "175px";
-            } else {
-                node.style.display = "none";
-            }
-        }
-        info.innerHTML = " " + (currpos+1) + " of " + imagesDiv.childNodes.length + " ";
-    }
-
-    GEvent.addListener(this, "click", function () {
-        clearLightBox();
-
-        if(!this.imagesDiv) {
-            this.imagesDiv = document.createElement("div");
-            for(var i = 0, len = this.photos.length; i < len; ++i) {
-                var photo = this.photos[i];
-                p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret;
-
-                var imgspan = document.createElement("span");
-                var imglink = document.createElement("a");
-                var img = document.createElement("img");
-
-                img.setAttribute("alt", photo.title);
-                img.setAttribute("width", 75);
-                img.setAttribute("height", 75);
-                imglink.setAttribute("rel", "lightbox[photo]");
-                imglink.setAttribute("title", photo.title);
-                imglink.setAttribute("href", p_url);
-                imgspan.id="pic"+i;
-                imgspan.style.position = "absolute";
-                imgspan.style.display = "none";
-
-                imglink.appendChild(img);
-                imgspan.appendChild(imglink);
-                this.imagesDiv.appendChild(imgspan);
-            }
-        	this.info = document.createElement("span");
-        }
-
-
-        var imgl = document.createElement("img");
-        imgl.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif");
-        imgl.marker = this;
-        imgl.style.cursor = "pointer";
-    	imgl.onmousedown = function() {
-    	    if( this.marker.currpos <= 0) {
-    	        return;
-    	    }
-	        this.marker.currpos--;
-    	    refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
-    	}
-        var imgr = document.createElement("img");
-        imgr.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_next_default.gif");
-        imgr.marker = this;
-        imgr.style.cursor = "pointer";
-    	imgr.onmousedown = function() {
-    	    if( this.marker.currpos >= this.marker.imagesDiv.childNodes.length-1) {
-    	        return;
-    	    }
-	        this.marker.currpos++;
-    	    refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
-    	}
-        var controlDiv = document.createElement("div");
-        controlDiv.appendChild(imgl);
-        controlDiv.appendChild(imgr);
-        controlDiv.appendChild(this.info);
-
-        refreshImgList(this.imagesDiv, this.currpos, this.info);
-
-        var infoWindow = document.createElement("div");
-        infoWindow.appendChild(this.imagesDiv);
-        infoWindow.appendChild(controlDiv);
-        infoWindow.style.width = "250px";
-        infoWindow.style.height = "100px";
-        this.imagesDiv.style.height = "80px"
-        controlDiv.style.position = "absolute";
-        controlDiv.style.top = "80px";
-        controlDiv.style.height = "20px";
-        this.imagesDiv.style.width = controlDiv.style.width = infoWindow.style.height;
-
-        this.openInfoWindow(infoWindow);
-
-        initLightbox();
-    });
+    GEvent.addListener(this, "click", this.onClick);
 }
-
 FlickrGmapMarker.prototype = new GMarker(new GLatLng(0, 0));
 FlickrGmapMarker.prototype.initialize = function(map) {
 	GMarker.prototype.initialize.call(this, map);
@@ -240,7 +116,129 @@ FlickrGmapMarker.prototype.remove = function() {
     this.div = null;
     GMarker.prototype.remove.call(this);
 }
+FlickrGmapMarker.prototype.refreshImgList = function(imagesDiv, currpos, info) {
+    if( currpos == 0) {
+        var to = imagesDiv.childNodes.length > 5 ? 5 : imagesDiv.childNodes.length;
+        for(var i = 0; i< to; ++i) {
+            var a = imagesDiv.childNodes[i].childNodes[0];
+            var img = a.childNodes[0];
+            if( !img.getAttribute("src")) {
+                var url = a.getAttribute("href");
+                img.setAttribute("src", url+"_s.jpg");
+                a.setAttribute("href", url+".jpg");
+            }
+        }
+    } else {
+        var span = imagesDiv.childNodes[currpos+4];
+        if(span) {
+            var a = span.childNodes[0];
+            var img = a.childNodes[0];
+            if( !img.getAttribute("src")) {
+                var url = a.getAttribute("href");
+                img.setAttribute("src", url+"_s.jpg");
+                a.setAttribute("href", url+".jpg");
+            }
+        }
+    }
+    
+    for( var i = 0; i < imagesDiv.childNodes.length; i++ ) {
+        var node = imagesDiv.childNodes[i];
+        if(i == currpos) {
+            node.style.display = "inline";
+            node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "75px";
+            node.style.top =  "0px";
+            node.style.left = "80px";
+        } else if(i == currpos-1) {
+            node.style.display = "inline";
+            node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
+            node.style.top =  "15px";
+            node.style.left = "15px";
+        } else if(i == currpos+1) {
+            node.style.display = "inline";
+            node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
+            node.style.top =  "15px";
+            node.style.left = "175px";
+        } else {
+            node.style.display = "none";
+        }
+    }
+    info.innerHTML = " " + (currpos+1) + " of " + imagesDiv.childNodes.length + " ";
+}
+FlickrGmapMarker.prototype.onClick = function() {
+    clearLightBox();
 
+    if(!this.imagesDiv) {
+        this.imagesDiv = document.createElement("div");
+        for(var i = 0, len = this.photos.length; i < len; ++i) {
+            var photo = this.photos[i];
+            p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret;
+
+            var imgspan = document.createElement("span");
+            var imglink = document.createElement("a");
+            var img = document.createElement("img");
+
+            img.setAttribute("alt", photo.title);
+            img.setAttribute("width", 75);
+            img.setAttribute("height", 75);
+            imglink.setAttribute("rel", "lightbox[photo]");
+            imglink.setAttribute("title", photo.title);
+            imglink.setAttribute("href", p_url);
+            imgspan.id="pic"+i;
+            imgspan.style.position = "absolute";
+            imgspan.style.display = "none";
+
+            imglink.appendChild(img);
+            imgspan.appendChild(imglink);
+            this.imagesDiv.appendChild(imgspan);
+        }
+    	this.info = document.createElement("span");
+    }
+
+
+    var imgl = document.createElement("img");
+    imgl.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif");
+    imgl.marker = this;
+    imgl.style.cursor = "pointer";
+	imgl.onmousedown = function() {
+	    if( this.marker.currpos <= 0) {
+	        return;
+	    }
+        this.marker.currpos--;
+	    this.marker.refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
+	}
+    var imgr = document.createElement("img");
+    imgr.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_next_default.gif");
+    imgr.marker = this;
+    imgr.style.cursor = "pointer";
+	imgr.onmousedown = function() {
+	    if( this.marker.currpos >= this.marker.imagesDiv.childNodes.length-1) {
+	        return;
+	    }
+        this.marker.currpos++;
+	    this.marker.refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
+	}
+    var controlDiv = document.createElement("div");
+    controlDiv.appendChild(imgl);
+    controlDiv.appendChild(imgr);
+    controlDiv.appendChild(this.info);
+
+    this.refreshImgList(this.imagesDiv, this.currpos, this.info);
+
+    var infoWindow = document.createElement("div");
+    infoWindow.appendChild(this.imagesDiv);
+    infoWindow.appendChild(controlDiv);
+    infoWindow.style.width = "250px";
+    infoWindow.style.height = "100px";
+    this.imagesDiv.style.height = "80px"
+    controlDiv.style.position = "absolute";
+    controlDiv.style.top = "80px";
+    controlDiv.style.height = "20px";
+    this.imagesDiv.style.width = controlDiv.style.width = infoWindow.style.height;
+
+    this.openInfoWindow(infoWindow);
+
+    initLightbox();
+}
 
 
 
@@ -387,50 +385,38 @@ try {
 
 
 
-function PageControl() {
-    this.setPageInfo = function(curr, total) {
-        if( total < 2) {
-            this.zoomInDiv.style.backgroundColor = "gray";
-            this.zoomOutDiv.style.backgroundColor = "gray";
-        } else {
-            this.zoomInDiv.style.backgroundColor = "white";
-            this.zoomOutDiv.style.backgroundColor = "white";
-        }
-        this.infoSpan.innerHTML = curr + " of " + total;
-    }
-}
+function PageControl() {}
 PageControl.prototype = new GControl();
+PageControl.prototype.currpage = 1;
+PageControl.prototype.totalpages = 1;
 PageControl.prototype.initialize = function(map) {
+    this.fgs = map.fgs;
     var container = document.createElement("div");
-    
-    this.zoomInDiv = document.createElement("span");
-    this.setButtonStyle_(this.zoomInDiv);
-    container.appendChild(this.zoomInDiv);
-    this.zoomInDiv.appendChild(document.createTextNode("Page UP"));
-    GEvent.addDomListener(this.zoomInDiv, "click", function() {
-        map.fgs.photopage_up();
-    });
 
-    this.infoSpan = document.createElement("span");
-    this.setButtonStyle_(this.infoSpan);
-    container.appendChild(this.infoSpan);
+    this.spanPgup = document.createElement("span");
+    this.spanPgup.pagectrl = this;
+    this.setButtonStyle_(this.spanPgup);
+    container.appendChild(this.spanPgup);
+    this.spanPgup.appendChild(document.createTextNode("Page UP"));
+    GEvent.addDomListener(this.spanPgup, "click", this.pgup);
 
-    this.zoomOutDiv = document.createElement("span");
-    this.setButtonStyle_(this.zoomOutDiv);
-    container.appendChild(this.zoomOutDiv);
-    this.zoomOutDiv.appendChild(document.createTextNode("Page Down"));
-    GEvent.addDomListener(this.zoomOutDiv, "click", function() {
-        map.fgs.photopage_down();
-    });
+    this.spanInfo = document.createElement("span");
+    this.setButtonStyle_(this.spanInfo);
+    container.appendChild(this.spanInfo);
+
+    this.spanPgdn = document.createElement("span");
+    this.spanPgdn.pagectrl = this;
+    this.setButtonStyle_(this.spanPgdn);
+    container.appendChild(this.spanPgdn);
+    this.spanPgdn.appendChild(document.createTextNode("Page Down"));
+    GEvent.addDomListener(this.spanPgdn, "click", this.pgdn);
 
     map.getContainer().appendChild(container);
     return container;
 }
-
 PageControl.prototype.getDefaultPosition = function() {
     return new GControlPosition(G_ANCHOR_BOTTOM_RIGHT, new GSize(10, 25));
 }
-
 PageControl.prototype.setButtonStyle_ = function(button) {
     //button.style.textDecoration = "underline";
     button.style.color = "#0000cc";
@@ -443,6 +429,37 @@ PageControl.prototype.setButtonStyle_ = function(button) {
     button.style.width = "6em";
     button.style.cursor = "pointer";
 }
+PageControl.prototype.setPageInfo = function(curr, total) {
+    this.currpage = curr;
+    this.totalpages = total;
+    if( this.totalpages < 2) {
+        this.spanPgup.style.backgroundColor = "gray";
+        this.spanPgdn.style.backgroundColor = "gray";
+    } else {
+        this.spanPgup.style.backgroundColor = "white";
+        this.spanPgdn.style.backgroundColor = "white";
+    }
+    this.spanPgup.style.cursor = "pointer";
+    this.spanPgdn.style.cursor = "pointer";
+    this.spanInfo.style.cursor = "pointer";
+    this.spanInfo.innerHTML = this.currpage + " of " + this.totalpages;
+}
+PageControl.prototype.pgup = function() {
+    if( this.pagectrl.currpage == 1) return;
+    this.pagectrl.currpage --;
+    this.pagectrl.spanPgup.style.cursor = "wait";
+    this.pagectrl.spanInfo.style.cursor = "wait";
+    this.pagectrl.spanPgdn.style.cursor = "wait";
+    this.pagectrl.fgs.browsePhotos_refresh();
+}
+PageControl.prototype.pgdn = function() {
+    if( this.pagectrl.currpage == this.pagectrl.totalpages) return;
+    this.pagectrl.currpage ++;
+    this.pagectrl.spanPgup.style.cursor = "wait";
+    this.pagectrl.spanInfo.style.cursor = "wait";
+    this.pagectrl.spanPgdn.style.cursor = "wait";
+    this.pagectrl.fgs.browsePhotos_refresh();
+}
 
 
 
@@ -452,15 +469,13 @@ function FlickrGmapShow_BrowsePhotos(mapName, latitude, longitude, zoom, searchp
     
     if (!GBrowserIsCompatible()) { return; }
 
-    this.currpage = 1;
-    this.totalpages = 1;
     this.searchparams = searchparams;
         
     var map = new GMap2(document.getElementById(mapName));
     map.fgs = this;
     this.map = map;
-    GEvent.addListener(map, "dragend", browsePhotos_ondrag);
-    GEvent.addListener(map, "zoomend", browsePhotos_onzoom);
+    GEvent.addListener(map, "dragend", this.browsePhotos_ondrag);
+    GEvent.addListener(map, "zoomend", this.browsePhotos_onzoom);
     map.addControl(new GLargeMapControl());
     map.addControl(new GMapTypeControl());
     this.pagectrl = new PageControl();
@@ -469,32 +484,19 @@ function FlickrGmapShow_BrowsePhotos(mapName, latitude, longitude, zoom, searchp
     map.enableContinuousZoom();
     map.lastCenter = new GLatLng(0, 0);
     map.setCenter(new GLatLng(latitude, longitude), zoom, G_SATELLITE_MAP);
-    
-
-    function browsePhotos_ondrag() {
-        var center = this.getCenter();
-        var dist = 3*deltas[this.getZoom()];
-        if(Math.abs(center.lat()-this.lastCenter.lat())<dist && Math.abs(center.lng()-this.lastCenter.lng())<dist ) {
-            return;
-        }
-        this.fgs.currpage = 1;
-        this.fgs.browsePhotos_refresh();
-    }
-
-    function browsePhotos_onzoom() {
-        this.fgs.currpage = 1;
-        this.fgs.browsePhotos_refresh();
-    }
 }
-FlickrGmapShow_BrowsePhotos.prototype.photopage_up = function() {
-    if( this.currpage == 1) return;
-    this.currpage --;
-    this.browsePhotos_refresh();
+FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_ondrag = function() {
+    var center = this.getCenter();
+    var dist = 3*deltas[this.getZoom()];
+    if(Math.abs(center.lat()-this.lastCenter.lat())<dist && Math.abs(center.lng()-this.lastCenter.lng())<dist ) {
+        return;
+    }
+    this.fgs.pagectrl.currpage = 1;
+    this.fgs.browsePhotos_refresh();
 }
-FlickrGmapShow_BrowsePhotos.prototype.photopage_down = function() {
-    if( this.currpage == this.totalpages) return;
-    this.currpage ++;
-    this.browsePhotos_refresh();
+FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_onzoom = function() {
+    this.fgs.pagectrl.currpage = 1;
+    this.fgs.browsePhotos_refresh();
 }
 FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_refresh = function() {
     this.map.lastCenter = this.map.getCenter();
@@ -503,18 +505,45 @@ FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_refresh = function() {
     var bound = this.map.getBounds();
     var sw = bound.getSouthWest();
     var ne = bound.getNorthEast();
+    var w = sw.lng();
+    var e = ne.lng();
+    var n = ne.lat();
+    var s = sw.lat();
+    var wid;
+    if( e < w) {
+        wid = 360+e-w;
+    } else {
+        wid = e - w;
+    }
+    var hig = n - s;
     
+    w += wid/5;
+    if( w > 180) w -= 360;
+    e -= wid/5;
+    if( e <= -180) e += 360;
+
+    if( e < w) {
+        if( (180+e) > (180-w)) {
+            w = -180;
+        } else {
+            e = 180;
+        }
+    }
+    
+    
+    n -= hig/5;
+    s += hig/5;
+
     FlickrGmapShow_BrowsePhotos_cbBrowsePhotos.map = this.map;
     var params = "extras=geo&";
     if(this.searchparams) {
         params += this.searchparams;
     }
-    runFlickrAPI("flickr.photos.search", "FlickrGmapShow_BrowsePhotos_cbBrowsePhotos", params + "&page="+this.currpage+"&bbox="+sw.lng()+","+sw.lat()+","+ne.lng()+","+ne.lat());
+    runFlickrAPI("flickr.photos.search", "FlickrGmapShow_BrowsePhotos_cbBrowsePhotos", params + "&page="+this.pagectrl.currpage+"&bbox="+w+","+s+","+e+","+n);
 }
 
 function FlickrGmapShow_BrowsePhotos_cbBrowsePhotos(rsp) {
-var map = FlickrGmapShow_BrowsePhotos_cbBrowsePhotos.map;
-
+    var map = FlickrGmapShow_BrowsePhotos_cbBrowsePhotos.map;
 try {
     if( rsp.stat == "fail") {
         alert(rsp.message);
@@ -525,7 +554,6 @@ try {
     }
     map.clearOverlays();
     
-    map.fgs.totalpages = rsp.photos.pages;
     map.fgs.pagectrl.setPageInfo(rsp.photos.page, rsp.photos.pages);
     
     delta = deltas[map.getZoom()];
