@@ -2,8 +2,8 @@
 
 var FLICKR_API_KEY = 'ebed0eef1b25b738b1903ef93b8f25ee';
 
-function runFlickrAPI(method, callback, parms) {
-    var urlSrc = "http://www.flickr.com/services/rest/?api_key="+FLICKR_API_KEY+"&format=json&method="+method+"&jsoncallback="+callback+"&"+parms;
+function runFlickrAPI(apimethod, callback, parms) {
+    var urlSrc = "http://www.flickr.com/services/rest/?api_key="+FLICKR_API_KEY+"&format=json&method="+apimethod+"&jsoncallback="+callback+"&tick="+(new Date()).getTime()+"&"+parms;
     var script = document.createElement("script");
     script.src = urlSrc;
     script.id = "flickrapiscript";
@@ -336,6 +336,9 @@ FlickrGmapShow_PhotoSet.prototype.showPhotoSet_onzoom = function (oldLevel, newL
 }
 
 function FlickrGmapShow_PhotoSet_cbShowPhotoSet(rsp) {
+var fgs = FlickrGmapShow_PhotoSet_cbShowPhotoSet.fgs;
+var map = fgs.map;
+try {
     if( rsp.stat == "fail") {
         if( typeof _cbfunErrorShowPhotoSet == 'function') {
             _cbfunErrorShowPhotoSet(rsp.message);
@@ -343,8 +346,6 @@ function FlickrGmapShow_PhotoSet_cbShowPhotoSet(rsp) {
         return;
     }
 
-    var fgs = FlickrGmapShow_PhotoSet_cbShowPhotoSet.fgs;
-    var map = fgs.map;
     var totalphotos = map.total_photos;
     for (var i=0,len=rsp.photoset.photo.length; i<len; i++) {
         photo = rsp.photoset.photo[i];
@@ -365,8 +366,23 @@ function FlickrGmapShow_PhotoSet_cbShowPhotoSet(rsp) {
     GEvent.addListener(map, "zoomend", fgs.showPhotoSet_onzoom);
     var zoom = map.getBoundsZoomLevel(bounds);
     map.setCenter(bounds.getCenter(), zoom, G_SATELLITE_MAP);
+} finally {
     endWait(map);
 }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -374,13 +390,11 @@ function FlickrGmapShow_PhotoSet_cbShowPhotoSet(rsp) {
 function PageControl() {
     this.setPageInfo = function(curr, total) {
         if( total < 2) {
-            this.zoomInDiv.style.display = "none";
-            this.infoSpan.style.display = "none";
-            this.zoomOutDiv.style.display = "none";
+            this.zoomInDiv.style.backgroundColor = "gray";
+            this.zoomOutDiv.style.backgroundColor = "gray";
         } else {
-            this.zoomInDiv.style.display = "inline";
-            this.infoSpan.style.display = "inline";
-            this.zoomOutDiv.style.display = "inline";
+            this.zoomInDiv.style.backgroundColor = "white";
+            this.zoomOutDiv.style.backgroundColor = "white";
         }
         this.infoSpan.innerHTML = curr + " of " + total;
     }
@@ -499,13 +513,16 @@ FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_refresh = function() {
 }
 
 function FlickrGmapShow_BrowsePhotos_cbBrowsePhotos(rsp) {
+var map = FlickrGmapShow_BrowsePhotos_cbBrowsePhotos.map;
+
+try {
     if( rsp.stat == "fail") {
+        alert(rsp.message);
         if( typeof _cbfunErrorBrowsePhotos == 'function') {
             _cbfunErrorBrowsePhotos(rsp.message);
         }
         return;
     }
-    var map = FlickrGmapShow_BrowsePhotos_cbBrowsePhotos.map;
     map.clearOverlays();
     
     map.fgs.totalpages = rsp.photos.pages;
@@ -549,8 +566,9 @@ function FlickrGmapShow_BrowsePhotos_cbBrowsePhotos(rsp) {
         if(temp_photos[i].length == 0) { continue; }
         map.addOverlay(new FlickrGmapMarker(markerIcon, temp_photos[i]));
     }
-    
+} finally {    
     clearFlickrScript();
     endWait(map);
+}
 }
 
