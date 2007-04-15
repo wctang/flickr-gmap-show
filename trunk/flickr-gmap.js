@@ -1,6 +1,9 @@
 
 
 var FLICKR_API_KEY = 'ebed0eef1b25b738b1903ef93b8f25ee';
+var imgPrevImg = "http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif";
+var imgNextImg = "http://l.yimg.com/www.flickr.com/images/simple_next_default.gif";
+var imgPosition = "http://l.yimg.com/www.flickr.com/images/dot1_p.png";
 
 function runFlickrAPI(apimethod, callback, parms) {
     var urlSrc = "http://www.flickr.com/services/rest/?api_key="+FLICKR_API_KEY+"&format=json&method="+apimethod+"&jsoncallback="+callback+"&tick="+(new Date()).getTime()+"&"+parms;
@@ -39,10 +42,7 @@ function endWait(map) {
 
 // Create our "tiny" marker icon
 var markerIcon = new GIcon();
-//icon.image = "http://labs.google.com/ridefinder/images/mm_20_red.png";
-//icon.shadow = "http://labs.google.com/ridefinder/images/mm_20_shadow.png";
-//icon.shadowSize = new GSize(22, 20);
-markerIcon.image = "http://l.yimg.com/www.flickr.com/images/dot1_p.png";
+markerIcon.image = imgPosition;
 markerIcon.iconSize = new GSize(18, 19);
 markerIcon.iconAnchor = new GPoint(9, 9);
 markerIcon.infoWindowAnchor = new GPoint(9, 9);
@@ -116,11 +116,11 @@ FlickrGmapMarker.prototype.remove = function() {
     this.div = null;
     GMarker.prototype.remove.call(this);
 }
-FlickrGmapMarker.prototype.refreshImgList = function(imagesDiv, currpos, info) {
-    if( currpos == 0) {
-        var to = imagesDiv.childNodes.length > 5 ? 5 : imagesDiv.childNodes.length;
+FlickrGmapMarker.prototype.refreshImgList = function() {
+    if( this.currpos == 0) {
+        var to = this.imagesDiv.childNodes.length > 5 ? 5 : this.imagesDiv.childNodes.length;
         for(var i = 0; i< to; ++i) {
-            var a = imagesDiv.childNodes[i].childNodes[0];
+            var a = this.imagesDiv.childNodes[i].childNodes[0];
             var img = a.childNodes[0];
             if( !img.getAttribute("src")) {
                 var url = a.getAttribute("href");
@@ -129,7 +129,7 @@ FlickrGmapMarker.prototype.refreshImgList = function(imagesDiv, currpos, info) {
             }
         }
     } else {
-        var span = imagesDiv.childNodes[currpos+4];
+        var span = this.imagesDiv.childNodes[this.currpos+4];
         if(span) {
             var a = span.childNodes[0];
             var img = a.childNodes[0];
@@ -141,19 +141,19 @@ FlickrGmapMarker.prototype.refreshImgList = function(imagesDiv, currpos, info) {
         }
     }
     
-    for( var i = 0; i < imagesDiv.childNodes.length; i++ ) {
-        var node = imagesDiv.childNodes[i];
-        if(i == currpos) {
+    for( var i = 0; i < this.imagesDiv.childNodes.length; i++ ) {
+        var node = this.imagesDiv.childNodes[i];
+        if(i == this.currpos) {
             node.style.display = "inline";
             node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "75px";
             node.style.top =  "0px";
             node.style.left = "80px";
-        } else if(i == currpos-1) {
+        } else if(i == this.currpos-1) {
             node.style.display = "inline";
             node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
             node.style.top =  "15px";
             node.style.left = "15px";
-        } else if(i == currpos+1) {
+        } else if(i == this.currpos+1) {
             node.style.display = "inline";
             node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "45px";
             node.style.top =  "15px";
@@ -162,7 +162,7 @@ FlickrGmapMarker.prototype.refreshImgList = function(imagesDiv, currpos, info) {
             node.style.display = "none";
         }
     }
-    info.innerHTML = " " + (currpos+1) + " of " + imagesDiv.childNodes.length + " ";
+    this.info.innerHTML = " " + (this.currpos+1) + " of " + this.imagesDiv.childNodes.length + " ";
 }
 FlickrGmapMarker.prototype.onClick = function() {
     clearLightBox();
@@ -196,33 +196,23 @@ FlickrGmapMarker.prototype.onClick = function() {
 
 
     var imgl = document.createElement("img");
-    imgl.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif");
+    imgl.setAttribute("src", imgPrevImg);
     imgl.marker = this;
     imgl.style.cursor = "pointer";
-	imgl.onmousedown = function() {
-	    if( this.marker.currpos <= 0) {
-	        return;
-	    }
-        this.marker.currpos--;
-	    this.marker.refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
-	}
+	imgl.onmousedown = this.prevImg;
+
     var imgr = document.createElement("img");
-    imgr.setAttribute("src", "http://l.yimg.com/www.flickr.com/images/simple_next_default.gif");
+    imgr.setAttribute("src", imgNextImg);
     imgr.marker = this;
     imgr.style.cursor = "pointer";
-	imgr.onmousedown = function() {
-	    if( this.marker.currpos >= this.marker.imagesDiv.childNodes.length-1) {
-	        return;
-	    }
-        this.marker.currpos++;
-	    this.marker.refreshImgList(this.marker.imagesDiv, this.marker.currpos, this.marker.info);
-	}
+	imgr.onmousedown = this.nextImg;
+
     var controlDiv = document.createElement("div");
     controlDiv.appendChild(imgl);
     controlDiv.appendChild(imgr);
     controlDiv.appendChild(this.info);
 
-    this.refreshImgList(this.imagesDiv, this.currpos, this.info);
+    this.refreshImgList();
 
     var infoWindow = document.createElement("div");
     infoWindow.appendChild(this.imagesDiv);
@@ -239,6 +229,20 @@ FlickrGmapMarker.prototype.onClick = function() {
 
     initLightbox();
 }
+FlickrGmapMarker.prototype.nextImg = function() {
+    if( this.marker.currpos >= this.marker.imagesDiv.childNodes.length-1) {
+        return;
+    }
+    this.marker.currpos++;
+    this.marker.refreshImgList();
+}
+FlickrGmapMarker.prototype.prevImg = function() {
+    if( this.marker.currpos <= 0) {
+        return;
+    }
+    this.marker.currpos--;
+    this.marker.refreshImgList();
+}
 
 
 
@@ -246,28 +250,6 @@ FlickrGmapMarker.prototype.onClick = function() {
 
 
 
-var deltas =   [
-3.8, //0
-3.8, //1
-2,  //2
-1.5, //3
-0.6,//4 
-0.4, //5
-0.23, //6
-0.13, //7
-0.065, //8
-0.035, //9
-0.019, //10
-0.0095, //11
-0.005, //12
-0.0024, //13
-0.0012, //14
-0.0007, //15
-0.0003, //16
-0.00009, //17
-0.000025,//18
-0.000017,//19
-0.000001]; //20
 
 
 
@@ -295,7 +277,9 @@ FlickrGmapShow_PhotoSet.prototype.showPhotoSet_onzoom = function (oldLevel, newL
 
     this.clearOverlays();
 
-    delta = deltas[newLevel];
+    var p1 = this.fromDivPixelToLatLng(new GPoint(0, 0)).lat();
+    var p2 = this.fromDivPixelToLatLng(new GPoint(0, 20)).lat();
+    var delta = p1 - p2; 
 
     var temp_bounds = new Array();
     var temp_photos = new Array();
@@ -487,8 +471,10 @@ function FlickrGmapShow_BrowsePhotos(mapName, latitude, longitude, zoom, searchp
 }
 FlickrGmapShow_BrowsePhotos.prototype.browsePhotos_ondrag = function() {
     var center = this.getCenter();
-    var dist = 3*deltas[this.getZoom()];
-    if(Math.abs(center.lat()-this.lastCenter.lat())<dist && Math.abs(center.lng()-this.lastCenter.lng())<dist ) {
+    var p1 = this.fromDivPixelToLatLng(new GPoint(0, 0)).lat();
+    var p2 = this.fromDivPixelToLatLng(new GPoint(0, 60)).lat();
+    var delta = (p1 - p2);
+    if(Math.abs(center.lat()-this.lastCenter.lat())<delta && Math.abs(center.lng()-this.lastCenter.lng())<delta ) {
         return;
     }
     this.fgs.pagectrl.currpage = 1;
@@ -556,7 +542,10 @@ try {
     
     map.fgs.pagectrl.setPageInfo(rsp.photos.page, rsp.photos.pages);
     
-    delta = deltas[map.getZoom()];
+    
+    var p1 = map.fromDivPixelToLatLng(new GPoint(0, 0)).lat();
+    var p2 = map.fromDivPixelToLatLng(new GPoint(0, 20)).lat();
+    var delta = p1 - p2; 
 
     var temp_bounds = new Array();
     var temp_photos = new Array();
