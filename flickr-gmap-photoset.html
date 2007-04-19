@@ -31,17 +31,15 @@ width:100%; height:100%;
 </head>
 
 <body onunload="GUnload()">
+
+    <a href="javascript:auth.auth();">auth</a>
+
     <h2 id="header">Flickr GMap Show Photoset</h2>
     <div id="mainwrap">
         <div id="gmap"></div>
     </div>
 
     <script type="text/javascript">
-    function errorfun(errmsg) {
-        document.getElementById('header').innerHTML = errmsg;
-    }
-
-        
     if(location.href.indexOf("?")!=-1) {
         var queryString = location.href.substring(location.href.indexOf("?")+1);
         var parameters = queryString.split("&");
@@ -59,12 +57,13 @@ width:100%; height:100%;
             }
         }
     }
-    
+
     if(!photosetid || photosetid.length == 0) {
-        errorfun("not set the photoset_id");
+        alert("not set the photoset_id");
     } else {
-        new FlickrGmapShow_PhotoSet("gmap", photosetid, errorfun);
+        var map = FlickrGmapShow.createPhotoSetMap(document.getElementById("gmap"), photosetid);
     }
     </script>
+
 </body>
 </html>
