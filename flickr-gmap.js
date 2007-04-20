@@ -2,7 +2,6 @@
 
 var FLICKR_API_KEY = "ebed0eef1b25b738b1903ef93b8f25ee";
 var FLICKR_API_SECRET = "4260ccd8c3f7837e";
-var FLICKR_AUTH_MD5 = '3688a4bf2a27de59a7ab50b3eb70ab4e';
 
 var imgPrevImg = "http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif";
 var imgNextImg = "http://l.yimg.com/www.flickr.com/images/simple_next_default.gif";
@@ -612,6 +611,11 @@ try {
     GEvent.addListener(this, "zoomend", this._onzoom);
     var zoom = this.getBoundsZoomLevel(bounds);
     this.setCenter(bounds.getCenter(), zoom, G_SATELLITE_MAP);
+
+    if( rsp.photoset.pages > parseInt(rsp.photoset.page)) {
+        Utilities.maskMap(this);
+        flickr.callapi({method:'flickr.photosets.getPhotos', extras:'geo', photoset_id:photosetid, page:parseInt(rsp.photoset.page)+1}, this, this._search_callback);
+    }
 } finally {
     Utilities.unmaskMap(this);
 }
