@@ -333,7 +333,6 @@ flickr.callapi = function(args, obj, callback, sign) {
 }
 
 
-
 flickr.keys(FLICKR_API_KEY, FLICKR_API_SECRET);
 
 function FPhotoMarker(icon, photos) {
@@ -402,9 +401,8 @@ FPhotoMarker.prototype.refreshImgList = function() {
             var a = this.imagesDiv_.childNodes[i].childNodes[0];
             var img = a.childNodes[0];
             if( !img.getAttribute("src")) {
-                var url = a.getAttribute("href");
+                var url = a.href.substring(0,a.href.length-4);
                 img.setAttribute("src", url+"_s.jpg");
-                a.setAttribute("href", url+".jpg");
             }
         }
     } else {
@@ -413,9 +411,8 @@ FPhotoMarker.prototype.refreshImgList = function() {
             var a = span.childNodes[0];
             var img = a.childNodes[0];
             if( !img.getAttribute("src")) {
-                var url = a.getAttribute("href");
+                var url = a.href.substring(0,a.href.length-4);
                 img.setAttribute("src", url+"_s.jpg");
-                a.setAttribute("href", url+".jpg");
             }
         }
     }
@@ -450,22 +447,22 @@ FPhotoMarker.prototype.onClick = function() {
         var imagesDiv = document.createElement("div");
         for(var i = 0, len = this.photos_.length; i < len; ++i) {
             var photo = this.photos_[i];
-            p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret;
+            p_url = "http://farm"+photo.farm+".static.flickr.com/"+photo.server+"/"+photo.id+"_"+photo.secret+".jpg";
 
             var imgspan = document.createElement("span");
             var imglink = document.createElement("a");
             var img = document.createElement("img");
 
-            img.setAttribute("alt", photo.title);
-            img.setAttribute("width", 75);
-            img.setAttribute("height", 75);
-            img.border="0";
-            imglink.setAttribute("rel", "lightbox[photo]");
-            imglink.setAttribute("title", photo.title);
-            imglink.setAttribute("href", p_url);
+            img.alt = photo.title;
+            img.width = 75;
+            img.height = 75;
+            img.border = "0";
+            imglink.rel = "lightbox[photo]";
+            imglink.title = photo.title;
+            imglink.href = p_url;
             imgspan.id="pic"+i;
-            imgspan.style.position = "absolute";
-            imgspan.style.display = "none";
+            imgspan.style.position="absolute";
+            imgspan.style.display="none";
 
             imglink.appendChild(img);
             imgspan.appendChild(imglink);
@@ -523,11 +520,6 @@ FPhotoMarker.prototype.prevImg = function() {
     this.marker.currpos_--;
     this.marker.refreshImgList();
 };
-
-
-
-
-
 
 function FPhotoSet() {
     if (!GBrowserIsCompatible()) { return; }
