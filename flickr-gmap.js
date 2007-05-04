@@ -407,7 +407,7 @@ FPhotoMarker.prototype.refreshImgList = function() {
             var img = a.childNodes[0];
             if( !img.getAttribute("src")) {
                 var url = a.href.substring(0,a.href.length-4);
-                img.setAttribute("src", url+"_s.jpg");
+                img.src=url+"_s.jpg";
             }
         }
     } else {
@@ -417,7 +417,7 @@ FPhotoMarker.prototype.refreshImgList = function() {
             var img = a.childNodes[0];
             if( !img.getAttribute("src")) {
                 var url = a.href.substring(0,a.href.length-4);
-                img.setAttribute("src", url+"_s.jpg");
+                img.src=url+"_s.jpg";
             }
         }
     }
@@ -426,7 +426,7 @@ FPhotoMarker.prototype.refreshImgList = function() {
         var node = this.imagesDiv_.childNodes[i];
         if(i == this.currpos_) {
             node.style.display = "inline";
-            node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = "75px";
+            node.childNodes[0].childNodes[0].style.width=node.childNodes[0].childNodes[0].style.height='75px';
             node.style.top =  "0px";
             node.style.left = "80px";
         } else if(i == this.currpos_-1) {
@@ -443,12 +443,13 @@ FPhotoMarker.prototype.refreshImgList = function() {
             node.style.display = "none";
         }
     }
-    this.info_.innerHTML = " " + (this.currpos_+1) + " of " + this.imagesDiv_.childNodes.length + " ";
+    this.title_.innerHTML=this.imagesDiv_.childNodes[this.currpos_].childNodes[0].title;
+    this.info_.innerHTML=" " + (this.currpos_+1) + " of " + this.imagesDiv_.childNodes.length + " ";
 };
 FPhotoMarker.prototype.onClick = function() {
     Utilities.clearLightBox();
 
-    if(!this.imagesDiv_) {
+    if(!this.infoWindow_) {
         var imagesDiv = document.createElement("div");
         for(var i = 0, len = this.photos_.length; i < len; ++i) {
             var photo = this.photos_[i];
@@ -459,8 +460,7 @@ FPhotoMarker.prototype.onClick = function() {
             var img = document.createElement("img");
 
             img.alt = photo.title;
-            img.width = 75;
-            img.height = 75;
+            img.width=img.height=75;
             img.border = "0";
             imglink.rel = "lightbox[photo]";
             imglink.title = photo.title;
@@ -473,42 +473,47 @@ FPhotoMarker.prototype.onClick = function() {
             imgspan.appendChild(imglink);
             imagesDiv.appendChild(imgspan);
         }
-        this.info_ = document.createElement("span");
-        this.imagesDiv_ = imagesDiv;
+
+        var imgl = document.createElement("img");
+        var imgr = document.createElement('img');
+        imgl.marker=imgr.marker=this;
+        imgl.style.cursor=imgr.style.cursor="pointer";
+        imgl.src=imgPrevImg;
+        imgr.src=imgNextImg;
+        imgl.onmousedown = this.prevImg;
+        imgr.onmousedown = this.nextImg;
+        var infoSpan = document.createElement("span");
+        var controlDiv = document.createElement('div');
+        controlDiv.appendChild(imgl);
+        controlDiv.appendChild(imgr);
+        controlDiv.appendChild(infoSpan);
+
+        var titleDiv=document.createElement('div');
+
+        var infoWindow = document.createElement("div");
+        infoWindow.appendChild(titleDiv);
+        infoWindow.appendChild(imagesDiv);
+        infoWindow.appendChild(controlDiv);
+        
+        titleDiv.style.position=imagesDiv.style.position=controlDiv.style.position='absolute';
+        titleDiv.style.textAlign='center';
+        titleDiv.style.top='0px';
+        imagesDiv.style.top='20px';
+        controlDiv.style.top='100px';
+        titleDiv.style.height='20px';
+        imagesDiv.style.height='80px';
+        controlDiv.style.height='20px';
+        infoWindow.style.height='120px';
+        imagesDiv.style.width=controlDiv.style.width=titleDiv.style.width=infoWindow.style.width='250px';
+
+        this.infoWindow_=infoWindow;
+        this.title_=titleDiv;
+        this.imagesDiv_=imagesDiv;
+        this.info_=infoSpan;
     }
 
-    var imgl = document.createElement("img");
-    imgl.setAttribute("src", imgPrevImg);
-    imgl.marker = this;
-    imgl.style.cursor = "pointer";
-    imgl.onmousedown = this.prevImg;
-
-    var imgr = document.createElement("img");
-    imgr.setAttribute("src", imgNextImg);
-    imgr.marker = this;
-    imgr.style.cursor = "pointer";
-    imgr.onmousedown = this.nextImg;
-
-    var controlDiv = document.createElement("div");
-    controlDiv.appendChild(imgl);
-    controlDiv.appendChild(imgr);
-    controlDiv.appendChild(this.info_);
-
     this.refreshImgList();
-
-    var infoWindow = document.createElement("div");
-    infoWindow.appendChild(this.imagesDiv_);
-    infoWindow.appendChild(controlDiv);
-    infoWindow.style.width = "250px";
-    infoWindow.style.height = "100px";
-    this.imagesDiv_.style.height = "80px"
-    controlDiv.style.position = "absolute";
-    controlDiv.style.top = "80px";
-    controlDiv.style.height = "20px";
-    this.imagesDiv_.style.width = controlDiv.style.width = infoWindow.style.height;
-
-    this.openInfoWindow(infoWindow);
-
+    this.openInfoWindow(this.infoWindow_);
     initLightbox();
 };
 FPhotoMarker.prototype.nextImg = function() {
