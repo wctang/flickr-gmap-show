@@ -1,7 +1,4 @@
 
-
-
-
 var FLICKR_API_KEY = "ebed0eef1b25b738b1903ef93b8f25ee";
 var FLICKR_API_SECRET = "4260ccd8c3f7837e";
 
@@ -11,11 +8,17 @@ var imgPosition = "http://l.yimg.com/www.flickr.com/images/dot1_p.png";
 var imgLoading = "http://flickr-gmap-show.googlecode.com/svn/trunk/lightbox/images/loading.gif";		
 
 // Create our "tiny" marker icon
-var markerIcon = new GIcon();
-markerIcon.image = imgPosition;
-markerIcon.iconSize = new GSize(18, 19);
-markerIcon.iconAnchor = new GPoint(9, 9);
-markerIcon.infoWindowAnchor = new GPoint(9, 9);
+var markerIcon=null;
+function getMarkerIcon() {
+    if(markerIcon == null) {
+        markerIcon = new GIcon();
+        markerIcon.image = imgPosition;
+        markerIcon.iconSize = new GSize(18, 19);
+        markerIcon.iconAnchor = new GPoint(9, 9);
+        markerIcon.infoWindowAnchor = new GPoint(9, 9);
+    }
+    return markerIcon;
+}
 
 
 var Utilities = {};
@@ -278,7 +281,7 @@ Utilities.MD5 = function (string) {
 
 
 
-var flickr = {};
+flickr = {};
 flickr._api_key = null;
 flickr._secret_key = null;
 flickr._callbacks = {};
@@ -353,6 +356,7 @@ function FPhotoMarker(icon, photos) {
     this.currpos_ = 0;
     GEvent.addListener(this, "click", this.onClick);
 };
+function FPhotoMarker_init() {
 Utilities.extend(FPhotoMarker, GMarker);
 FPhotoMarker.prototype.initialize = function(map) {
     GMarker.prototype.initialize.apply(this, arguments);
@@ -526,12 +530,14 @@ FPhotoMarker.prototype.prevImg = function() {
     this.marker.currpos_--;
     this.marker.refreshImgList();
 };
+};
 
 function FPhotoSet() {
     if (!GBrowserIsCompatible()) { return; }
     this.baseConstructor.apply(this, arguments);
     this.total_photos = new Array();
 };
+function FPhotoSet_init() {
 Utilities.extend(FPhotoSet, GMap2);
 FPhotoSet.prototype._frob_callback = function(rsp) {
 }
@@ -579,7 +585,7 @@ FPhotoSet.prototype._onzoom = function() {
 
     for (var i=0,len=temp_photos.length; i<len ; i++) {
         if(temp_photos[i].length == 0) { continue; }
-        this.addOverlay(new FPhotoMarker(markerIcon, temp_photos[i]));
+        this.addOverlay(new FPhotoMarker(getMarkerIcon(), temp_photos[i]));
     }
 
     Utilities.unmaskMap(this);
@@ -640,8 +646,7 @@ try {
     Utilities.unmaskMap(this);
 }
 };
-
-
+};
 
 
 
@@ -676,6 +681,7 @@ function FPageControl() {
 
     this._setPageNumber(1, 0);
 };
+function FPageControl_init() {
 Utilities.extend(FPageControl, GControl);
 FPageControl.prototype.initialize = function(map) {
     this.map = map;
@@ -745,7 +751,7 @@ FPageControl.prototype.pagedn = function() {
     pagectrl._spanPgdn.style.cursor = "wait";
     pagectrl.map._refresh();
 };
-
+};
 
 
 
@@ -762,6 +768,7 @@ function FBrowser() {
     GEvent.addListener(this, "dragend", this._ondrag);
     GEvent.addListener(this, "zoomend", this._onzoom);
 };
+function FBrowser_init() {
 Utilities.extend(FBrowser, GMap2);
 FBrowser.prototype.setSearchParameter = function(params) {
     this._searchparams = params;
@@ -868,17 +875,27 @@ try {
 
     for (var i=0,len=temp_photos.length; i<len ; i++) {
         if(temp_photos[i].length == 0) { continue; }
-        this.addOverlay(new FPhotoMarker(markerIcon, temp_photos[i]));
+        this.addOverlay(new FPhotoMarker(getMarkerIcon(), temp_photos[i]));
     }
 } finally {
     Utilities.unmaskMap(this);
 }
 };
+};
 
 
 
 var FlickrGmapShow = {};
+FlickrGmapShow.init=function() {
+if(!FlickrGmapShow._init) {
+FPageControl_init();
+FPhotoMarker_init();
+FPhotoSet_init();
+FBrowser_init();
+FlickrGmapShow._init = true;
+}}
 FlickrGmapShow.createBrowser = function(map, lat, lng, zoom, params) {
+    this.init();
     var m = new FBrowser(map);
     m.setSearchParameter(params);
     m.addControl(new GLargeMapControl());
@@ -889,6 +906,7 @@ FlickrGmapShow.createBrowser = function(map, lat, lng, zoom, params) {
     return m;
 };
 FlickrGmapShow.createPhotoSetMap = function(map, photosetid) {
+    this.init();
     var m = new FPhotoSet(map);
     m.addControl(new GLargeMapControl());
     m.addControl(new GMapTypeControl());
