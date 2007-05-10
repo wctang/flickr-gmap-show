@@ -902,6 +902,7 @@ FlickrGmapShow.createBrowser = function(map, lat, lng, zoom, params) {
     m.addControl(new GMapTypeControl());
     m.enableDoubleClickZoom();
     m.enableContinuousZoom();
+    m.enableScrollWheelZoom();
     m.setCenter(new GLatLng(lat, lng), zoom, G_SATELLITE_MAP);
     return m;
 };
@@ -912,6 +913,7 @@ FlickrGmapShow.createPhotoSetMap = function(map, photosetid) {
     m.addControl(new GMapTypeControl());
     m.enableDoubleClickZoom();
     m.enableContinuousZoom();
+    m.enableScrollWheelZoom();
     m.setPhotoSetId(photosetid);
     return m;
 };
