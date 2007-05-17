@@ -7,7 +7,7 @@
 
 (function() {
 
-var FGSSCRIPT = 'http://www.csie.nctu.edu.tw/~wctang/fgs/fgs.c.js';
+var FGSSCRIPT = 'http://flickr-gmap-show.googlecode.com/svn/tags/fgs/current/fgs.c.js';
     
 var loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/sets\/(\d*)(\/.*)?$/(window.location.href);
 if(loc&&loc[1]&&loc[2]) {
