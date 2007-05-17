@@ -643,7 +643,7 @@ var FGS = {
     },
 
     init : function() {
-        loadjs('http://www.csie.nctu.edu.tw/~wctang/fgs/gmap.js');
+        loadjs('http://flickr-gmap-show.googlecode.com/svn/tags/fgs/current/gmap.js');
 
 
         var loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/sets\/(\d*)(\/.*)?$/(window.location.href);
