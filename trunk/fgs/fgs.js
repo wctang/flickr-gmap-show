@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------------
 //
-// Flickr Gmap Show with Greasemonkey user script v1.0
+// Flickr Gmap Show with Greasemonkey user script v1.1
 // by wctang (http://www.wctang.info/)
 // 
 // Licensed under MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -9,11 +9,27 @@
 
 
 
-var imgPrevImg = 'http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif';
-var imgNextImg = 'http://l.yimg.com/www.flickr.com/images/simple_next_default.gif';
-var imgClose = 'http://l.yimg.com/www.flickr.com/images/simple_close_default.gif';
-var imgPos = ['http://l.yimg.com/www.flickr.com/images/dot1_b.png', 'http://l.yimg.com/www.flickr.com/images/dot2_b.png', 'http://l.yimg.com/www.flickr.com/images/dot3_b.png', 'http://l.yimg.com/www.flickr.com/images/dot4_b.png'];
-var imgLoading = 'http://flickr-gmap-show.googlecode.com/svn/trunk/lightbox/images/loading.gif';
+var imgPos = ['http://l.yimg.com/www.flickr.com/images/dot1_p.png', 'http://l.yimg.com/www.flickr.com/images/dot2_p.png', 'http://labs.google.com/ridefinder/images/mm_20_red.png'];
+var shwPos = ['', '', 'http://labs.google.com/ridefinder/images/mm_20_shadow.png'];
+var img_loading = 'http://flickr-gmap-show.googlecode.com/svn/trunk/lightbox/images/loading.gif';
+
+var imgs = {
+    map_default  : 'data:image/gif;base64,R0lGODdhCgAMAIgAAP///4CAgCwAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
+    map_hover    : 'data:image/gif;base64,R0lGODdhCgAMAIgAAP///wAA/ywAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
+    map_selected : 'data:image/gif;base64,R0lGODdhCgAMAIgAAAAA/////ywAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
+
+    close_default  : 'data:image/gif;base64,R0lGODlhDgANAIAAAP///6CgpCH5BAAAAAAALAAAAAAOAA0AAAIfjI8Jy73mIoAzNErrs/se72Qdg4BjhnGnKo3tlsRGAQA7', // http://l.yimg.com/www.flickr.com/images/simple_close_default.gif
+    close_hover    : 'data:image/gif;base64,R0lGODlhDwAPAJEDAP///wAAAP9UAP///yH5BAEAAAMALAAAAAAPAA8AAAItXI6JJu3vDpxNUmgFAG7H0HkbV4Hh+GQNmprrSJan5slv+F2YqwuqHjAohsECADs=', // http://l.yimg.com/www.flickr.com/images/simple_close_hover.gif
+    close_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEALBGF////wAAAP9UAP///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAM1SLLcrCDKKRcYOGtstx/dp4VBkJUZiZYmJ1wYi6avxm7hILcufN+9GG8GqolosCNI4WgKCAkAOw==', // http://l.yimg.com/www.flickr.com/images/simple_close_selected.gif
+
+    prev_default  : 'data:image/gif;base64,R0lGODlhDwAPAJEDAL+/v9jY2Pn6/f///yH5BAEAAAMALAAAAAAPAA8AAAIoXI6JJu3vDpxNUmgfADjAzT2ZAE5ZaXoOKqrr1k1we8V15N6BofR7AQA7', // http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif
+    prev_hover    : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/QCG59jY2P///////wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMqSLLcrCPKKRe90WKqZwicQH3g1A3k1aWqKJFAOH7yXG+Vi2f6LiiO4C8BADs=', // http://l.yimg.com/www.flickr.com/images/simple_prev_hover.gif
+    prev_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/UNpkwAAAAB14v///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMwSLLcrCHKKVcYOGtstx/dp4UZAGzkYJ6jcGGrF8ayW5r1C+OtvqM2USYlEigcSGMCADs=', // http://l.yimg.com/www.flickr.com/images/simple_prev_selected.gif
+
+    next_default  : 'data:image/gif;base64,R0lGODlhDwAPAJEDAL+/v9jY2Pn6/f///yH5BAEAAAMALAAAAAAPAA8AAAIoXI6JJu3vDpxNUmgdADO3zT3et4kBBUYnlKpsab7derm1fQuBofR7AQA7', // http://l.yimg.com/www.flickr.com/images/simple_next_default.gif
+    next_hover    : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/QCG59jY2P///////wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMsSLLcrCPKKRe90WKqZQhXF33gJI6fKWBktU5A61LyPKXcu9l7pvcChWMYTAAAOw==', // http://l.yimg.com/www.flickr.com/images/simple_next_hover.gif
+    next_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/UNpkwAAAAB14v///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMxSLLcrCHKKVcYOGtstx/dp4UYAHjkYJ6jcGlr+8Jmlqq17dKsPuOoncg3tCkcSAEhAQA7' // http://l.yimg.com/www.flickr.com/images/simple_next_selected.gif
+};
 
 function $(e) {
     return document.getElementById(e);
@@ -21,15 +37,18 @@ function $(e) {
 function _ce(e) {
     return document.createElement(e);
 };
+function _ga(e,a) {
+    return e.getAttribute(a);
+};
 
-function loadjs(src, id){
+function loadjs(src){
     var s = _ce('script');
     s.type='text/javascript';
     s.src=src;
-    if(id) s.id = id;
     document.getElementsByTagName('head')[0].appendChild(s);
 };
 
+var old_document_write = document.write;
 document.write = function(str) {
     if(str.indexOf('<script ')>=0){
         var f = str.indexOf('src="')+5;
@@ -50,7 +69,7 @@ document.write = function(str) {
             document.getElementsByTagName('head')[0].appendChild(e);
         }
     } else {
-        orgdocwrite(str);
+        old_document_write(str);
     }
 };
 
@@ -66,11 +85,17 @@ var Utilities={
         subClass.prototype.baseConstructor = baseClass;
         subClass.superClass = baseClass.prototype;
     },
+    createDOM : function(str) {
+        var d = _ce('div');
+        d.innerHTML = str;
+        return d.firstChild;
+    },
+
     maskMap : function(map) {
         if(!map._masklayer) {
             var div = Utilities.createDOM(
                 '<div style="position:absolute; top:0px; left:0px; background:black; opacity:0.5; filter:alpha(opacity=50); cursor:wait;">'+ 
-                    '<div style="position:absolute; background:white;"><img src="'+imgLoading+'"/></div>'+
+                    '<div style="position:absolute; background:white;"><img src="'+img_loading+'"/><br/><span>&nbsp;</span></div>'+
                 '</div>');
             map._masklayer = div;
             map._masklayer.counter = 0;
@@ -87,19 +112,25 @@ var Utilities={
             domobj.appendChild(map._masklayer);
         }
     },
-
     unmaskMap : function(map) {
         if(map._masklayer) {
-            if( map._masklayer.counter > 0) map._masklayer.counter --;
-            if( map._masklayer.counter == 0) {
-                map._masklayer.parentNode.removeChild(map._masklayer);
+            if( map._masklayer.counter > 0) {
+                map._masklayer.counter --;
+                if( map._masklayer.counter == 0) {
+                    map._masklayer.parentNode.removeChild(map._masklayer);
+                }
             }
         }
     },
+    setLoading : function(map, curr, total) {
+        if(map._masklayer) {
+            var imgdiv = map._masklayer.firstChild;
+            imgdiv.childNodes[2].innerHTML = Math.round(curr*100/total)+'%';
+        }
+    },
 
-    markerIcons : null,
     getMarkerIcon : function(numPhotos) {
-        var markerIcons = this.markerIcons;
+        var markerIcons = Utilities.getMarkerIcon.markerIcons;
         if(markerIcons == null) {
             markerIcons = [];
             markerIcons[0] = new GIcon();
@@ -112,29 +143,45 @@ var Utilities={
             markerIcons[1].iconSize = new GSize(20, 21);
             markerIcons[1].iconAnchor = new GPoint(10, 10);
             markerIcons[1].infoWindowAnchor = new GPoint(10, 10);
+            markerIcons[2] = new GIcon();
+            markerIcons[2].image = imgPos[2];
+            markerIcons[2].shadow = shwPos[2];
+            markerIcons[2].iconSize = new GSize(12, 20);
+            markerIcons[2].shadowSize = new GSize(22, 20);
+            markerIcons[2].iconAnchor = new GPoint(6, 20);
+            markerIcons[2].infoWindowAnchor = new GPoint(5, 8);
+            Utilities.getMarkerIcon.markerIcons = markerIcons;
         }
         
-        if(numPhotos <= 100) {
+        if(numPhotos < 0) {
+            return markerIcons[2];
+        } else if(numPhotos <= 100) {
             return markerIcons[0];
         } else {
             return markerIcons[1];
         }
     },
     
-    createDOM : function(str) {
-        var d = _ce('div');
-        d.innerHTML = str;
-        return d.firstChild;
-    },
-    
-    getTotalOffsetTop : function(elem) {
-        var e = elem;
-        var t = 0;
+    getTotalOffset : function(elem) {
+        var e = elem, t = 0, l = 0;
         while(e.offsetParent != null) {
             t += e.offsetTop;
+            l += e.offsetLeft;
             e = e.offsetParent;
         }
-        return t;
+        return [t,l];
+    },
+    
+    _createButton : function(key) {
+        var a = Utilities.createDOM('<a style="cursor:pointer;"><img src="'+imgs[key+'_default']+'" style="cursor:pointer;"/></a>');
+        a.imgdef = imgs[key+'_default'];
+        a.imghover = imgs[key+'_hover'];
+        a.imgselected = imgs[key+'_selected'];
+        a.onmouseout = function() { this.childNodes[0].src = this.imgdef; };
+        a.onmouseover = function() { this.childNodes[0].src = this.imghover; };
+        a.onmousedown = function() { this.childNodes[0].src = this.imgselected; };
+        a.onmouseup = function() { this.childNodes[0].src = this.imghover; };
+        return a;
     }
 };
 
@@ -198,7 +245,7 @@ FPhotoMarker.create = function () {
                 for(var i = 0; i< to; ++i) {
                     var a = this.imagesDiv_.childNodes[i].childNodes[0];
                     var img = a.childNodes[0];
-                    if( !img.getAttribute('src')) {
+                    if( !_ga(img,'src')) {
                         var url = a.url.substring(0,a.url.length-4);
                         img.src=url+'_s.jpg';
                     }
@@ -208,7 +255,7 @@ FPhotoMarker.create = function () {
                 if(span) {
                     var a = span.childNodes[0];
                     var img = a.childNodes[0];
-                    if( !img.getAttribute('src')) {
+                    if( !_ga(img,'src')) {
                         var url = a.url.substring(0,a.url.length-4);
                         img.src=url+'_s.jpg';
                     }
@@ -243,27 +290,28 @@ FPhotoMarker.create = function () {
         FPhotoMarker.prototype.onClick = function() {
             if(!this.infoContent_) {
                 var infoContent = Utilities.createDOM(
-                    '<div style="height:120px; width:250px;">'+
-                        '<div style="position:absolute; top:0px;  left:0px; height:20px; width:250px; text-align:center;"></div>'+
-                        '<div style="position:absolute; top:20px; left:0px; height:80px; width:250px;"></div>'+
-                        '<div style="position:absolute; top:100px;left:0px; height:20px; width:250px;">'+
-                            '<img src="'+imgPrevImg+'" style="cursor:pointer;"/>'+ 
-                            '<img src="'+imgNextImg+'" style="cursor:pointer;"/>'+
-                            '<span/>'+
-                        '</div>'+
+                    '<div style="height:140px; width:250px;">'+
+                        '<div style="position:relative; left:0px; height:40px; width:250px; text-align:center;"></div>'+
+                        '<div style="position:relative; left:0px; height:80px; width:250px;"></div>'+
+                        '<div style="position:relative; left:0px; height:20px; width:250px;"></div>'+
                     '</div>');
                 var titleDiv = infoContent.childNodes[0];
                 var imagesDiv = infoContent.childNodes[1];
                 var controlDiv = infoContent.childNodes[2];
-                controlDiv.childNodes[0].marker=this;
-                controlDiv.childNodes[1].marker=this;
-                controlDiv.childNodes[0].onmousedown = this.prevImg;
-                controlDiv.childNodes[1].onmousedown = this.nextImg;
+                var pre = Utilities._createButton('prev');
+                var nex = Utilities._createButton('next');
+                var info = Utilities.createDOM('<span/>');
+                nex.marker = pre.marker = this;
+                pre.onclick = this.prevImg;
+                nex.onclick = this.nextImg;
+                controlDiv.appendChild(pre);
+                controlDiv.appendChild(nex);
+                controlDiv.appendChild(info);
 
                 for(var i = 0, len = this.photos_.length; i < len; ++i) {
                     var photo = this.photos_[i];
-                    var p_url = 'http://farm'+photo.getAttribute('farm')+'.static.flickr.com/'+photo.getAttribute('server')+'/'+photo.getAttribute('id')+'_'+photo.getAttribute('secret')+'.jpg';
-                    var p_title = photo.getAttribute('title');
+                    var p_url = 'http://farm'+_ga(photo,'farm')+'.static.flickr.com/'+_ga(photo,'server')+'/'+_ga(photo,'id')+'_'+_ga(photo,'secret')+'.jpg';
+                    var p_title = _ga(photo,'title');
                     
                     var imgspan = _ce('span');
                     var imglink = _ce('a');
@@ -290,7 +338,7 @@ FPhotoMarker.create = function () {
                 this.infoContent_=infoContent;
                 this.title_=titleDiv;
                 this.imagesDiv_=imagesDiv;
-                this.info_=controlDiv.childNodes[2];
+                this.info_=info;
             }
             
             this.refreshImgList();
@@ -318,7 +366,7 @@ FPhotoMarker.create = function () {
             var overlay = Utilities.createDOM(
                 '<div style="position:absolute; top:0px; left:0px; width:'+document.body.scrollWidth+'px; height:'+document.body.scrollHeight+'px; background:black; opacity:0.8; filter:alpha(opacity=50);"></div>');
             var imgdiv = Utilities.createDOM(
-                '<div style="position:absolute; top:'+(self.innerHeight/2-16)+'px; left:'+(self.innerWidth/2-16)+'px; background:white;"><img src="'+imgLoading+'"/></div>');
+                '<div style="position:absolute; top:'+(self.innerHeight/2-16)+'px; left:'+(self.innerWidth/2-16)+'px; background:white;"><img src="'+img_loading+'"/></div>');
             
             var imgPreloader = new Image();
             imgPreloader.imgdiv = imgdiv;
@@ -367,23 +415,49 @@ FPhotoSet.create = function() {
 
         FPhotoSet.prototype.setPhotoSetId = function(photosetid) {
             this.photosetid = photosetid;
-            
             Utilities.maskMap(this);
             window.F.API.callMethod('flickr.photosets.getPhotos', { photoset_id:photosetid, extras:'geo'}, this);
         };
+
+        FPhotoSet.prototype.setGroupId = function(group_id) {
+            this.group_id = group_id;
+            Utilities.maskMap(this);
+            window.F.API.callMethod('flickr.groups.pools.getPhotos', { group_id:group_id, extras:'geo'}, this);
+        };
+        FPhotoSet.prototype.setUserId = function(user_id) {
+            this.user_id = user_id;
+            Utilities.maskMap(this);
+            window.F.API.callMethod('flickr.photos.search', { user_id:user_id, extras:'geo'}, this);
+        };
+        
 
         FPhotoSet.prototype.flickr_photosets_getPhotos_onLoad = function(success, responseXML, responseText, params){
             try {
                 if(success == true) {
                     var rsp = responseXML.getElementsByTagName('rsp')[0];
-                    var photoset = rsp.getElementsByTagName('photoset')[0];
+                    var setkey;
+                    if(this.photosetid) {
+                        setkey = 'photoset';
+                    } else if(this.group_id) {
+                        setkey = 'photos';
+                    } else if(this.user_id) {
+                        setkey = 'photos';
+                    }
+                    var photoset = rsp.getElementsByTagName(setkey)[0];
                     var photos = photoset.getElementsByTagName('photo');
-                    
+                    var pages = parseInt(_ga(photoset,'pages'));
+                    var page = parseInt(_ga(photoset,'page'));
+                    var total = parseInt(_ga(photoset,'total'));
+                    var perpage = parseInt(_ga(photoset,'perpage'));
+                    var curr = page * perpage;
+
+                    Utilities.setLoading(this, page, pages);
+
                     var photo;
                     for(var i = 0, len = photos.length; i < len; ++i) {
                         photo = photos[i];
-                        var lat = photo.getAttribute('latitude');
-                        var lon = photo.getAttribute('longitude');
+                        var lat = _ga(photo,'latitude');
+                        var lon = _ga(photo,'longitude');
                         if(lat == 0 && lon == 0) {
                             continue;
                         }
@@ -392,11 +466,15 @@ FPhotoSet.create = function() {
                         this.total_photos[this.total_photos.length] = photo;
                     }
                     
-                    var pages = parseInt(photoset.getAttribute('pages'));
-                    var page = parseInt(photoset.getAttribute('page'));
                     if( pages > page) {
                         Utilities.maskMap(this);
-                        window.F.API.callMethod('flickr.photosets.getPhotos', { photoset_id:params.photoset_id, extras:'geo', page:page+1}, this);
+                        if(this.photosetid) {
+                            window.F.API.callMethod('flickr.photosets.getPhotos', { photoset_id:params.photoset_id, extras:'geo', page:page+1}, this);
+                        } else if(this.group_id) {
+                            window.F.API.callMethod('flickr.groups.pools.getPhotos', { group_id:params.group_id, extras:'geo', page:page+1}, this);
+                        } else if(this.user_id) {
+                            window.F.API.callMethod('flickr.photos.search', { user_id:params.user_id, extras:'geo', page:page+1}, this);
+                        }
                         return;
                     }
                     
@@ -404,7 +482,7 @@ FPhotoSet.create = function() {
                     for (var i=0,len=this.total_photos.length; i<len; i++) {
                         bounds.extend(this.total_photos[i].position);
                     }
-             
+
                     GEvent.addListener(this, 'zoomend', this._onzoom);
            
                     var zoom = this.getBoundsZoomLevel(bounds);
@@ -414,6 +492,14 @@ FPhotoSet.create = function() {
                 Utilities.unmaskMap(this);
             }
         };
+
+        FPhotoSet.prototype.flickr_groups_pools_getPhotos_onLoad = function(success, responseXML, responseText, params){
+            return this.flickr_photosets_getPhotos_onLoad(success, responseXML, responseText, params);
+        };
+        FPhotoSet.prototype.flickr_photos_search_onLoad = function(success, responseXML, responseText, params){
+            return this.flickr_photosets_getPhotos_onLoad(success, responseXML, responseText, params);
+        };
+
 
         FPhotoSet.prototype._onzoom = function() {
             Utilities.maskMap(this);
@@ -456,7 +542,6 @@ FPhotoSet.create = function() {
             }
             Utilities.unmaskMap(this);
         };
-        
 
         FPhotoSet.init=true;
     }
@@ -476,55 +561,87 @@ FPhoto.create = function() {
     if(!FPhoto.init) {
         Utilities.extend(FPhoto, GMap2);
 
-        FPhoto.prototype.setPhotoId = function(photoid) {
-            this.photoid = photoid;
-            window.F.API.callMethod('flickr.photos.getInfo', {photo_id:this.photoid}, this);
+        FPhoto.prototype.setPhotoId = function(photo_id) {
+            this.photo_id = photo_id;
+            Utilities.maskMap(this);
+            window.F.API.callMethod('flickr.photos.getInfo', {photo_id:this.photo_id}, this);
         };
         
         FPhoto.prototype.flickr_photos_getInfo_onLoad = function(success, responseXML, responseText, params){
+            try {
+                if(success == true) {
+                    var rsp = responseXML.getElementsByTagName('rsp')[0];
+                    var photo = rsp.getElementsByTagName('photo')[0];
+    
+                    var latitude = 0;
+                    var longitude = 180;
+                    var zoom = 2;
+                    var location = photo.getElementsByTagName('location')[0];
+                    if(location) {
+                        latitude = parseFloat(_ga(location,'latitude'));
+                        longitude = parseFloat(_ga(location,'longitude'));
+                        zoom = 13;
+        
+                        var locality = location.getElementsByTagName('locality');
+                        if(locality&&locality.length!=0) locality= (locality[0]).firstChild.textContent;
+                        var county = location.getElementsByTagName('county');
+                        if(county&&county.length!=0) county= (county[0]).firstChild.textContent;
+                        var region = location.getElementsByTagName('region');
+                        if(region&&region.length!=0) region= (region[0]).firstChild.textContent;
+                        var country = location.getElementsByTagName('country');
+                        if(country&&country.length!=0) country= (country[0]).firstChild.textContent;
+                        
+                        this.wrap.infoSpan.innerHTML = region+', '+country+'. ';
+                    }
+    
+                    var marker = new GMarker(new GLatLng(latitude, longitude), {icon:Utilities.getMarkerIcon(-1), draggable: true});
+                    marker.title = photo.getElementsByTagName('title').textContent;
+                    marker.photo_url = 'http://farm'+_ga(photo,'farm')+'.static.flickr.com/'+_ga(photo,'server')+'/'+this.photo_id+'_'+_ga(photo,'secret')+'_s.jpg';
+                    marker.infoContent = Utilities.createDOM(
+                        '<div>'+
+                            '<img src="'+marker.photo_url+'"/>'+
+                        '</div>');
+                    GEvent.addListener(marker, 'click', function() {
+                        marker.openInfoWindow(marker.infoContent);
+                    });
+                    GEvent.addListener(marker, 'dragend', function(){
+                        if(!marker.isModified) {
+                            var a = Utilities.createDOM('<a href="javascript:;">Save location?</a>');
+                            a.gmap = marker.gmap;
+                            GEvent.addDomListener(a, 'click', function() {
+                                if(confirm('save location?')) {
+                                    var p=this.gmap.marker.getPoint();
+                                    window.F.API.callMethod('flickr.photos.geo.setLocation', {photo_id:this.gmap.photo_id, lat:p.lat(), lon:p.lng()}, this.gmap);
+                                }
+                            });
+                            marker.gmap.wrap.infoSpan.parentNode.appendChild(a);
+                            marker.isModified = true;
+                        }
+                    });
+                    marker.gmap = this;
+                    this.marker = marker;
+                    this.setCenter(marker.getPoint(), zoom);
+                    this.addOverlay(marker);
+                    GEvent.trigger(this.marker, 'click');
+                }
+            } finally {
+                Utilities.unmaskMap(this);
+            }
+        };
+
+        FPhoto.prototype.flickr_photos_geo_setLocation_onLoad = function(success, responseXML, responseText, params){
             if(success == true) {
-                var rsp = responseXML.getElementsByTagName('rsp')[0];
-                var photo = rsp.getElementsByTagName('photo')[0];
-
-                var location = photo.getElementsByTagName('location')[0];
-
-                var secret = photo.getAttribute('secret');
-                var server = parseInt(photo.getAttribute('server'));
-                var farm = parseInt(photo.getAttribute('farm'));
-                var p_url = 'http://farm'+farm+'.static.flickr.com/'+server+'/'+this.photoid+'_'+secret+'_s.jpg';
-                
-                var latitude = parseFloat(location.getAttribute('latitude'));
-                var longitude = parseFloat(location.getAttribute('longitude'));
-                this.accuracy = parseFloat(location.getAttribute('accuracy'));
-                this.position = new GLatLng(latitude, longitude);
-                
-                var locality = location.getElementsByTagName('locality');
-                if(locality&&locality.length!=0) locality= (locality[0]).firstChild.textContent;
-                var county = location.getElementsByTagName('county');
-                if(county&&county.length!=0) county= (county[0]).firstChild.textContent;
-                var region = location.getElementsByTagName('region');
-                if(region&&region.length!=0) region= (region[0]).firstChild.textContent;
-                var country = location.getElementsByTagName('country');
-                if(country&&country.length!=0) country= (country[0]).firstChild.textContent;
-                
-                $('fgs-info').innerHTML = region+', '+country;
-                
-
-                this.recenter();
-                
-                var marker = new GMarker(this.position, Utilities.getMarkerIcon(1));
-                GEvent.addListener(marker, "click", function() {
-                    marker.openInfoWindowHtml('<div><img src="'+p_url+'"/></div>');
-                });
-                this.addOverlay(marker);
-                GEvent.trigger(marker, 'click');
-                this.marker = marker;
+                this.wrap.infoSpan.parentNode.removeChild(this.wrap.infoSpan.nextSibling);
+                this.marker.isModified = false;
+            } else {
+                alert('save location failed.');
             }
         };
 
         FPhoto.prototype.recenter = function(){
-            this.setCenter(this.position, 13);
-            if(this.marker) GEvent.trigger(this.marker, 'click');
+            if(this.marker) {
+                this.setCenter(this.marker.getPoint(), 13);
+            }
         };
 
 
@@ -540,10 +657,13 @@ FPhoto.create = function() {
 
 
 var FGS = {
+    currMap : null,
+    
     createPhotoSetMap : function(map,photosetid) {
         if (!GBrowserIsCompatible()) return;
         
         var m = FPhotoSet.create(map);
+        FGS.M = m;
         m.addControl(new GLargeMapControl());
         m.addControl(new GMapTypeControl());
         m.enableDoubleClickZoom();
@@ -553,35 +673,71 @@ var FGS = {
         return m;
     },
 
-    createPhotoMap : function(map,photoid) {
+    createGroupPoolMap : function(map,group_id) {
+        if (!GBrowserIsCompatible()) return;
+        
+        var m = FPhotoSet.create(map);
+        FGS.M = m;
+        m.addControl(new GLargeMapControl());
+        m.addControl(new GMapTypeControl());
+        m.enableDoubleClickZoom();
+        m.enableContinuousZoom();
+        m.enableScrollWheelZoom();
+        m.setGroupId(group_id);
+        return m;
+    },
+    
+    createUserPhotoMap : function(map,user_id) {
+        if (!GBrowserIsCompatible()) return;
+        
+        var m = FPhotoSet.create(map);
+        FGS.M = m;
+        m.addControl(new GLargeMapControl());
+        m.addControl(new GMapTypeControl());
+        m.enableDoubleClickZoom();
+        m.enableContinuousZoom();
+        m.enableScrollWheelZoom();
+        m.setUserId(user_id);
+        return m;
+    },
+    
+
+    createPhotoMap : function(map,photo_id) {
         if (!GBrowserIsCompatible()) return;
 
         var m = FPhoto.create(map);
+        FGS.M = m;
         m.addControl(new GSmallMapControl());
         m.addControl(new GMapTypeControl());
         m.enableDoubleClickZoom();
         m.enableContinuousZoom();
-        m.setPhotoId(photoid);
+        m.setPhotoId(photo_id);
         return m;
     },
 
-    showPhotoSet : function(photosetid) {
-        var wrap=$('fgs-wrap');
+    
+    getFullPageMapDom : function(domobj) {
+        var wrap=domobj.mapwrap;
         if(!wrap) {
             wrap = Utilities.createDOM(
                 '<div id="fgs-wrap" style="position:absolute; top:20px; left:20px; visibility:visible; padding:10px; background-color:white; border:1px solid black;">'+
-                    '<div id="fgs-close" style="position:relative; top:10px; height:10px; width:10px;"><img src="'+imgClose+'"/></div>' +
-                    '<div id="fgs-map" style="position:relative; top:30px; left:10px; width:0px; height:0px; border:1px solid black;"/>' +
+                    '<div style="position:relative; top:10px; height:10px; width:10px;"></div>' +
+                    '<div style="position:relative; top:30px; left:10px; width:0px; height:0px; border:1px solid black;"/>' +
                 '</div>');
-            document.body.appendChild(wrap);
-            
-            var clslnk = $('fgs-close');
+            var clslnk = Utilities._createButton('close');
+            clslnk.mapwrap = wrap;
             clslnk.onclick=function() {
-                var m = $('fgs-map');
-                var wrap=$('fgs-wrap');
+                var wrap = this.mapwrap;
                 wrap.style.visibility='hidden';
-                m.style.width=m.style.height=wrap.style.width=wrap.style.height='0px';
+                wrap.mapDom.style.width=wrap.mapDom.style.height=wrap.style.width=wrap.style.height='0px';
             };
+            wrap.firstChild.appendChild(clslnk);
+
+            wrap.clslnk = wrap.firstChild;
+            wrap.mapDom = wrap.childNodes[1];
+            
+            domobj.mapwrap = wrap;
+            document.body.appendChild(wrap);
         }
 
         var w = (innerWidth-80);
@@ -589,106 +745,187 @@ var FGS = {
         wrap.style.width=w+'px';
         wrap.style.height=h+'px';
         wrap.style.visibility='visible';
-        
-        var clslnk = $('fgs-close');
-        clslnk.style.left=(w-20)+'px';
-        
-        var m = $('fgs-map');
-        m.style.width=(w-20)+'px';
-        m.style.height=(h-40)+'px';
-        
-        if(m.gmap) {
-            m.gmap.checkResize();
-        } else {
-            var gmap = FGS.createPhotoSetMap(m,photosetid);
-            m.gmap = gmap;
-        }
+        wrap.clslnk.style.left=(w-20)+'px';
+        wrap.mapDom.style.width=(w-20)+'px';
+        wrap.mapDom.style.height=(h-40)+'px';
+        return wrap;
     },
-
-    showPhoto : function(photoid) {
-        var wrap=$('fgs-wrap');
+    
+    showPhoto : function(photo_id, domobj) {
+        var wrap=domobj.mapwrap;
         if(wrap) {
             if( wrap.style.visibility == 'visible') {
                 wrap.style.visibility = 'hidden';
             } else {
-                $('fgs-map').gmap.recenter();
+                wrap.gmap.recenter();
                 wrap.style.visibility = 'visible';
             }
             return;
         }
         
-        var offset_top = Utilities.getTotalOffsetTop($('li_location'))-320;
-        
+        var offst = Utilities.getTotalOffset(domobj);
         wrap = Utilities.createDOM(
-            '<div id="fgs-wrap"  style="position:absolute; top:'+offset_top+'px;left:480px;width:500px;height:300px; padding:5px; visibility:visible; background-color:white; border:1px solid gray; z-index:100;">'+
-                '<div id="fgs-close" style="position:relative; left:480px; width:10px; height:20px; "><img src="'+imgClose+'"/></div>' +
-                '<div id="fgs-map"   style="position:relative; width:500px; height:260px;"></div>' +
-                '<div style="position:relative; width:500px; height:20px;"><span id="fgs-info"></span></div>' +
+            '<div id="fgs-wrap"  style="position:absolute; top:'+(offst[0]-320)+'px;left:'+(offst[1]-200)+'px;width:500px;height:300px; padding:5px; visibility:visible; background-color:white; border:1px solid gray; z-index:2000;">'+
+                '<div style="position:relative; left:480px; width:10px; height:20px;"></div>' +
+                '<div style="position:relative; width:500px; height:260px;"></div>' +
+                '<div style="position:relative; width:500px; height:20px; text-align:left;"><span></span></div>' +
             '</div>');
-        $('photoswftd').insertBefore(wrap, $('About'));
-
-        var clslnk = wrap.firstChild;
+        var clslnk = Utilities._createButton('close');
+        clslnk.mapwrap = wrap;
         clslnk.onclick=function() {
-            $('fgs-wrap').style.visibility='hidden';
+            this.mapwrap.style.visibility='hidden';
         };
+        wrap.firstChild.appendChild(clslnk);
         
-        var m = $('fgs-map');
-        m.gmap = FGS.createPhotoMap(m,photoid);
+        wrap.clslnk = wrap.firstChild;
+        wrap.mapDom = wrap.childNodes[1];
+        wrap.infoSpan = wrap.childNodes[2].firstChild;
+        
+        domobj.mapwrap = wrap;
+        document.body.appendChild(wrap);
+        //$('photoswftd').insertBefore(wrap, $('About'));
+
+        wrap.gmap = FGS.createPhotoMap(wrap.mapDom,photo_id);
+        wrap.gmap.wrap = wrap;
     },
 
-    windowUnload : function() {
+
+
+    _windowUnload : function() {
         if(typeof GUnload == 'function') {
             GUnload();
         }
-    },
-
-    init : function() {
-        loadjs('http://flickr-gmap-show.googlecode.com/svn/tags/fgs/current/gmap.js');
+    },    
 
 
+
+    _processFlickrPage : function() {
         var loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/sets\/(\d*)(\/.*)?$/(window.location.href);
         if(loc&&loc[1]&&loc[2]) { // photo set
             var paras = document.getElementsByTagName('p');
             for (var i=0; i< paras.length; i++) {
                 if(paras[i].className == 'Links') {
                     if( paras[i].childNodes[0]==undefined) continue;
-                    var nobr = paras[i].childNodes[0];
-                    var cs = nobr.childNodes;
-                    var img;
+                    var cs = paras[i].getElementsByTagName('a');
                     for(var j = 0; j<cs.length; j++) {
-                        if(cs[j].nodeType == 1 && cs[j].tagName=='IMG') {
-                            img=cs[j];
+                        if(cs[j].textContent == 'Map') {
+                            var a = Utilities._createButton('map');
+                            a.onclick=function(){
+                                var wrap = FGS.getFullPageMapDom(a);
+                                if(wrap.gmap) {
+                                    wrap.gmap.checkResize();
+                                } else {
+                                    wrap.gmap = FGS.createPhotoSetMap(wrap.mapDom,loc[2]);
+                                    wrap.gmap.wrap = wrap;
+                                }
+                            };
+                            cs[j].parentNode.insertBefore(a, cs[j]);
                             break;
                         }
                     }
-
-                    var a = document.createElement('a');
-                    a.innerHTML='GMap';
-                    a.href='javascript:;';
-                    a.onclick=function(){FGS.showPhotoSet(loc[2]);};
-                    nobr.appendChild(img.cloneNode(true));
-                    nobr.appendChild(a);
                     break;
                 }
             }
-        } else {
-            loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/(\d*)(\/.*)?$/(window.location.href);
-            var locdiv = document.getElementById('li_location');
-            var geospan = document.getElementById('div_pre_geo_block');
-            if(loc&&loc[1]&&loc[2]&&locdiv&&geospan) { // photo
-                geospan.innerHTML += '(<a class="Plain" id="fgs_photo_map_link" href="javascript:;">Gmap</a>)';
-                var a = $('fgs_photo_map_link');
-                a.onclick=function(){FGS.showPhoto(loc[2]);};
-            }
+            return;
         }
+        
+        loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/(\d*)(\/.*)?$/(window.location.href);
+        var maplink = document.getElementById('a_link_to_map');
+        var maplink2 = document.getElementById('a_place_on_map_old');
+        if(loc&&loc[1]&&loc[2]&&(maplink||maplink2)) { // photo
+            var a = Utilities._createButton('map');
+            a.onclick=function(){FGS.showPhoto(loc[2], this);};
+            if(maplink) {
+                maplink.parentNode.insertBefore(a, maplink);
+            } else if(maplink2) {
+                maplink2.parentNode.insertBefore(a, maplink2.nextSibling);
+            }
+            return;
+        }
+
+        loc = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)(\/.*)?$/(window.location.href);
+        if(loc&&loc[1]) {
+            var paras = document.getElementsByTagName('p');
+            for (var i=0; i< paras.length; i++) {
+                if(paras[i].className == 'Do') {
+                    if( paras[i].childNodes[0]==undefined) continue;
+                    var cs = paras[i].getElementsByTagName('a');
+                    for(var j = 0; j<cs.length; j++) {
+                        if(cs[j].textContent == 'Map') {
+                            var maphref = /^http:\/\/www.*\.flickr\.com\/photos\/([a-zA-Z0-9\-\_@]*)\/(\d*)(\/.*)?$/(cs[j].href);
+                            var a = Utilities._createButton('map');
+                            a.photo_id = maphref[2];
+                            a.onclick=function(){FGS.showPhoto(this.photo_id, this);};
+                            cs[j].parentNode.insertBefore(a, cs[j]);
+                            break;
+                        }
+                    }
+                } else if(paras[i].className == 'Links') {
+                    if( paras[i].childNodes[0]==undefined) continue;
+                    var cs = paras[i].getElementsByTagName('a');
+                    for(var j = 0; j<cs.length; j++) {
+                        if(cs[j].textContent == 'Map') {
+                            var a = Utilities._createButton('map');
+                            a.onclick=function(){
+                                var wrap = FGS.getFullPageMapDom(a);
+                                if(wrap.gmap) {
+                                    wrap.gmap.checkResize();
+                                } else {
+                                    wrap.gmap = FGS.createUserPhotoMap(wrap.mapDom,f.w.value);
+                                }
+                            };
+                            cs[j].parentNode.insertBefore(a, cs[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        
+        loc = /^http:\/\/www.*\.flickr\.com\/groups\/([a-zA-Z0-9\-\_@]*)(\/)?$/(window.location.href);
+        if(loc&&loc[1]) {
+            var paras = document.getElementsByTagName('p');
+            for (var i=0; i< paras.length; i++) {
+                if(paras[i].className == 'Links') {
+                    if( paras[i].childNodes[0]==undefined) continue;
+                    var cs = paras[i].getElementsByTagName('a');
+                    for(var j = 0; j<cs.length; j++) {
+                        if(cs[j].textContent == 'Map') {
+                            var a = Utilities._createButton('map');
+                            a.onclick=function(){
+                                var wrap = FGS.getFullPageMapDom(a);
+                                if(wrap.gmap) {
+                                    wrap.gmap.checkResize();
+                                } else {
+                                    wrap.gmap = FGS.createGroupPoolMap(wrap.mapDom,f.w.value);
+                                }
+                            };
+                            cs[j].parentNode.insertBefore(a, cs[j]);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            return;
+        }
+    },
+
+
+
+    init : function() {
+        loadjs('http://flickr-gmap-show.googlecode.com/svn/tags/fgs/current/gmap.js');
+
+        FGS._processFlickrPage();
 
         var oldOnunload = window.onunload;
         if (typeof window.onunload != 'function') {
-            window.onunload = FGS.windowUnload;
+            window.onunload = FGS._windowUnload;
         } else {
             window.onunload = function() {
                 oldOnunload();
-                FGS.windowUnload();
+                FGS._windowUnload();
             };
         }
     }
