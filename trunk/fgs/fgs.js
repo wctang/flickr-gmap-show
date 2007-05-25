@@ -915,7 +915,7 @@ var FGS = {
 
 
     init : function() {
-        loadjs('http://flickr-gmap-show.googlecode.com/svn/tags/fgs/current/gmap.js');
+        loadjs('gmap.js');
 
         FGS._processFlickrPage();
 
