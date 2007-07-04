@@ -3,8 +3,8 @@
 <ModulePrefs title="Flickr Gmap Show" description="Browse flickr photos on Google Maps" 
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
 author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
-title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://www.wctang.info/fgs_mapplet_preview.png"
-thumbnail="http://www.wctang.info/fgs_mapplet_thumb.png">
+title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
+thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png">
   <Require feature="sharedmap"/>
   <Require feature="setprefs" />
 </ModulePrefs>
@@ -60,39 +60,33 @@ var deltas = [0,0,0,0,0,
 0.002374791275833843,
 0.0011871839595940514,
 0.0005935388549467291,
-0.0002967560452766804
-];
+0.0002967560452766804];
 var MAX_ZOOM = 18;
 var MIN_ZOOM = 5;
 var currZoom = 0;
 
 var prefs = new _IG_Prefs(__MODULE_ID__);
 
-var imgdir = 'http://csie.nctu.edu.tw/~wctang/pics/';
+var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
-    loading : 'http://flickr-gmap-show.googlecode.com/svn/trunk/lightbox/images/loading.gif',
+    loading : imgdir+'loading.gif',
 
-    map_default  : 'data:image/gif;base64,R0lGODdhCgAMAIgAAP///4CAgCwAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
-    map_hover    : 'data:image/gif;base64,R0lGODdhCgAMAIgAAP///wAA/ywAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
-    map_selected : 'data:image/gif;base64,R0lGODdhCgAMAIgAAAAA/////ywAAAAACgAMAAACF4SPF7vY9p6CIalqQWTUYalh4eU1YgYUADs=',
+    close_default  : imgdir+'simple_close_default.gif',
+    close_hover    : imgdir+'simple_close_hover.gif',
+    close_selected : imgdir+'simple_close_selected.gif',
 
-    close_default  : 'data:image/gif;base64,R0lGODlhDgANAIAAAP///6CgpCH5BAAAAAAALAAAAAAOAA0AAAIfjI8Jy73mIoAzNErrs/se72Qdg4BjhnGnKo3tlsRGAQA7', // http://l.yimg.com/www.flickr.com/images/simple_close_default.gif
-    close_hover    : 'data:image/gif;base64,R0lGODlhDwAPAJEDAP///wAAAP9UAP///yH5BAEAAAMALAAAAAAPAA8AAAItXI6JJu3vDpxNUmgFAG7H0HkbV4Hh+GQNmprrSJan5slv+F2YqwuqHjAohsECADs=', // http://l.yimg.com/www.flickr.com/images/simple_close_hover.gif
-    close_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEALBGF////wAAAP9UAP///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAM1SLLcrCDKKRcYOGtstx/dp4VBkJUZiZYmJ1wYi6avxm7hILcufN+9GG8GqolosCNI4WgKCAkAOw==', // http://l.yimg.com/www.flickr.com/images/simple_close_selected.gif
+    prev_default  : imgdir+'simple_prev_default.gif',
+    prev_hover    : imgdir+'simple_prev_hover.gif',
+    prev_selected : imgdir+'simple_prev_selected.gif',
 
-    prev_default  : 'data:image/gif;base64,R0lGODlhDwAPAJEDAL+/v9jY2Pn6/f///yH5BAEAAAMALAAAAAAPAA8AAAIoXI6JJu3vDpxNUmgfADjAzT2ZAE5ZaXoOKqrr1k1we8V15N6BofR7AQA7', // http://l.yimg.com/www.flickr.com/images/simple_prev_default.gif
-    prev_hover    : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/QCG59jY2P///////wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMqSLLcrCPKKRe90WKqZwicQH3g1A3k1aWqKJFAOH7yXG+Vi2f6LiiO4C8BADs=', // http://l.yimg.com/www.flickr.com/images/simple_prev_hover.gif
-    prev_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/UNpkwAAAAB14v///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMwSLLcrCHKKVcYOGtstx/dp4UZAGzkYJ6jcGGrF8ayW5r1C+OtvqM2USYlEigcSGMCADs=', // http://l.yimg.com/www.flickr.com/images/simple_prev_selected.gif
-
-    next_default  : 'data:image/gif;base64,R0lGODlhDwAPAJEDAL+/v9jY2Pn6/f///yH5BAEAAAMALAAAAAAPAA8AAAIoXI6JJu3vDpxNUmgdADO3zT3et4kBBUYnlKpsab7derm1fQuBofR7AQA7', // http://l.yimg.com/www.flickr.com/images/simple_next_default.gif
-    next_hover    : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/QCG59jY2P///////wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMsSLLcrCPKKRe90WKqZQhXF33gJI6fKWBktU5A61LyPKXcu9l7pvcChWMYTAAAOw==', // http://l.yimg.com/www.flickr.com/images/simple_next_hover.gif
-    next_selected : 'data:image/gif;base64,R0lGODlhDwAPAKIEAPn6/UNpkwAAAAB14v///wAAAAAAAAAAACH5BAEAAAQALAAAAAAPAA8AAAMxSLLcrCHKKVcYOGtstx/dp4UYAHjkYJ6jcGlr+8Jmlqq17dKsPuOoncg3tCkcSAEhAQA7', // http://l.yimg.com/www.flickr.com/images/simple_next_selected.gif
+    next_default  : imgdir+'simple_next_default.gif',
+    next_hover    : imgdir+'simple_next_hover.gif',
+    next_selected : imgdir+'simple_next_selected.gif',
     
-    popup_default : 'data:image/gif;base64,R0lGODlhDQAKAJEDAJWhrP///7e/yP///yH5BAEAAAMALAAAAAANAAoAAAIfnI95wi0qgpRvOAFyrlGCSRmYBgbctDliWSEXo8RJAQA7', // http://l.yimg.com/www.flickr.com/images/simple_new_window_default.gif
-    popup_hover   : 'data:image/gif;base64,R0lGODlhDQAKAKIEANra2mt3gv///42Vnv///wAAAAAAAAAAACH5BAEAAAQALAAAAAANAAoAAAMiSLrcOzAON4C1k8gRes+VFQgkCXpjKYDlJymDulJb5txLAgA7', // http://l.yimg.com/www.flickr.com/images/simple_new_window_hover.gif
-    popup_selected: 'data:image/gif;base64,R0lGODlhDQAKAKIEANra2mt3gv///42Vnv///wAAAAAAAAAAACH5BAEAAAQALAAAAAANAAoAAAMiSLrcOzAON4C1k8gRes+VFQgkCXpjKYDlJymDulJb5txLAgA7', // http://l.yimg.com/www.flickr.com/images/simple_new_window_selected.gif
+    popup_default : imgdir+'simple_new_window_default.gif',
+    popup_hover   : imgdir+'simple_new_window_hover.gif',
+    popup_selected: imgdir+'simple_new_window_selected.gif'
 };
-
 
 
 flickr = {
@@ -123,11 +117,16 @@ callapi : function(args, obj, callback, sign) {
     args.api_key = flickr._api_key;
     if (flickr._token) { args.auth_token = flickr._token; }
     _IG_FetchXmlContent(flickr._url(args, sign), function(resp){
-        callback.call(obj, resp.firstChild);
+        var rsp;
+        if(resp.childNodes[0].nodeName=='rsp') {
+            rsp = resp.childNodes[0];
+        } else if(resp.childNodes[1].nodeName=='rsp') {
+            rsp = resp.childNodes[1];
+        }
+        callback.call(obj, rsp);
     });
 }
 };
-
 
 
 function $(e,doc) {
@@ -203,43 +202,44 @@ var Utilities={
 
 
 var masklayer = Utilities.createDOM(
-    '<div style="position:absolute; top:25px; left:10px; background:black; opacity:0.8; filter:alpha(opacity=50); cursor:wait; z-index:-1;">'+
+    '<div style="position:absolute; background:black; opacity:0.8; filter:alpha(opacity=80); cursor:wait; display:none;">'+
         '<div style="position:absolute; background:white;"><img src="'+imgs['loading']+'"/><br/><span>&nbsp;</span></div>'+
     '</div>');
 masklayer.counter=0;
+masklayer.init=false;
 function mask() {
+    if(!masklayer.init) {
+        document.body.appendChild(masklayer);
+        masklayer.init = true;
+    }
     masklayer.counter++;
+    var w = document.body.clientWidth;
+    var h = document.body.clientHeight;
     if( masklayer.counter == 1) {
         masklayer.style.top = '0px';
         masklayer.style.left = '0px';
-        masklayer.style.width = document.body.scrollWidth+'px';
-        masklayer.style.height = document.body.scrollHeight+'px';
+        masklayer.style.width = w+'px';
+        masklayer.style.height = h+'px';
         var imgdiv = masklayer.firstChild;
         imgdiv.style.top = '100px';
-        imgdiv.style.left = (masklayer.clientWidth/2-16) + 'px';
-        masklayer.style.zIndex = 100;
+        imgdiv.style.left = (w/2-16) + 'px';
+        masklayer.style.display = 'block';
     }
 };
 function unmask() {
     if( masklayer.counter > 0) {
         masklayer.counter --;
         if( masklayer.counter == 0) {
-            masklayer.style.zIndex = -1;
+            masklayer.style.display = 'none';
         }
     }
 };
-document.body.appendChild(masklayer);
 
 
 function FPhotoMarker(icon, photos, bounds) {
     if(!FPhotoMarker.init) return;
 
-    var position;
-    if( photos.length == 1) {
-        position = photos[0].position;
-    } else {
-        position = bounds.getCenter();
-    }
+    var position = bounds.getCenter();
     this.baseConstructor.call(this, position, {icon:icon});
 
     this.photos_ = photos;
@@ -249,19 +249,6 @@ function FPhotoMarker(icon, photos, bounds) {
 FPhotoMarker.create = function () {
     if(!FPhotoMarker.init) {
         Utilities.extend(FPhotoMarker, GMarker);
-
-        FPhotoMarker.prototype.initialize = function(map) {
-            GMarker.prototype.initialize.apply(this, arguments);
-            this.map_ = map;
-        };
-        FPhotoMarker.prototype.redraw = function(force) {
-            GMarker.prototype.redraw.apply(this, arguments);
-            if (!force) return;
-        };
-        FPhotoMarker.prototype.remove = function() {
-            alert('remove');
-            GMarker.prototype.remove.apply(this, arguments);
-        };
 
         FPhotoMarker.prototype.refreshImgList = function() {
             if( this.currpos_ == 0) {
@@ -312,7 +299,7 @@ FPhotoMarker.create = function () {
         FPhotoMarker.prototype.onClick = function() {
             if(!this.infoContent_) {
                 var infoContent = Utilities.createDOM(
-                    '<div style="height:140px; width:250px;">'+
+                    '<div style="height:140px;width:250px;border:solid 1px gray;padding:10px;margin:10px;">'+
                         '<div style="position:relative; left:0px; height:40px; width:250px; text-align:center;"></div>'+
                         '<div style="position:relative; left:0px; height:80px; width:250px;"></div>'+
                         '<div style="position:relative; left:0px; height:20px; width:250px;"></div>'+
@@ -386,10 +373,10 @@ FPhotoMarker.create = function () {
         };
         FPhotoMarker.prototype.onClickPhoto = function() {
             var overlay = Utilities.createDOM(
-                '<div style="position:absolute; top:0px; left:0px; width:'+document.body.scrollWidth+'px; height:'+document.body.scrollHeight+'px; background:black; opacity:0.8; filter:alpha(opacity=50);"></div>');
+                '<div style="position:absolute; top:0px; left:0px; width:'+document.body.clientWidth+'px; height:'+document.body.clientHeight+'px; background:black; opacity:0.8; filter:alpha(opacity=80);"></div>');
             var imgdiv = Utilities.createDOM(
-                '<div style="position:absolute; top:100px; left:'+(self.innerWidth/2-16)+'px; background:white;">'+
-                    '<div style="position:relative;width=100%;height=0px;"></div>'+
+                '<div style="position:absolute; top:100px; left:'+(document.body.clientWidth/2-16)+'px; background:white;">'+
+                    '<div style="position:relative;"></div>'+
                     '<img style="position:relative;" src="'+imgs['loading']+'"/>'+
                 '</div>');
 
@@ -400,7 +387,7 @@ FPhotoMarker.create = function () {
                 if( this.imgdiv.removed) return;
                 var w = this.width+20;
                 var h = this.height+50;
-                var t = (self.innerWidth-w)/2;
+                var t = (document.body.clientWidth-w)/2;
                 if ( t < 0) t = 0;
                 this.imgdiv.style.left= t + 'px';
                 this.imgdiv.style.width = w + 'px';
@@ -461,7 +448,7 @@ function FBrowser() {
 FBrowser.create = function() {
     if(!FBrowser.init) {
         Utilities.extend(FBrowser, GMap2);
-        
+
         FBrowser.prototype.prevPage = function() {
             var map = this.map;
             if( map.pageCurr <= 1) {
@@ -491,8 +478,8 @@ FBrowser.create = function() {
 
             var map = this;
             if(!force) {
-                this.getCenterAsync( function(c) {
-                    center = c;
+                map.getCenterAsync( function(c) {
+                    var center = c;
                     var delta = deltas[zoom];
                     if(Math.abs(center.lat()-map._lastcenter.lat())<delta && Math.abs(center.lng()-map._lastcenter.lng())<delta ) {
                         return;
@@ -501,27 +488,29 @@ FBrowser.create = function() {
                     }
                 });
             } else if(!center) {
-                this.getCenterAsync( function(c) {
+                map.getCenterAsync( function(c) {
                     map.updateview(zoom, true, c);
                 });
             } else {
                 map._lastcenter = center;
                 map.pageCurr = 1;
                 map.pageTotal = 1;
+                currZoom = zoom;
                 map.getBoundsAsync(function(bound) {
                     map.refreshData(bound);
                 });
-                currZoom = zoom;
             }
         };
 
         FBrowser.prototype.ondragend = function() {
+            mask();
             this.updateview();
         };
         FBrowser.prototype.onzoomend = function(oldLevel,newLevel) {
             if( newLevel < MIN_ZOOM || newLevel > MAX_ZOOM) {
                 return;
             }
+            mask();
             this.updateview(newLevel, true);
         }
         FBrowser.prototype.refreshData = function(bound) {
@@ -538,12 +527,12 @@ FBrowser.create = function() {
                 wid = e - w;
             }
             var hig = n - s;
-            
+
             w += wid/5;
             if( w > 180) w -= 360;
             e -= wid/5;
             if( e <= -180) e += 360;
-        
+
             if( e < w) {
                 if( (180+e) > (180-w)) {
                     w = -180;
@@ -564,23 +553,26 @@ FBrowser.create = function() {
             } else {
                 min_date = year+'-'+month+'-01'; max_date = year+'-'+month+'-31';
             }
-            
-            mask();
+
+            var photoContent = $('photoContent');
+            while(photoContent.firstChild) {
+                photoContent.removeChild(photoContent.firstChild);
+            }
             if(tagstr) {
                 flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n, tags:tagstr, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             } else {
                 flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             }
         };
-        
+
         FBrowser.prototype.search_callback = function(rsp) {
             try {
                 if(_ga(rsp,'stat') != 'ok') {
                     return;
                 }
-                
+
                 var delta = deltas[currZoom]/3;
-                
+
                 var photoset = rsp.getElementsByTagName('photos')[0];
                 var photos = photoset.getElementsByTagName('photo');
                 this.pageCurr = parseInt(_ga(photoset,'page'));
@@ -600,9 +592,9 @@ FBrowser.create = function() {
                 if(tagstr) {
                     $('info').innerHTML += '<h4 style="margin:0px;">with Tag: '+tagstr+'</h4>';
                 }
-                
+
                 this.clearOverlays();
-                
+
                 var temp_bounds = new Array();
                 var temp_photos = new Array();
                 for (var i=0,len=photos.length; i<len; i++) {
@@ -610,8 +602,8 @@ FBrowser.create = function() {
                     var lat = parseFloat(_ga(photo,'latitude'));
                     var lon = parseFloat(_ga(photo,'longitude'));
                     if(lat == 0 && lon == 0) { continue; }
-                    photo.position = new GLatLng(lat, lon);
-                    var pos = photo.position;
+
+                    var pos = new GLatLng(lat, lon);
 
                     var isMerged = false;
                     for (var j=0,len2=temp_bounds.length; j<len2; j++) {
@@ -633,12 +625,12 @@ FBrowser.create = function() {
                         temp_photos[temp_photos.length] = ps;
                     }
                 }
-                
+
                 for (var i=0,len=temp_photos.length; i<len ; i++) {
                     if(temp_photos[i].length == 0) { continue; }
                     this.addOverlay(FPhotoMarker.create(Utilities.getMarkerIcon(temp_photos[i].length), temp_photos[i], temp_bounds[i]));
                 }
-            } finally {
+          } finally {
                 unmask();
             }
         };
@@ -649,26 +641,24 @@ FBrowser.create = function() {
 };
 
 
-
-
 var FGS = {
-    createYearBrowserMap : function(year) {
+    createYearBrowserMap : function() {
         var m = FBrowser.create();
         m.getZoomAsync(function(z) {
             if(z > MAX_ZOOM) z = MAX_ZOOM;
             if(z < MIN_ZOOM) z = MIN_ZOOM;
             currZoom = z;
             m.setZoom(currZoom);
+            mask();
             m.updateview();
         });
     },
 
     init : function() {
-       FGS.createYearBrowserMap(2007);
+       FGS.createYearBrowserMap();
     }
 };
 FGS.init();
-
 
 </script>
 
