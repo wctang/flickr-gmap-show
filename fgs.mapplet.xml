@@ -2,11 +2,12 @@
 <Module>
 <ModulePrefs title="Flickr Gmap Show" description="Browse flickr photos on Google Maps" 
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
-author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
+author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="www.wctang.info"
 title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
 thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png">
   <Require feature="sharedmap"/>
   <Require feature="setprefs" />
+  <Require feature="analytics"/>
 </ModulePrefs>
 <UserPref name="year" display_name="Year : " datatype="enum" default_value="2007">
     <EnumValue value="2007" display_value="2007"/>
@@ -44,7 +45,9 @@ thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thu
 <div style='margin-bottom:10px;' id='info'></div>
 <div style='margin-bottom:10px;' id='photoContent'></div>
 
-<script>
+<script type="text/javascript">
+
+var _uacct = "UA-359113-4";
 
 var deltas = [0,0,0,0,0,
 2.267663023758292,
@@ -88,7 +91,75 @@ var imgs = {
     popup_selected: imgdir+'simple_new_window_selected.gif'
 };
 
+// utility
+function $(e) { return document.getElementById(e); };
+function $c(e) { return document.createElement(e); };
+function $a(e,a) { return e.getAttribute(a); };
+function $dom(s) { var d=$c('div');d.innerHTML=s;return d.firstChild; };
+function $extend(subc,basec) { 
+    function inheritance(){}; inheritance.prototype=basec.prototype; subc.prototype=new inheritance(); 
+    subc.prototype.constructor = subc; subc.prototype.baseConstructor = basec; subc.superClass = basec.prototype;
+};
+function $cbtn(n, title, href, target) {
+    var a = $dom('<a style="cursor:pointer;"><img src="'+imgs[n+'_default']+'" style="cursor:pointer;border:0;"/></a>');
+    a.n=n;
+    a.onmouseout=function(){ this.firstChild.src = imgs[this.n+'_default'];};
+    a.onmouseover=function(){ this.firstChild.src = imgs[this.n+'_hover'];};
+    a.onmousedown=function(){ this.firstChild.src = imgs[this.n+'_selected'];};
+    a.onmouseup=function(){ this.firstChild.src = imgs[this.n+'_hover'];};
+    if(title) a.title=title;
+    if(href) a.href=href;
+    if(target) a.target=target;
+    return a;
+}
+var icons=[];
+function $icon(n) {
+    if(n > 100) n = 100;
+    if(!icons[n]) {
+        var img = new GIcon(null,imgdir + n + ".png");
+        if(n < 10) {
+            img.iconSize = new GSize(18, 19);
+            img.iconAnchor = new GPoint(9, 9);
+            img.infoWindowAnchor = new GPoint(9, 9);
+        } else if (n < 100) {
+            img.iconSize = new GSize(20, 21);
+            img.iconAnchor = new GPoint(10, 10);
+            img.infoWindowAnchor = new GPoint(10, 10);
+        } else {
+            img.iconSize = new GSize(26, 27);
+            img.iconAnchor = new GPoint(13, 13);
+            img.infoWindowAnchor = new GPoint(13, 13);
+        }
+        icons[n] = img;
+    }
+    return icons[n];
+}
 
+// mask layer
+var masklayer = $dom(
+    '<div style="position:absolute; background:black; top:0px; left:0px; opacity:.8;-moz-opacity:.8;filter:alpha(opacity=80); cursor:wait; display:none;">'+
+        '<div style="position:absolute; top:100px; background:white;">'+
+            '<img src="'+imgs['loading']+'"/>'+
+        '</div>'+
+    '</div>');
+masklayer.init=false;
+function mask() {
+    if(!masklayer.init) {
+        document.body.appendChild(masklayer);
+        masklayer.init = true;
+    }
+    var w = document.body.clientWidth;
+    var h = document.body.clientHeight;
+    masklayer.style.width = w+'px';
+    masklayer.style.height = h+'px';
+    masklayer.firstChild.style.left = (w-32)/2 + 'px';
+    masklayer.style.display = 'block';
+};
+function unmask() {
+    masklayer.style.display = 'none';
+};
+
+// flickr
 flickr = {
 _api_key : "ebed0eef1b25b738b1903ef93b8f25ee",
 _secret_key : "4260ccd8c3f7837e",
@@ -115,122 +186,38 @@ _url : function(args, sign, type) {
 },
 callapi : function(args, obj, callback, sign) {
     args.api_key = flickr._api_key;
+    args.format = 'json';
+    args.nojsoncallback = '1';
     if (flickr._token) { args.auth_token = flickr._token; }
-    _IG_FetchXmlContent(flickr._url(args, sign), function(resp){
-        var rsps = resp.getElementsByTagName('rsp');
-        if(rsps && rsps.length == 1) {
-            callback.call(obj, rsps[0]);
+
+    _IG_FetchContent(flickr._url(args, sign), function(str) {
+        if (str == null) {
+            return;
+        }
+
+        try {
+            var rsp = eval('(' + str + ')');
+            callback.call(obj, rsp);
+        } finally {
+            unmask();
         }
     });
 },
 photourl : function(photo,t) {
-    if(!t) return 'http://farm'+_ga(photo,'farm')+'.static.flickr.com/'+_ga(photo,'server')+'/'+_ga(photo,'id')+'_'+_ga(photo,'secret');
-    else if(t=='.') return 'http://farm'+_ga(photo,'farm')+'.static.flickr.com/'+_ga(photo,'server')+'/'+_ga(photo,'id')+'_'+_ga(photo,'secret')+'.jpg';
-    else   return 'http://farm'+_ga(photo,'farm')+'.static.flickr.com/'+_ga(photo,'server')+'/'+_ga(photo,'id')+'_'+_ga(photo,'secret')+'_'+t+'.jpg';
+    if(!t) return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret;
+    else if(t=='.') return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'.jpg';
+    else   return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_'+t+'.jpg';
 },
 pageurl : function(photo) {
-    return 'http://www.flickr.com/photo.gne?id='+_ga(photo,'id');
+    return 'http://www.flickr.com/photo.gne?id='+photo.id;
 }
 
 };
 
 
-function $(e,doc) {
-    if(!doc) doc=document;
-    return doc.getElementById(e);
-};
-function _ce(e,doc) {
-    if(!doc) doc=document;
-    return doc.createElement(e);
-};
-function _ga(e,a) {
-    return e.getAttribute(a);
-};
-
-var Utilities={
-    extend : function(subClass, baseClass){
-        function inheritance() {};
-        inheritance.prototype = baseClass.prototype;
-    
-        subClass.prototype = new inheritance();
-        subClass.prototype.constructor = subClass;
-        subClass.prototype.baseConstructor = baseClass;
-        subClass.superClass = baseClass.prototype;
-    },
-    createDOM : function(str,doc) {
-        var d = _ce('div',doc);
-        d.innerHTML = str;
-        return d.firstChild;
-    },
-    getMarkerIcon : function(numPhotos) {
-        if(numPhotos > 100) {
-            numPhotos = 100;
-        }
-        var markerIcons = Utilities.getMarkerIcon.markerIcons;
-        if( markerIcons == null) {
-            markerIcons = Utilities.getMarkerIcon.markerIcons = [];
-        }
-        if(!markerIcons[numPhotos]) {
-            var img = new GIcon();
-            img.image = imgdir + numPhotos + ".png";
-            if(numPhotos < 10) {
-                img.iconSize = new GSize(18, 19);
-                img.iconAnchor = new GPoint(9, 9);
-                img.infoWindowAnchor = new GPoint(9, 9);
-            } else if (numPhotos < 100) {
-                img.iconSize = new GSize(20, 21);
-                img.iconAnchor = new GPoint(10, 10);
-                img.infoWindowAnchor = new GPoint(10, 10);
-            } else {
-                img.iconSize = new GSize(26, 27);
-                img.iconAnchor = new GPoint(13, 13);
-                img.infoWindowAnchor = new GPoint(13, 13);
-            }
-            markerIcons[numPhotos] = img;
-        }
-        return markerIcons[numPhotos];
-    },
-    createButton : function(key, title, href, target) {
-        var a = Utilities.createDOM('<a style="cursor:pointer;"><img src="'+imgs[key+'_default']+'" style="cursor:pointer;border:0;"/></a>');
-        a.imgdef = imgs[key+'_default'];
-        a.imghover = imgs[key+'_hover'];
-        a.imgselected = imgs[key+'_selected'];
-        a.onmouseout=function(){ this.childNodes[0].src = this.imgdef;};
-        a.onmouseover=function(){ this.childNodes[0].src = this.imghover;};
-        a.onmousedown=function(){ this.childNodes[0].src = this.imgselected;};
-        a.onmouseup=function(){ this.childNodes[0].src = this.imghover;};
-        if(title) a.title=title;
-        if(href) a.href=href;
-        if(target) a.target=target;
-        return a;
-    }
-};
 
 
-var masklayer = Utilities.createDOM(
-    '<div style="position:absolute; background:black; opacity:0.8; filter:alpha(opacity=80); cursor:wait; display:none;">'+
-        '<div style="position:absolute; background:white;"><img src="'+imgs['loading']+'"/><br/><span>&nbsp;</span></div>'+
-    '</div>');
-masklayer.init=false;
-function mask() {
-    if(!masklayer.init) {
-        document.body.appendChild(masklayer);
-        masklayer.init = true;
-    }
-    var w = document.body.clientWidth;
-    var h = document.body.clientHeight;
-    masklayer.style.top = '0px';
-    masklayer.style.left = '0px';
-    masklayer.style.width = w+'px';
-    masklayer.style.height = h+'px';
-    var imgdiv = masklayer.firstChild;
-    imgdiv.style.top = '100px';
-    imgdiv.style.left = (w/2-16) + 'px';
-    masklayer.style.display = 'block';
-};
-function unmask() {
-    masklayer.style.display = 'none';
-};
+
 
 
 
@@ -247,7 +234,7 @@ function FPhotoMarker(icon, photos, bounds) {
 };
 FPhotoMarker.create = function () {
     if(!FPhotoMarker.init) {
-        Utilities.extend(FPhotoMarker, GMarker);
+        $extend(FPhotoMarker, GMarker);
 
         FPhotoMarker.prototype.refreshImgList = function() {
             if( this.currpos_ == 0) {
@@ -255,8 +242,8 @@ FPhotoMarker.create = function () {
                 for(var i = 0; i< to; ++i) {
                     var a = this.imagesDiv_.childNodes[i].childNodes[0];
                     var img = a.childNodes[0];
-                    if( !_ga(img,'src')) {
-                        img.src=a.url+'_s.jpg';
+                    if( !img.src) {
+                        img.src=flickr.photourl(a.photo,'s');
                     }
                 }
             } else {
@@ -264,8 +251,8 @@ FPhotoMarker.create = function () {
                 if(span) {
                     var a = span.childNodes[0];
                     var img = a.childNodes[0];
-                    if( !_ga(img,'src')) {
-                        img.src=a.url+'_s.jpg';
+                    if( !img.src) {
+                        img.src=flickr.photourl(a.photo,'s');
                     }
                 }
             }
@@ -297,7 +284,7 @@ FPhotoMarker.create = function () {
 
         FPhotoMarker.prototype.onClick = function() {
             if(!this.infoContent_) {
-                var infoContent = Utilities.createDOM(
+                var infoContent = $dom(
                     '<div style="height:140px;width:250px;border:solid 1px gray;padding:10px;margin:10px;">'+
                         '<div style="position:relative; left:0px; height:40px; width:250px; text-align:center;"></div>'+
                         '<div style="position:relative; left:0px; height:80px; width:250px;"></div>'+
@@ -306,9 +293,9 @@ FPhotoMarker.create = function () {
                 var titleDiv = infoContent.childNodes[0];
                 var imagesDiv = infoContent.childNodes[1]
                 var controlDiv = infoContent.childNodes[2];
-                var pre = Utilities.createButton('prev','Previous photo');
-                var nex = Utilities.createButton('next','Next photo');
-                var info = Utilities.createDOM('<span/>');
+                var pre = $cbtn('prev','Previous photo');
+                var nex = $cbtn('next','Next photo');
+                var info = $dom('<span/>');
                 nex.marker = pre.marker = this;
                 pre.onclick = this.prevImg;
                 nex.onclick = this.nextImg;
@@ -319,23 +306,22 @@ FPhotoMarker.create = function () {
                 for(var i = 0, len = this.photos_.length; i < len; ++i) {
                     var photo = this.photos_[i];
 
-                    var imgspan = _ce('span');
-                    var imglink = _ce('a');
-                    var img = _ce('img');
+                    var img = $c('img');
 
-                    img.alt = _ga(photo,'title');
+                    img.alt = photo.title;
                     img.width=img.height=75;
                     img.style.border = 'dotted 2px gray';
                     img.style.padding = '1px';
-                    imglink.title = img.alt;
 
-                    imglink.url = flickr.photourl(photo);
-                    
-                    imglink.pageurl = flickr.pageurl(photo);
+                    var imglink = $c('a');
+                    imglink.title = photo.title;
+                    imglink.photo=photo;
                     imglink.onclick = this.onPhotoClick;
                     imglink.onmouseover = this.onPhotoHover;
                     imglink.onmouseout = this.onPhotoHoverOut;
                     imglink.style.cursor = 'pointer';
+
+                    var imgspan = $c('span');
                     imgspan.id='pic'+i;
                     imgspan.style.position='absolute';
                     imgspan.style.display='none';
@@ -363,9 +349,9 @@ FPhotoMarker.create = function () {
             var photo = this.photos_[rand];
             var infowin = 
                 '<div style="font-size: 12px; width: 240px;">'+
-                    '<b style="display: block; margin-bottom: 4px;">'+_ga(photo,'title')+'</b>'+
+                    '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
                     '<img src="' + flickr.photourl(photo,'m') + '"/><br />'+
-                    '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+_ga(photo,'owner')+'/"/>'+_ga(photo,'owner')+'</a></i><br />'+
+                    '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+photo.owner+'</a></i><br />'+
                     '<a target="_blank" href="'+flickr.pageurl(photo)+'">View this photo on flickr</a></div>';
             this.openInfoWindowHtml(infowin, {disableGoogleLinks:true});
         };
@@ -390,49 +376,47 @@ FPhotoMarker.create = function () {
             this.firstChild.style.border = 'dotted 2px gray';
         }
         FPhotoMarker.prototype.onPhotoClick = function() {
-            var overlay = Utilities.createDOM(
-                '<div style="position:absolute; top:0px; left:0px; width:'+document.body.clientWidth+'px; height:'+document.body.clientHeight+'px; background:black; opacity:0.8; filter:alpha(opacity=80);"></div>');
-            var imgdiv = Utilities.createDOM(
-                '<div style="position:absolute; top:100px; left:'+(document.body.clientWidth/2-16)+'px; background:white;">'+
-                    '<div style="position:relative;"></div>'+
-                    '<img style="position:relative;" src="'+imgs['loading']+'"/>'+
-                '</div>');
+            var w = document.body.clientWidth;
+            var h = document.body.clientHeight;
+            var overlay = $dom(
+                '<div><div style="position:absolute; top:0px; left:0px; width:'+w+'px; height:'+h+'px; background:black; opacity:.8;-moz-opacity:.8;filter:alpha(opacity=80);">'+
+                    '<div style="position:absolute; top:100px; left:'+(w-32)/2+'px; background:white;">'+
+                        '<img src="'+imgs['loading']+'"/>'+
+                    '</div>'+
+                '</div></div>');
 
             var imgPreloader = new Image();
-            imgPreloader.imgdiv = imgdiv;
-            imgPreloader.imgobj = this;
             imgPreloader.onload=function(){
-                if( this.imgdiv.removed) return;
-                var w = this.width+20;
-                var h = this.height+50;
-                var t = (document.body.clientWidth-w)/2;
-                if ( t < 0) t = 0;
-                this.imgdiv.style.left= t + 'px';
-                this.imgdiv.style.width = w + 'px';
-                //t = (self.innerHeight-h)/2;
-                //if ( t < 0) t = 0;
-                t = 50;
-                this.imgdiv.style.top = t + 'px';
-                this.imgdiv.style.height = h + 'px';
-                this.imgdiv.childNodes[0].style.marginTop = '10px';
-                this.imgdiv.childNodes[0].style.marginLeft = '10px';
-                this.imgdiv.childNodes[0].style.height = '20px';
-                this.imgdiv.childNodes[0].innerHTML = this.imgobj.title + ' ';
-                this.imgdiv.childNodes[0].appendChild(Utilities.createButton('popup','View photo page',this.imgobj.pageurl,'_new'));
-                this.imgdiv.childNodes[1].style.marginTop = '10px';
-                this.imgdiv.childNodes[1].style.marginLeft = '10px';
-                this.imgdiv.childNodes[1].src = this.src;
-            };
-            imgPreloader.src = this.url+'_m.jpg';
+                if( this.overlay.removed) return;
 
-            overlay.imgdiv = imgdiv;
+                var w = this.width+20;
+                var lef = (document.body.clientWidth-w)/2;
+                if(lef < 0) lef=0;
+
+                var photo = this.photo;
+                var photoctx = $dom(
+                    '<div style="position:absolute; top:50px; left:'+lef+'px; width:'+w+'px; font-size: 12px; background:white;">'+
+                        '<div style="margin:10px;">'+
+                            '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
+                            '<img src="'+this.src+'"/><br />'+
+                            '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+photo.owner+'</a></i><br />'+
+                            '<a target="_blank" href="'+flickr.pageurl(photo)+'">View this photo on flickr</a>'+
+                        '</div>'+
+                    '</div>');
+
+                this.overlay.firstChild.firstChild.style.display='none';
+                this.overlay.appendChild(photoctx);
+            };
+            overlay.imgPreloader = imgPreloader;
+            imgPreloader.overlay = overlay;
+            imgPreloader.photo=this.photo;
+            imgPreloader.src = flickr.photourl(this.photo,'m');
+
             overlay.onclick=function() {
-                this.imgdiv.removed = true;
-                this.imgdiv.parentNode.removeChild(this.imgdiv);
+                this.removed=true;
                 this.parentNode.removeChild(this);
             };
             document.body.appendChild(overlay);
-            document.body.appendChild(imgdiv);
         };
 
         FPhotoMarker.init=true;
@@ -451,9 +435,9 @@ function FBrowser() {
     GEvent.addListener(this, "dragend", this.ondragend);
     GEvent.addListener(this, "zoomend", this.onzoomend);
 
-    var pre = Utilities.createButton('prev','Previous Page');
-    var nex = Utilities.createButton('next','Next Page');
-    var pageInfo = Utilities.createDOM('<span/>');
+    var pre = $cbtn('prev','Previous Page');
+    var nex = $cbtn('next','Next Page');
+    var pageInfo = $dom('<span/>');
     pre.onclick = this.prevPage;
     nex.onclick = this.nextPage;
     var pageContent = $('pageContent');
@@ -465,64 +449,63 @@ function FBrowser() {
 };
 FBrowser.create = function() {
     if(!FBrowser.init) {
-        Utilities.extend(FBrowser, GMap2);
+        $extend(FBrowser, GMap2);
+
+        FBrowser.prototype.updateview = function(bound, currPage, level) {
+            var map = this;
+            if(level) {
+                currZoom = level;
+            }
+            if( currZoom < MIN_ZOOM || currZoom > MAX_ZOOM) {
+                return;
+            }
+            if(currPage) {
+                map.pageCurr = currPage;
+            } else {
+                map.pageCurr = 1;
+                map.pageTotal = 1;
+            }
+
+            mask();
+            if(bound) {
+                map._lastcenter = bound.getCenter();
+                map.refreshData(bound);
+            } else {
+                map.getBoundsAsync(function(bound) {
+                    map._lastcenter = bound.getCenter();
+                    map.refreshData(bound);
+                });
+            }
+        };
 
         FBrowser.prototype.prevPage = function() {
             var map = this.map;
             if( map.pageCurr <= 1) {
                 return;
             }
-            mask();
-            map.pageCurr--;
-            map.getBoundsAsync(function(bound) {
-                map.refreshData(bound);
-            });
+            map.updateview(null, map.pageCurr-1);
         };
         FBrowser.prototype.nextPage = function() {
             var map = this.map;
             if( map.pageCurr >= map.pageTotal) {
                 return;
             }
-            mask();
-            map.pageCurr++;
-            map.getBoundsAsync(function(bound) {
-                map.refreshData(bound);
-            });
+            map.updateview(null, map.pageCurr+1);
         };
-
-        FBrowser.prototype.updateview = function() {
-            var map = this;
-            map.pageCurr = 1;
-            map.pageTotal = 1;
-            map.getBoundsAsync(function(bound) {
-                map.refreshData(bound);
-            });
-        };
-
         FBrowser.prototype.ondragend = function() {
             var map = this;
-            map.getCenterAsync( function(center) {
+            map.getBoundsAsync( function(bound) {
+                var center = bound.getCenter();
                 var delta = deltas[currZoom];
                 if(Math.abs(center.lat()-map._lastcenter.lat())<delta && Math.abs(center.lng()-map._lastcenter.lng())<delta ) {
                     return;
                 } else {
-                    mask();
-                    map._lastcenter = center;
-                    map.updateview();
+                    map.updateview(bound);
                 }
             });
         };
         FBrowser.prototype.onzoomend = function(oldLevel,newLevel) {
-            if( newLevel < MIN_ZOOM || newLevel > MAX_ZOOM) {
-                return;
-            }
-            currZoom = newLevel;
-            mask();
-            var map = this;
-            map.getCenterAsync( function(center) {
-                map._lastcenter = center;
-                map.updateview();
-            });
+            this.updateview(null, null, newLevel);
         }
         FBrowser.prototype.refreshData = function(bound) {
             var sw = bound.getSouthWest();
@@ -573,77 +556,80 @@ FBrowser.create = function() {
             if(tagstr) {
                 flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n, tags:tagstr, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             } else {
-                flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
+                flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n,              min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             }
         };
 
         FBrowser.prototype.search_callback = function(rsp) {
-            try {
-                if(_ga(rsp,'stat') != 'ok') {
-                    return;
-                }
+            if(rsp.stat != 'ok') {
+                return;
+            }
 
-                var delta = deltas[currZoom]/3;
+            var delta = deltas[currZoom]/3;
 
-                var photoset = rsp.getElementsByTagName('photos')[0];
-                var photos = photoset.getElementsByTagName('photo');
-                this.pageCurr = parseInt(_ga(photoset,'page'));
-                this.pageTotal = parseInt(_ga(photoset,'pages'));
+            var photoset = rsp.photos;
+            var photos = photoset.photo;
+            this.pageCurr = parseInt(photoset.page);
+            this.pageTotal = parseInt(photoset.pages);
+            this.total = parseInt(photoset.total);
+            this.perpage = parseInt(photoset.perpage);
 
-                var pageInfo = $('pageContent').pageInfo;
-                pageInfo.innerHTML = ' Page ' + this.pageCurr + ' of ' + this.pageTotal + ' pages.';
+            var pageInfo = $('pageContent').pageInfo;
+            var start, end;
+            if(this.total == 0) start = end = 0;
+            start = ((this.pageCurr-1)*this.perpage)+1;
+            end = ((this.pageCurr)*this.perpage);
+            if(end > this.total) end = this.total;
+            pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
 
-                var year = parseInt(prefs.getString('year'));
-                var month = prefs.getString('month');
-                var tagstr = prefs.getString('tags');
-                if(month == 'all') {
-                    $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + ' photos.</h3>';
-                } else {
-                    $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + '-' + month + ' photos.</h3>';
-                }
-                if(tagstr) {
-                    $('info').innerHTML += '<h4 style="margin:0px;">with Tag: '+tagstr+'</h4>';
-                }
+            var year = parseInt(prefs.getString('year'));
+            var month = prefs.getString('month');
+            var tagstr = prefs.getString('tags');
+            if(month == 'all') {
+                $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + ' photos.</h3>';
+            } else {
+                $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + '/' + month + ' photos.</h3>';
+            }
+            if(tagstr) {
+                $('info').innerHTML += '<h4 style="margin:0px;">with Tag: '+tagstr+'</h4>';
+            }
 
-                this.clearOverlays();
+            this.clearOverlays();
 
-                var temp_bounds = new Array();
-                var temp_photos = new Array();
-                for (var i=0,len=photos.length; i<len; i++) {
-                    var photo = photos[i];
-                    var lat = parseFloat(_ga(photo,'latitude'));
-                    var lon = parseFloat(_ga(photo,'longitude'));
-                    if(lat == 0 && lon == 0) { continue; }
+            var temp_bounds = new Array();
+            var temp_photos = new Array();
+            for (var i=0,len=photos.length; i<len; i++) {
+                var photo = photos[i];
+                var lat = parseFloat(photo.latitude);
+                var lon = parseFloat(photo.longitude);
+                if(lat == 0 && lon == 0) { continue; }
 
-                    var pos = new GLatLng(lat, lon);
+                var pos = new GLatLng(lat, lon);
 
-                    var isMerged = false;
-                    for (var j=0,len2=temp_bounds.length; j<len2; j++) {
-                        var bb = temp_bounds[j];
-                        if( bb.contains(pos)) {
-                            isMerged = true;
-                            var ps = temp_photos[j];
-                            ps[ps.length] = photo;
-                            break;
-                        }
-                    }
-
-                    if(!isMerged) {
-                        var ps = new Array();
-                        ps[0] = photo;
-                        
-                        var bound = new GLatLngBounds(new GLatLng(pos.lat()-delta, pos.lng()-delta), new GLatLng(pos.lat()+delta, pos.lng()+delta));
-                        temp_bounds[temp_bounds.length] = bound;
-                        temp_photos[temp_photos.length] = ps;
+                var isMerged = false;
+                for (var j=0,len2=temp_bounds.length; j<len2; j++) {
+                    var bb = temp_bounds[j];
+                    if( bb.contains(pos)) {
+                        isMerged = true;
+                        var ps = temp_photos[j];
+                        ps[ps.length] = photo;
+                        break;
                     }
                 }
 
-                for (var i=0,len=temp_photos.length; i<len ; i++) {
-                    if(temp_photos[i].length == 0) { continue; }
-                    this.addOverlay(FPhotoMarker.create(Utilities.getMarkerIcon(temp_photos[i].length), temp_photos[i], temp_bounds[i]));
+                if(!isMerged) {
+                    var ps = new Array();
+                    ps[0] = photo;
+                    
+                    var bound = new GLatLngBounds(new GLatLng(pos.lat()-delta, pos.lng()-delta), new GLatLng(pos.lat()+delta, pos.lng()+delta));
+                    temp_bounds[temp_bounds.length] = bound;
+                    temp_photos[temp_photos.length] = ps;
                 }
-            } finally {
-                unmask();
+            }
+
+            for (var i=0,len=temp_photos.length; i<len ; i++) {
+                if(temp_photos[i].length == 0) { continue; }
+                this.addOverlay(FPhotoMarker.create($icon(temp_photos[i].length), temp_photos[i], temp_bounds[i]));
             }
         };
 
@@ -657,24 +643,22 @@ var FGS = {
     createYearBrowserMap : function() {
         var m = FBrowser.create();
         m.getZoomAsync(function(z) {
-            if(z > MAX_ZOOM) z = MAX_ZOOM;
-            if(z < MIN_ZOOM) z = MIN_ZOOM;
-            currZoom = z;
-            m.setZoom(currZoom);
-            mask();
-            m.getCenterAsync( function(center) {
-                m._lastcenter = center;
-                m.updateview();
-            });
+            if(z > MAX_ZOOM) {
+                m.setZoom(MAX_ZOOM);
+            } else if(z < MIN_ZOOM) {
+                m.setZoom(MIN_ZOOM);
+            } else {
+                m.updateview(null, null, z);
+            }
         });
     },
 
     init : function() {
+       _IG_Analytics(_uacct, "/mapplet");
        FGS.createYearBrowserMap();
     }
 };
 FGS.init();
-
 </script>
 
 
