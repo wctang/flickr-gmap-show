@@ -2,7 +2,7 @@
 <Module>
 <ModulePrefs title="Flickr Gmap Show" description="Browse flickr photos on Google Maps" 
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
-author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="www.wctang.info"
+author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
 title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
 thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png">
   <Require feature="sharedmap"/>
@@ -191,7 +191,7 @@ callapi : function(args, obj, callback, sign) {
     if (flickr._token) { args.auth_token = flickr._token; }
 
     _IG_FetchContent(flickr._url(args, sign), function(str) {
-        if (str == null) {
+        if (!str) {
             return;
         }
 
@@ -210,6 +210,10 @@ photourl : function(photo,t) {
 },
 pageurl : function(photo) {
     return 'http://www.flickr.com/photo.gne?id='+photo.id;
+},
+buddyurl : function(photo) {
+    if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
+    else return 'http://www.flickr.com/images/buddyicon.jpg';
 }
 
 };
@@ -347,11 +351,16 @@ FPhotoMarker.create = function () {
             if(this.photos_.length<2) rand = 0;
             else rand = Math.round((this.photos_.length-1)*Math.random());
             var photo = this.photos_[rand];
+            var owner = photo.ownername;
+            if(!owner) owner = photo.owner;
+            var datetaken = photo.datetaken.substr(0,10);
             var infowin = 
                 '<div style="font-size: 12px; width: 240px;">'+
                     '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
-                    '<img src="' + flickr.photourl(photo,'m') + '"/><br />'+
-                    '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+photo.owner+'</a></i><br />'+
+                    '<img style="margin-bottom:4px;" src="' + flickr.photourl(photo,'m') + '"/><br />'+
+                    '<a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/><img style="float:right;width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>'+
+                    '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a></i><br />'+
+                    '<i>Taken on '+datetaken+'</i><br />'+
                     '<a target="_blank" href="'+flickr.pageurl(photo)+'">View this photo on flickr</a></div>';
             this.openInfoWindowHtml(infowin, {disableGoogleLinks:true});
         };
@@ -394,12 +403,17 @@ FPhotoMarker.create = function () {
                 if(lef < 0) lef=0;
 
                 var photo = this.photo;
+                var owner = photo.ownername;
+                if(!owner) owner = photo.owner;
+                var datetaken = photo.datetaken.substr(0,10);
                 var photoctx = $dom(
                     '<div style="position:absolute; top:50px; left:'+lef+'px; width:'+w+'px; font-size: 12px; background:white;">'+
                         '<div style="margin:10px;">'+
                             '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
-                            '<img src="'+this.src+'"/><br />'+
-                            '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+photo.owner+'</a></i><br />'+
+                            '<img style="margin-bottom:4px;" src="'+this.src+'"/><br />'+
+                            '<a style="float:right;" target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/><img style="width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>'+
+                            '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a></i><br />'+
+                            '<i>Taken on '+datetaken+'</i><br />'+
                             '<a target="_blank" href="'+flickr.pageurl(photo)+'">View this photo on flickr</a>'+
                         '</div>'+
                     '</div>');
@@ -554,9 +568,9 @@ FBrowser.create = function() {
             }
             this.closeInfoWindow();
             if(tagstr) {
-                flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n, tags:tagstr, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
+                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, tags:tagstr, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             } else {
-                flickr.callapi({method: 'flickr.photos.search',  extras:'geo', bbox:w+','+s+','+e+','+n,              min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
+                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,              min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
             }
         };
 
@@ -576,9 +590,12 @@ FBrowser.create = function() {
 
             var pageInfo = $('pageContent').pageInfo;
             var start, end;
-            if(this.total == 0) start = end = 0;
-            start = ((this.pageCurr-1)*this.perpage)+1;
-            end = ((this.pageCurr)*this.perpage);
+            if(this.total == 0) {
+                start = end = 0;
+            } else {
+                start = ((this.pageCurr-1)*this.perpage)+1;
+                end = ((this.pageCurr)*this.perpage);
+            }
             if(end > this.total) end = this.total;
             pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
 
