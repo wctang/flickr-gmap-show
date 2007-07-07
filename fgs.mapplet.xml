@@ -6,46 +6,19 @@ author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" autho
 title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
 thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png">
   <Require feature="sharedmap"/>
-  <Require feature="setprefs" />
   <Require feature="analytics"/>
 </ModulePrefs>
-<UserPref name="year" display_name="Year : " datatype="enum" default_value="2007">
-    <EnumValue value="2007" display_value="2007"/>
-    <EnumValue value="2006" display_value="2006"/>
-    <EnumValue value="2005" display_value="2005"/>
-    <EnumValue value="2004" display_value="2004"/>
-    <EnumValue value="2003" display_value="2003"/>
-    <EnumValue value="2002" display_value="2002"/>
-    <EnumValue value="2001" display_value="2001"/>
-    <EnumValue value="2000" display_value="2000"/>
-    <EnumValue value="1999" display_value="1999"/>
-    <EnumValue value="1998" display_value="1998"/>
-    <EnumValue value="1997" display_value="1997"/>
-</UserPref>
-<UserPref name="month" display_name="Month : " datatype="enum" default_value="all">
-    <EnumValue value="all" display_value="All"/>
-    <EnumValue value="01" display_value="01"/>
-    <EnumValue value="02" display_value="02"/>
-    <EnumValue value="03" display_value="03"/>
-    <EnumValue value="04" display_value="04"/>
-    <EnumValue value="05" display_value="05"/>
-    <EnumValue value="06" display_value="06"/>
-    <EnumValue value="07" display_value="07"/>
-    <EnumValue value="08" display_value="08"/>
-    <EnumValue value="09" display_value="09"/>
-    <EnumValue value="10" display_value="10"/>
-    <EnumValue value="11" display_value="11"/>
-    <EnumValue value="12" display_value="12"/>
-</UserPref>
-<UserPref name="tags" display_name="Tag : " datatype="string" default_value="">
-</UserPref>
 
 <Content type="html"><![CDATA[
+<div style='margin-bottom:10px;' id='settingContent'></div>
 <div style='margin-bottom:10px;' id='pageContent'></div>
-<div style='margin-bottom:10px;' id='info'></div>
 <div style='margin-bottom:10px;' id='photoContent'></div>
 
 <script type="text/javascript">
+var settingContent = $('settingContent');
+var pageContent = $('pageContent');
+var photoContent = $('photoContent');
+
 
 var _uacct = "UA-359113-4";
 
@@ -63,12 +36,11 @@ var deltas = [0,0,0,0,0,
 0.002374791275833843,
 0.0011871839595940514,
 0.0005935388549467291,
-0.0002967560452766804];
-var MAX_ZOOM = 18;
+0.0002967560452766804,
+0.0001483780226383402];
+var MAX_ZOOM = 19;
 var MIN_ZOOM = 5;
 var currZoom = 0;
-
-var prefs = new _IG_Prefs(__MODULE_ID__);
 
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
@@ -163,20 +135,17 @@ function unmask() {
 flickr = {
 _api_key : "ebed0eef1b25b738b1903ef93b8f25ee",
 _secret_key : "4260ccd8c3f7837e",
-_callbacks : {},
-_callback_number : 0,
-_url : function(args, sign, type) {
-    if (!type) { type = 'rest'; }
-    var url = 'http://api.flickr.com/services/'+type+'/?'
+_url : function(args, sign) {
+    var url = 'http://api.flickr.com/services/rest/?'
     var signature = flickr._secret_key;
-    var keys = new Array ();
-    for (var k in args) { keys.push (k); }
-    keys.sort ();
+    var keys = [];
+    for (var k in args) { keys.push(k); }
+    keys.sort();
     for (var i=0; i<keys.length; i++) {
         var k = keys[i];
         var v = args[k];
 //        signature = signature + k + v;
-        url = url + (i>0?'&':'') + escape(k) + '=' + escape(v);
+        url += (i>0?'&':'') + _esc(k) + '=' + _esc(v);
     }
 //    if(sign) {
 //        signature = Utilities.MD5(signature);
@@ -191,9 +160,7 @@ callapi : function(args, obj, callback, sign) {
     if (flickr._token) { args.auth_token = flickr._token; }
 
     _IG_FetchContent(flickr._url(args, sign), function(str) {
-        if (!str) {
-            return;
-        }
+        if (!str) return;
 
         try {
             var rsp = eval('(' + str + ')');
@@ -232,8 +199,9 @@ function FPhotoMarker(icon, photos, bounds) {
     var position = bounds.getCenter();
     this.baseConstructor.call(this, position, {icon:icon});
 
-    this.photos_ = photos;
-    this.currpos_ = 0;
+    this.photos = photos;
+    this.currpos = 0;
+    this.ctx = null;
     GEvent.addListener(this, 'click', this.onClick);
 };
 FPhotoMarker.create = function () {
@@ -241,77 +209,70 @@ FPhotoMarker.create = function () {
         $extend(FPhotoMarker, GMarker);
 
         FPhotoMarker.prototype.refreshImgList = function() {
-            if( this.currpos_ == 0) {
-                var to = this.imagesDiv_.childNodes.length > 5 ? 5 : this.imagesDiv_.childNodes.length;
-                for(var i = 0; i< to; ++i) {
-                    var a = this.imagesDiv_.childNodes[i].childNodes[0];
-                    var img = a.childNodes[0];
-                    if( !img.src) {
-                        img.src=flickr.photourl(a.photo,'s');
-                    }
-                }
-            } else {
-                var span = this.imagesDiv_.childNodes[this.currpos_+4];
-                if(span) {
-                    var a = span.childNodes[0];
-                    var img = a.childNodes[0];
-                    if( !img.src) {
-                        img.src=flickr.photourl(a.photo,'s');
-                    }
-                }
+            var imgs = this.ctx.imgs;
+            
+            var end = this.currpos + 5;
+            if( end > imgs.length) end = imgs.length;
+            for( var i = this.currpos; i<end; ++i) {
+                var a = imgs[i].firstChild;
+                var img = a.firstChild;
+                if(!img.src) img.src=flickr.photourl(a.photo,'s');
             }
 
-            for( var i = 0; i < this.imagesDiv_.childNodes.length; i++ ) {
-                var node = this.imagesDiv_.childNodes[i];
-                if(i == this.currpos_) {
-                    node.style.display = 'inline';
-                    node.childNodes[0].childNodes[0].style.width=node.childNodes[0].childNodes[0].style.height='75px';
-                    node.style.top = '0px';
-                    node.style.left = '80px';
-                } else if(i == this.currpos_-1) {
-                    node.style.display = 'inline';
-                    node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = '45px';
-                    node.style.top = '15px';
-                    node.style.left = '15px';
-                } else if(i == this.currpos_+1) {
-                    node.style.display = 'inline';
-                    node.childNodes[0].childNodes[0].style.width = node.childNodes[0].childNodes[0].style.height = '45px';
-                    node.style.top = '15px';
-                    node.style.left = '175px';
+            for( var i = 0; i < imgs.length; i++ ) {
+                var node = imgs[i].style;
+                var img = imgs[i].firstChild.firstChild.style;
+                if(i == this.currpos) {
+                    node.display = 'inline';
+                    node.top = '0px';
+                    node.left = '80px';
+                    img.width=img.height='75px';
+                } else if(i == this.currpos-1) {
+                    node.display = 'inline';
+                    node.top = '15px';
+                    node.left = '15px';
+                    img.width = img.height = '45px';
+                } else if(i == this.currpos+1) {
+                    node.display = 'inline';
+                    node.top = '15px';
+                    node.left = '175px';
+                    img.width = img.height = '45px';
                 } else {
-                    node.style.display = 'none';
+                    node.display = 'none';
                 }
             }
-            this.title_.innerHTML=this.imagesDiv_.childNodes[this.currpos_].childNodes[0].title;
-            this.info_.innerHTML=' ' + (this.currpos_+1) + ' of ' + this.imagesDiv_.childNodes.length + ' ';
+            this.ctx.titl.innerHTML=imgs[this.currpos].firstChild.title;
+            this.ctx.info.innerHTML=' ' + (this.currpos+1) + ' of ' + imgs.length + ' ';
         };
 
         FPhotoMarker.prototype.onClick = function() {
-            if(!this.infoContent_) {
-                var infoContent = $dom(
+            if(!this.ctx) {
+                var ctx_ = $dom(
                     '<div style="height:140px;width:250px;border:solid 1px gray;padding:10px;margin:10px;">'+
                         '<div style="position:relative; left:0px; height:40px; width:250px; text-align:center;"></div>'+
                         '<div style="position:relative; left:0px; height:80px; width:250px;"></div>'+
                         '<div style="position:relative; left:0px; height:20px; width:250px;"></div>'+
                     '</div>');
-                var titleDiv = infoContent.childNodes[0];
-                var imagesDiv = infoContent.childNodes[1]
-                var controlDiv = infoContent.childNodes[2];
+                ctx_.titl = ctx_.childNodes[0];
+                var imgs = ctx_.childNodes[1]
+                var ctrl = ctx_.childNodes[2];
+
                 var pre = $cbtn('prev','Previous photo');
                 var nex = $cbtn('next','Next photo');
-                var info = $dom('<span/>');
                 nex.marker = pre.marker = this;
                 pre.onclick = this.prevImg;
                 nex.onclick = this.nextImg;
-                controlDiv.appendChild(pre);
-                controlDiv.appendChild(nex);
-                controlDiv.appendChild(info);
+                ctrl.appendChild(pre);
+                ctrl.appendChild(nex);
 
-                for(var i = 0, len = this.photos_.length; i < len; ++i) {
-                    var photo = this.photos_[i];
+                var info = $dom('<span/>');
+                ctrl.appendChild(info);
+                ctx_.info = info;
+
+                for(var i = 0, len = this.photos.length; i < len; ++i) {
+                    var photo = this.photos[i];
 
                     var img = $c('img');
-
                     img.alt = photo.title;
                     img.width=img.height=75;
                     img.style.border = 'dotted 2px gray';
@@ -326,31 +287,27 @@ FPhotoMarker.create = function () {
                     imglink.style.cursor = 'pointer';
 
                     var imgspan = $c('span');
-                    imgspan.id='pic'+i;
                     imgspan.style.position='absolute';
                     imgspan.style.display='none';
 
                     imglink.appendChild(img);
                     imgspan.appendChild(imglink);
-                    imagesDiv.appendChild(imgspan);
+                    imgs.appendChild(imgspan);
                 }
-                this.infoContent_=infoContent;
-                this.title_=titleDiv;
-                this.imagesDiv_=imagesDiv;
-                this.info_=info;
+                this.ctx=ctx_;
+                this.ctx.imgs=imgs.childNodes;
             }
 
             this.refreshImgList();
-            var photoContent = $('photoContent');
             while(photoContent.firstChild) {
                 photoContent.removeChild(photoContent.firstChild);
             }
-            photoContent.appendChild(this.infoContent_);
+            photoContent.appendChild(this.ctx);
             
             var rand;
-            if(this.photos_.length<2) rand = 0;
-            else rand = Math.round((this.photos_.length-1)*Math.random());
-            var photo = this.photos_[rand];
+            if(this.photos.length<2) rand = 0;
+            else rand = Math.round((this.photos.length-1)*Math.random());
+            var photo = this.photos[rand];
             var owner = photo.ownername;
             if(!owner) owner = photo.owner;
             var datetaken = photo.datetaken.substr(0,10);
@@ -365,17 +322,15 @@ FPhotoMarker.create = function () {
             this.openInfoWindowHtml(infowin, {disableGoogleLinks:true});
         };
         FPhotoMarker.prototype.nextImg = function() {
-            if( this.marker.currpos_ >= this.marker.imagesDiv_.childNodes.length-1) {
-                return;
-            }
-            this.marker.currpos_++;
+            if( this.marker.currpos >= this.marker.ctx.imgs.length-1) return;
+
+            this.marker.currpos++;
             this.marker.refreshImgList();
         };
         FPhotoMarker.prototype.prevImg = function() {
-            if( this.marker.currpos_ <= 0) {
-                return;
-            }
-            this.marker.currpos_--;
+            if( this.marker.currpos <= 0) return;
+
+            this.marker.currpos--;
             this.marker.refreshImgList();
         };
         FPhotoMarker.prototype.onPhotoHover = function() {
@@ -449,12 +404,40 @@ function FBrowser() {
     GEvent.addListener(this, "dragend", this.ondragend);
     GEvent.addListener(this, "zoomend", this.onzoomend);
 
+
+    var nowy = new Date().getFullYear();
+    var settingstr = '<span>Date: <select id="fgs_select_year">';
+    for(var i = 0; i<10; ++i) {
+        settingstr += '<option value="'+(nowy-i)+'">'+(nowy-i)+'</option>';
+    }
+    settingstr += '</select> - <select id="fgs_select_month"><option value="all">All</option>';
+    for(var i = 1; i<=12; ++i) {
+        if(i < 10) settingstr += '<option value="0'+i+'">0'+i+'</option>';
+        else       settingstr += '<option value="'+i+'">'+i+'</option>';
+    }
+    settingstr += 
+        '</select><br />Sort: <select id="fgs_select_sort">'+
+            '<option value="date-taken-desc">date-taken-desc</option>'+
+            '<option value="date-taken-asc">date-taken-asc</option>'+
+            '<option value="date-posted-desc">date-posted-desc</option>'+
+            '<option value="date-posted-asc">date-posted-asc</option>'+
+            '<option value="interestingness-desc">interestingness-desc</option>'+
+            '<option value="interestingness-asc">interestingness-asc</option>'+
+            '<option value="relevance">relevance</option></select><br />';
+    settingstr += 'Search: <form id="fgs_search_form"><input id="fgs_search" type="text"/><input type="submit"/></form></span>';
+    settingContent.appendChild($dom(settingstr));
+    var ysel = $('fgs_select_year');
+    var msel = $('fgs_select_month');
+    var ssel = $('fgs_select_sort');
+    var sform = $('fgs_search_form');
+    ysel.map = msel.map = ssel.map = sform.map = this;
+    ysel.onchange = msel.onchange = ssel.onchange = sform.onsubmit = this.changeSetting;
+
     var pre = $cbtn('prev','Previous Page');
     var nex = $cbtn('next','Next Page');
     var pageInfo = $dom('<span/>');
     pre.onclick = this.prevPage;
     nex.onclick = this.nextPage;
-    var pageContent = $('pageContent');
     pageContent.appendChild(pre);
     pageContent.appendChild(nex);
     pageContent.appendChild(pageInfo);
@@ -492,6 +475,10 @@ FBrowser.create = function() {
             }
         };
 
+        FBrowser.prototype.changeSetting = function() {
+            this.map.updateview();
+            return false;
+        };
         FBrowser.prototype.prevPage = function() {
             var map = this.map;
             if( map.pageCurr <= 1) {
@@ -551,9 +538,11 @@ FBrowser.create = function() {
             n-=hig/5;
             s+=hig/5;
 
-            var tagstr = prefs.getString('tags');
-            var year = parseInt(prefs.getString('year'));
-            var month = prefs.getString('month');
+            
+            var year = $('fgs_select_year').value;
+            var month = $('fgs_select_month').value;
+            var sort = $('fgs_select_sort').value;
+            var searchtxt = $('fgs_search').value;
 
             var max_date, min_date;
             if(month == 'all') {
@@ -562,15 +551,14 @@ FBrowser.create = function() {
                 min_date = year+'-'+month+'-01'; max_date = year+'-'+month+'-31';
             }
 
-            var photoContent = $('photoContent');
             while(photoContent.firstChild) {
                 photoContent.removeChild(photoContent.firstChild);
             }
             this.closeInfoWindow();
-            if(tagstr) {
-                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, tags:tagstr, min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
+            if(_trim(searchtxt)) {
+                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:100}, this, this.search_callback);
             } else {
-                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,              min_taken_date:min_date, max_taken_date:max_date, sort:'date-taken-desc', page:this.pageCurr, per_page:100}, this, this.search_callback);
+                flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:100}, this, this.search_callback);
             }
         };
 
@@ -588,7 +576,6 @@ FBrowser.create = function() {
             this.total = parseInt(photoset.total);
             this.perpage = parseInt(photoset.perpage);
 
-            var pageInfo = $('pageContent').pageInfo;
             var start, end;
             if(this.total == 0) {
                 start = end = 0;
@@ -597,19 +584,7 @@ FBrowser.create = function() {
                 end = ((this.pageCurr)*this.perpage);
             }
             if(end > this.total) end = this.total;
-            pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
-
-            var year = parseInt(prefs.getString('year'));
-            var month = prefs.getString('month');
-            var tagstr = prefs.getString('tags');
-            if(month == 'all') {
-                $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + ' photos.</h3>';
-            } else {
-                $('info').innerHTML = '<h3 style="margin:0px;">Show ' + year + '/' + month + ' photos.</h3>';
-            }
-            if(tagstr) {
-                $('info').innerHTML += '<h4 style="margin:0px;">with Tag: '+tagstr+'</h4>';
-            }
+            pageContent.pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
 
             this.clearOverlays();
 
