@@ -3,8 +3,8 @@
 <ModulePrefs title="__MSG_title__" description="__MSG_description__" 
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
 author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
-title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
-thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png" height="430" scrolling="true" category="tools">
+title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_preview.png"
+thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thumb.png" height="430" scrolling="true" category="tools">
   <Locale messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-en.xml"/>
   <Locale lang="zh-TW" messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-zh-tw.xml"/>
   <Require feature="analytics"/>
