@@ -1,25 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-<ModulePrefs title="Flickr Gmap Show" description="Browse flickr photos on Google Maps" 
+<ModulePrefs title="__MSG_title__" description="__MSG_description__" 
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
 author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
 title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_preview.png"
 thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thumb.png">
+  <Locale messages="http://www.csie.nctu.edu.tw/~wctang/fgs/msg-en.xml"/>
+  <Locale lang="zh-TW" messages="http://www.csie.nctu.edu.tw/~wctang/fgs/msg-zh-tw.xml"/>
   <Require feature="sharedmap"/>
   <Require feature="analytics"/>
 </ModulePrefs>
 
 <Content type="html"><![CDATA[
-<div style='margin-bottom:10px;' id='settingContent'></div>
-<div style='margin-bottom:10px;' id='pageContent'></div>
-<div style='margin-bottom:10px;' id='photoContent'></div>
+<style type="text/css">
+#settingDiv, #pageDiv, #photoDiv {
+    margin-bottom:10px;
+}
+#fgs_search_form {
+    display:inline;
+}
+
+img {
+    border:0px;
+}
+
+.mask {
+    background:black;
+    opacity:.8;
+    -moz-opacity:.8;
+    filter:alpha(opacity=80);
+}
+.mask div {
+    background:white;
+}
+
+a.btn {
+    cursor:pointer;
+}
+a.btn img {
+    cursor:pointer;
+}
+
+.photos {
+    height:140px;
+    width:250px;
+    border:solid 1px gray;
+    padding:10px;
+    margin:10px;
+}
+.photos div {
+    position:relative; 
+    left:0px; 
+    width:250px; 
+}
+
+a.photo img {
+    border : dotted 2px gray;
+    padding : 1px;
+    cursor : pointer;
+}
+a.photo:hover img {
+    border : dotted 2px red;
+}
+
+.popup {
+    font-size: 12px; 
+    background:white;
+}
+
+</style>
+
+<div id='settingDiv'></div>
+<div id='pageDiv'></div>
+<div id='photoDiv'></div>
 
 <script type="text/javascript">
-var settingContent = $('settingContent');
-var pageContent = $('pageContent');
-var photoContent = $('photoContent');
-
-
 var _uacct = "UA-359113-4";
 
 var deltas = [0,0,0,0,0,
@@ -40,7 +95,6 @@ var deltas = [0,0,0,0,0,
 0.0001483780226383402];
 var MAX_ZOOM = 19;
 var MIN_ZOOM = 5;
-var currZoom = 0;
 
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
@@ -73,7 +127,7 @@ function $extend(subc,basec) {
     subc.prototype.constructor = subc; subc.prototype.baseConstructor = basec; subc.superClass = basec.prototype;
 };
 function $cbtn(n, title, href, target) {
-    var a = $dom('<a style="cursor:pointer;"><img src="'+imgs[n+'_default']+'" style="cursor:pointer;border:0;"/></a>');
+    var a = $dom('<a class="btn"><img src="'+imgs[n+'_default']+'"/></a>');
     a.n=n;
     a.onmouseout=function(){ this.firstChild.src = imgs[this.n+'_default'];};
     a.onmouseover=function(){ this.firstChild.src = imgs[this.n+'_hover'];};
@@ -107,10 +161,16 @@ function $icon(n) {
     return icons[n];
 }
 
+var settingDiv = $('settingDiv');
+var pageDiv = $('pageDiv');
+var photoDiv = $('photoDiv');
+
+
+
 // mask layer
 var masklayer = $dom(
-    '<div style="position:absolute; background:black; top:0px; left:0px; opacity:.8;-moz-opacity:.8;filter:alpha(opacity=80); cursor:wait; display:none;">'+
-        '<div style="position:absolute; top:100px; background:white;">'+
+    '<div class="mask" style="position:absolute; top:0px; left:0px; cursor:wait; display:none;">'+
+        '<div style="position:absolute; top:100px;">'+
             '<img src="'+imgs['loading']+'"/>'+
         '</div>'+
     '</div>');
@@ -182,15 +242,7 @@ buddyurl : function(photo) {
     if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
     else return 'http://www.flickr.com/images/buddyicon.jpg';
 }
-
 };
-
-
-
-
-
-
-
 
 
 function FPhotoMarker(icon, photos, bounds) {
@@ -248,10 +300,10 @@ FPhotoMarker.create = function () {
         FPhotoMarker.prototype.onClick = function() {
             if(!this.ctx) {
                 var ctx_ = $dom(
-                    '<div style="height:140px;width:250px;border:solid 1px gray;padding:10px;margin:10px;">'+
-                        '<div style="position:relative; left:0px; height:40px; width:250px; text-align:center;"></div>'+
-                        '<div style="position:relative; left:0px; height:80px; width:250px;"></div>'+
-                        '<div style="position:relative; left:0px; height:20px; width:250px;"></div>'+
+                    '<div class="photos">'+
+                        '<div style="height:40px; text-align:center;"></div>'+
+                        '<div style="height:80px;"></div>'+
+                        '<div style="height:20px;"></div>'+
                     '</div>');
                 ctx_.titl = ctx_.childNodes[0];
                 var imgs = ctx_.childNodes[1]
@@ -275,16 +327,12 @@ FPhotoMarker.create = function () {
                     var img = $c('img');
                     img.alt = photo.title;
                     img.width=img.height=75;
-                    img.style.border = 'dotted 2px gray';
-                    img.style.padding = '1px';
 
                     var imglink = $c('a');
+                    imglink.className = 'photo';
                     imglink.title = photo.title;
                     imglink.photo=photo;
                     imglink.onclick = this.onPhotoClick;
-                    imglink.onmouseover = this.onPhotoHover;
-                    imglink.onmouseout = this.onPhotoHoverOut;
-                    imglink.style.cursor = 'pointer';
 
                     var imgspan = $c('span');
                     imgspan.style.position='absolute';
@@ -299,10 +347,10 @@ FPhotoMarker.create = function () {
             }
 
             this.refreshImgList();
-            while(photoContent.firstChild) {
-                photoContent.removeChild(photoContent.firstChild);
+            while(photoDiv.firstChild) {
+                photoDiv.removeChild(photoDiv.firstChild);
             }
-            photoContent.appendChild(this.ctx);
+            photoDiv.appendChild(this.ctx);
             
             var rand;
             if(this.photos.length<2) rand = 0;
@@ -311,6 +359,8 @@ FPhotoMarker.create = function () {
             var owner = photo.ownername;
             if(!owner) owner = photo.owner;
             var datetaken = photo.datetaken.substr(0,10);
+
+            // !! css style can't apply to info window !!
             var infowin = 
                 '<div style="font-size: 12px; width: 240px;">'+
                     '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
@@ -333,17 +383,11 @@ FPhotoMarker.create = function () {
             this.marker.currpos--;
             this.marker.refreshImgList();
         };
-        FPhotoMarker.prototype.onPhotoHover = function() {
-            this.firstChild.style.border = 'dotted 2px red';
-        }
-        FPhotoMarker.prototype.onPhotoHoverOut = function() {
-            this.firstChild.style.border = 'dotted 2px gray';
-        }
         FPhotoMarker.prototype.onPhotoClick = function() {
             var w = document.body.clientWidth;
             var h = document.body.clientHeight;
             var overlay = $dom(
-                '<div><div style="position:absolute; top:0px; left:0px; width:'+w+'px; height:'+h+'px; background:black; opacity:.8;-moz-opacity:.8;filter:alpha(opacity=80);">'+
+                '<div><div class="mask" style="position:absolute; top:0px; left:0px; width:'+w+'px; height:'+h+'px;">'+
                     '<div style="position:absolute; top:100px; left:'+(w-32)/2+'px; background:white;">'+
                         '<img src="'+imgs['loading']+'"/>'+
                     '</div>'+
@@ -362,7 +406,7 @@ FPhotoMarker.create = function () {
                 if(!owner) owner = photo.owner;
                 var datetaken = photo.datetaken.substr(0,10);
                 var photoctx = $dom(
-                    '<div style="position:absolute; top:50px; left:'+lef+'px; width:'+w+'px; font-size: 12px; background:white;">'+
+                    '<div class="popup" style="position:absolute; top:50px; left:'+lef+'px; width:'+w+'px;">'+
                         '<div style="margin:10px;">'+
                             '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
                             '<img style="margin-bottom:4px;" src="'+this.src+'"/><br />'+
@@ -400,13 +444,14 @@ function FBrowser() {
     this.baseConstructor.apply(this, arguments);
     this.pageCurr = 1;
     this.pageTotal = 1;
+    this.currZoom = 0;
     this._lastcenter = new GLatLng(0, 0);
+
     GEvent.addListener(this, "dragend", this.ondragend);
     GEvent.addListener(this, "zoomend", this.onzoomend);
 
-
     var nowy = new Date().getFullYear();
-    var settingstr = '<span>Date: <select id="fgs_select_year">';
+    var settingstr = '<span>__MSG_date__<select id="fgs_select_year">';
     for(var i = 0; i<10; ++i) {
         settingstr += '<option value="'+(nowy-i)+'">'+(nowy-i)+'</option>';
     }
@@ -416,16 +461,16 @@ function FBrowser() {
         else       settingstr += '<option value="'+i+'">'+i+'</option>';
     }
     settingstr += 
-        '</select><br />Sort: <select id="fgs_select_sort">'+
-            '<option value="date-taken-desc">date-taken-desc</option>'+
-            '<option value="date-taken-asc">date-taken-asc</option>'+
-            '<option value="date-posted-desc">date-posted-desc</option>'+
-            '<option value="date-posted-asc">date-posted-asc</option>'+
-            '<option value="interestingness-desc">interestingness-desc</option>'+
-            '<option value="interestingness-asc">interestingness-asc</option>'+
-            '<option value="relevance">relevance</option></select><br />';
-    settingstr += 'Search: <form id="fgs_search_form"><input id="fgs_search" type="text"/><input type="submit"/></form></span>';
-    settingContent.appendChild($dom(settingstr));
+        '</select><br />__MSG_sort__<select id="fgs_select_sort">'+
+            '<option value="date-taken-desc">__MSG_datetakendesc__</option>'+
+            '<option value="date-taken-asc">__MSG_datetakenasc__</option>'+
+            '<option value="date-posted-desc">__MSG_dateposteddesc__</option>'+
+            '<option value="date-posted-asc">__MSG_datepostedasc__</option>'+
+            '<option value="interestingness-desc">__MSG_interestingnessdesc__</option>'+
+            '<option value="interestingness-asc">__MSG_interestingnessasc__</option>'+
+            '<option value="relevance">__MSG_relevance__</option></select>';
+    settingstr += '<br />__MSG_search__<form id="fgs_search_form"><input id="fgs_search" type="text"/><input type="submit"/></form></span>';
+    settingDiv.appendChild($dom(settingstr));
     var ysel = $('fgs_select_year');
     var msel = $('fgs_select_month');
     var ssel = $('fgs_select_sort');
@@ -438,10 +483,10 @@ function FBrowser() {
     var pageInfo = $dom('<span/>');
     pre.onclick = this.prevPage;
     nex.onclick = this.nextPage;
-    pageContent.appendChild(pre);
-    pageContent.appendChild(nex);
-    pageContent.appendChild(pageInfo);
-    pageContent.pageInfo = pageInfo;
+    pageDiv.appendChild(pre);
+    pageDiv.appendChild(nex);
+    pageDiv.appendChild(pageInfo);
+    pageDiv.pageInfo = pageInfo;
     pre.map = nex.map = this;
 };
 FBrowser.create = function() {
@@ -449,25 +494,25 @@ FBrowser.create = function() {
         $extend(FBrowser, GMap2);
 
         FBrowser.prototype.updateview = function(bound, currPage, level) {
-            var map = this;
             if(level) {
-                currZoom = level;
+                this.currZoom = level;
             }
-            if( currZoom < MIN_ZOOM || currZoom > MAX_ZOOM) {
+            if( this.currZoom < MIN_ZOOM || this.currZoom > MAX_ZOOM) {
                 return;
             }
             if(currPage) {
-                map.pageCurr = currPage;
+                this.pageCurr = currPage;
             } else {
-                map.pageCurr = 1;
-                map.pageTotal = 1;
+                this.pageCurr = 1;
+                this.pageTotal = 1;
             }
 
-            mask();
+            mask(this);
             if(bound) {
-                map._lastcenter = bound.getCenter();
-                map.refreshData(bound);
+                this._lastcenter = bound.getCenter();
+                this.refreshData(bound);
             } else {
+                var map = this;
                 map.getBoundsAsync(function(bound) {
                     map._lastcenter = bound.getCenter();
                     map.refreshData(bound);
@@ -497,7 +542,7 @@ FBrowser.create = function() {
             var map = this;
             map.getBoundsAsync( function(bound) {
                 var center = bound.getCenter();
-                var delta = deltas[currZoom];
+                var delta = deltas[this.currZoom];
                 if(Math.abs(center.lat()-map._lastcenter.lat())<delta && Math.abs(center.lng()-map._lastcenter.lng())<delta ) {
                     return;
                 } else {
@@ -551,8 +596,8 @@ FBrowser.create = function() {
                 min_date = year+'-'+month+'-01'; max_date = year+'-'+month+'-31';
             }
 
-            while(photoContent.firstChild) {
-                photoContent.removeChild(photoContent.firstChild);
+            while(photoDiv.firstChild) {
+                photoDiv.removeChild(photoDiv.firstChild);
             }
             this.closeInfoWindow();
             if(_trim(searchtxt)) {
@@ -567,7 +612,7 @@ FBrowser.create = function() {
                 return;
             }
 
-            var delta = deltas[currZoom]/3;
+            var delta = deltas[this.currZoom]/3;
 
             var photoset = rsp.photos;
             var photos = photoset.photo;
@@ -584,7 +629,7 @@ FBrowser.create = function() {
                 end = ((this.pageCurr)*this.perpage);
             }
             if(end > this.total) end = this.total;
-            pageContent.pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
+            pageDiv.pageInfo.innerHTML = ' '+start+' ~ '+end+' of '+this.total+' photos.';
 
             this.clearOverlays();
 
@@ -646,8 +691,8 @@ var FGS = {
     },
 
     init : function() {
-       _IG_Analytics(_uacct, "/mapplet");
-       FGS.createYearBrowserMap();
+        _IG_Analytics(_uacct, "/mapplet");
+        FGS.createYearBrowserMap();
     }
 };
 FGS.init();

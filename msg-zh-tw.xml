@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messagebundle>
+<msg name="title">Flickr Gmap Show</msg>
+<msg name="description">在 Google Map 上瀏覽 flickr 照片</msg>
+<msg name="date">日期：</msg>
+<msg name="sort">排序：</msg>
+<msg name="search">搜尋：</msg>
+<msg name="datetakendesc">拍攝日期(由大到小)</msg>
+<msg name="datetakenasc">拍攝日期(由小到大)</msg>
+<msg name="dateposteddesc">上傳日期(由大到小)</msg>
+<msg name="datepostedasc">上傳日期(由小到大)</msg>
+<msg name="interestingnessdesc">有趣度(由大到小)</msg>
+<msg name="interestingnessasc">有趣度(由小到大)</msg>
+<msg name="relevance">相關性</msg>
+<msg name="currpage">$1 ~ $2 張，共 $3 張</msg>
+</messagebundle>
