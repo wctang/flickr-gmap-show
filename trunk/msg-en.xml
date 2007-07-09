@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messagebundle>
+<msg name="title">Flickr Gmap Show</msg>
+<msg name="description">Browse flickr geotagged photos on Google map</msg>
+<msg name="date">Date: </msg>
+<msg name="sort">Sort: </msg>
+<msg name="search">Search: </msg>
+<msg name="datetakendesc">taken date (desc)</msg>
+<msg name="datetakenasc">taken date (asc)</msg>
+<msg name="dateposteddesc">posted date (desc)</msg>
+<msg name="datepostedasc">posted date (asc)</msg>
+<msg name="interestingnessdesc">interestingness (desc)</msg>
+<msg name="interestingnessasc">interestingness (asc)</msg>
+<msg name="relevance">relevance</msg>
+<msg name="currpage">$1 ~ $2 of $3 photos</msg>
+</messagebundle>
