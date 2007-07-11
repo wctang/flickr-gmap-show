@@ -1,8 +1,10 @@
+= Flickr GMap Show - Greasemonkey Version =
+
 _Use with greasemonkey, add Google map function to flickr.com._
 
 [http://userscripts.org/scripts/show/9450 Project Page]
 
-= Features =
+== Features ==
   * Browse all geotagged photos with selected date on Google Map
   * Browse some user's geotagged photos on Google Map
   * Show all geotagged photos in some set on Google Map
@@ -11,7 +13,6 @@ _Use with greasemonkey, add Google map function to flickr.com._
   * View this photo on Google Map
   * Modify a photo's location with Google Map 
 
-= Screen Shots =
+== Screen Shots ==
 [http://www.flickr.com/photos/wctang/sets/72157600307686599/ More screen shots]
-
-
+[http://farm1.static.flickr.com/246/517184443_a401e6f3bb_o.png]
