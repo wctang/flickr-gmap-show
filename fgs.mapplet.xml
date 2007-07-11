@@ -416,12 +416,12 @@ function FBrowser() {
     }
     settingstr += 
         '</select><br />'+msg_sort+'<select id="fgs_select_sort">'+
+            '<option value="interestingness-desc">'+msg_interestingnessdesc+'</option>'+
+            '<option value="interestingness-asc">'+msg_interestingnessasc+'</option>'+
             '<option value="date-taken-desc">'+msg_datetakendesc+'</option>'+
             '<option value="date-taken-asc">'+msg_datetakenasc+'</option>'+
             '<option value="date-posted-desc">'+msg_dateposteddesc+'</option>'+
             '<option value="date-posted-asc">'+msg_datepostedasc+'</option>'+
-            '<option value="interestingness-desc">'+msg_interestingnessdesc+'</option>'+
-            '<option value="interestingness-asc">'+msg_interestingnessasc+'</option>'+
             '<option value="relevance">'+msg_relevance+'</option></select>';
     settingstr += '<br />'+msg_search+'<form id="fgs_search_form"><input id="fgs_search" type="text"/><input type="submit"/></form></span>';
     settingDiv.appendChild($dom(settingstr));
