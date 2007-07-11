@@ -1,0 +1,7 @@
+#labels Featured
+= Flickr GMap Show, Gadget =
+_Browse flickr photos on Google map with Google Map on iGoogle_
+
+  * [http://www.google.com/ig/add?synd=open&source=ggyp&moduleurl=http://flickr-gmap-show.googlecode.com/svn/trunk/fgs.gadget.xml http://buttons.googlesyndication.com/fusion/add.gif]
+
+[http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_preview.png]
