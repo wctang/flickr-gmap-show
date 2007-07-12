@@ -13,4 +13,7 @@
 <msg name="interestingnessasc">有趣度(由小到大)</msg>
 <msg name="relevance">相關性</msg>
 <msg name="currpage">$1 ~ $2 張，共 $3 張</msg>
+<msg name="takenon">於 $1</msg>
+<msg name="postby">由 $1 拍攝</msg>
+<msg name="viewonflickr">連至 flickr 顯示</msg>
 </messagebundle>

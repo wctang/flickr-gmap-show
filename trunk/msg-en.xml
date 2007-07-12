@@ -13,4 +13,7 @@
 <msg name="interestingnessasc">interestingness (asc)</msg>
 <msg name="relevance">relevance</msg>
 <msg name="currpage">$1 ~ $2 of $3 photos</msg>
+<msg name="takenon">Taken on $1</msg>
+<msg name="postby">Posted by $1</msg>
+<msg name="viewonflickr">View this photo on flickr</msg>
 </messagebundle>
