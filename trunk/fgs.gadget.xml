@@ -51,25 +51,20 @@ a.btn img {
     cursor:pointer;
 }
 
-.photos {
+.photoPanel {
     height:140px;
-    width:250px;
+    width:255px;
     border:0px;
 }
-.photos div {
+.photoPanel div {
     position:relative; 
     left:0px; 
-    width:250px; 
+    width:255px; 
     background:white;
 }
-
-a.photo img {
-    border : dotted 2px gray;
-    padding : 1px;
-    cursor : pointer;
-}
-a.photo:hover img {
-    border : dotted 2px red;
+.photoPanel .photos img {
+    margin:5px;
+    cursor:pointer;
 }
 
 .popup {
@@ -84,6 +79,8 @@ a.photo:hover img {
 <div id="settingDiv"></div>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x" type="text/javascript"></script>
+<script src="http://yui.yahooapis.com/2.2.2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script src="http://yui.yahooapis.com/2.2.2/build/animation/animation-min.js"></script>
 <script type="text/javascript">
 var _uacct = "UA-359113-4";
 
@@ -98,6 +95,9 @@ var msg_interestingnessasc = '__MSG_interestingnessasc__';
 var msg_relevance = '__MSG_relevance__';
 var msg_search = '__MSG_search__';
 var msg_currpage = '__MSG_currpage__';
+var msg_viewonflickr = '__MSG_viewonflickr__';
+var msg_takenon = '__MSG_takenon__';
+var msg_postby = '__MSG_postby__';
 
 
 
@@ -171,7 +171,7 @@ function $cbtn(n, title, href, target) {
     if(href) a.href=href;
     if(target) a.target=target;
     return a;
-}
+};
 var icons=[];
 function $icon(n) {
     if(n > 100) n = 100;
@@ -193,7 +193,7 @@ function $icon(n) {
         icons[n] = img;
     }
     return icons[n];
-}
+};
 
 
 // flickr
@@ -262,49 +262,68 @@ function FPhotoMarker(icon, photos, bounds) {
     GEvent.addListener(this, 'click', this.onClick);
 };
 $extend(FPhotoMarker, GMarker);
-FPhotoMarker.prototype.refreshImgList = function() {
+FPhotoMarker.prototype.refreshImgList = function(dir) {
     var imags = this.ctx.imags;
     
     var end = this.currpos + 5;
     if( end > imags.length) end = imags.length;
     for( var i = this.currpos; i<end; ++i) {
-        var a = imags[i].firstChild;
-        var img = a.firstChild;
-        if(!img.src) img.src=flickr.photourl(a.photo,'s');
+        var img = imags[i];
+        if(!img.src) img.src=flickr.photourl(img.photo,'s');
     }
 
+    function disappear() {
+        this.getEl().style.display='none';
+    };
+
+    var c = this.currpos;
     for( var i = 0; i < imags.length; i++ ) {
-        var node = imags[i].style;
-        var img = imags[i].firstChild.firstChild.style;
-        if(i == this.currpos) {
-            node.display = 'inline';
-            node.top = '0px';
-            node.left = '80px';
-            img.width=img.height='75px';
-        } else if(i == this.currpos-1) {
-            node.display = 'inline';
-            node.top = '15px';
-            node.left = '15px';
-            img.width = img.height = '45px';
-        } else if(i == this.currpos+1) {
-            node.display = 'inline';
-            node.top = '15px';
-            node.left = '175px';
-            img.width = img.height = '45px';
-        } else {
-            node.display = 'none';
+        var img=imags[i];
+        var s=img.style;
+        
+        var attr=null;
+        if(dir==0) {
+            switch(i) {
+                case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; break;
+                case c  : s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; break;
+                case c+1: s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; break;
+                default:  s.display='none'; break;
+            }
+        } else if(dir>0) {
+            switch(i) {
+                case c-2: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; attr={width:{to:0},height:{to:0}}; break;
+                case c-1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:0}}; break;
+                case c  : s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; attr={left:{to:85}};break;
+                case c+1: s.display='inline'; s.left='245px';s.top='75px';s.width=s.height='0px';  attr={left:{to:170},top:{to:0},width:{to:75},height:{to:75}}; break;
+                default:  s.display='none'; break;
+            }
+        } else if(dir<0) {
+            var attr=null;
+            switch(i) {
+                case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='0px';  attr={width:{to:75},height:{to:75}}; break;
+                case c  : s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; attr={left:{to:85}}; break;
+                case c+1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:170}};break;
+                case c+2: s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; attr={left:{to:245},top:{to:75},width:{to:0},height:{to:0}}; break;
+                default:  s.display='none'; break;
+            }
+        }
+        if(attr) {
+            var myAnim = new YAHOO.util.Motion(img, attr,.2, YAHOO.util.Easing.easeOutStrong);
+            if((i==this.currpos-2) || (i==this.currpos+2)) myAnim.onComplete.subscribe(disappear);
+            myAnim.animate();
         }
     }
-    this.ctx.titl.innerHTML=imags[this.currpos].firstChild.title;
+
+    this.ctx.titl.innerHTML=imags[this.currpos].alt;
     this.ctx.info.innerHTML=' ' + (this.currpos+1) + ' of ' + imags.length + ' ';
 };
 
 FPhotoMarker.prototype.onClick = function() {
     if(!this.ctx) {
         var ctx_ = $dom(
-            '<div class="photos">'+
+            '<div class="photoPanel">'+
                 '<div style="height:40px; text-align:center;"></div>'+
-                '<div style="height:80px;"></div>'+
+                '<div style="height:85px;" class="photos"></div>'+
                 '<div style="height:20px;"></div>'+
             '</div>');
         ctx_.titl = ctx_.childNodes[0];
@@ -328,41 +347,33 @@ FPhotoMarker.prototype.onClick = function() {
 
             var img = $c('img');
             img.alt = photo.title;
-            img.width=img.height=75;
+            img.photo=photo;
+            img.marker=this;
+            img.onclick = this.onPhotoClick;
+            img.style.position='absolute';
+            img.style.width=img.style.height='75px';
+            img.style.display='none';
 
-            var imglink = $c('a');
-            imglink.className = 'photo';
-            imglink.title = photo.title;
-            imglink.photo=photo;
-            imglink.marker=this;
-            imglink.onclick = this.onPhotoClick;
-
-            var imgspan = $c('span');
-            imgspan.style.position='absolute';
-            imgspan.style.display='none';
-
-            imglink.appendChild(img);
-            imgspan.appendChild(imglink);
-            imags.appendChild(imgspan);
+            imags.appendChild(img);
         }
         this.ctx=ctx_;
         this.ctx.imags=imags.childNodes;
     }
 
-    this.refreshImgList();
+    this.refreshImgList(0);
     this.onOpenInfoWindow();
 };
 FPhotoMarker.prototype.nextImg = function() {
     if( this.marker.currpos >= this.marker.ctx.imags.length-1) return;
 
     this.marker.currpos++;
-    this.marker.refreshImgList();
+    this.marker.refreshImgList(1);
 };
 FPhotoMarker.prototype.prevImg = function() {
     if( this.marker.currpos <= 0) return;
 
     this.marker.currpos--;
-    this.marker.refreshImgList();
+    this.marker.refreshImgList(-1);
 };
 FPhotoMarker.prototype.onPhotoClick = function() {
     var w = document.body.clientWidth;
@@ -475,16 +486,14 @@ FBrowser.prototype.changeSetting = function() {
 };
 FBrowser.prototype.prevPage = function() {
     var map = this.map;
-    if( map.pageCurr <= 1) {
-        return;
-    }
+    if( map.pageCurr <= 1) return;
+
     map.updateview(null, map.pageCurr-1);
 };
 FBrowser.prototype.nextPage = function() {
     var map = this.map;
-    if( map.pageCurr >= map.pageTotal) {
-        return;
-    }
+    if( map.pageCurr >= map.pageTotal) return;
+
     map.updateview(null, map.pageCurr+1);
 };
 FBrowser.prototype.onzoomend = function(oldLevel,newLevel) {
@@ -546,9 +555,7 @@ FBrowser.prototype.refreshData = function(bound) {
 };
 FBrowser.prototype.search_callback = function(rsp, points) {
     try {
-        if(!rsp || rsp.stat != 'ok') {
-            return;
-        }
+        if(!rsp || rsp.stat != 'ok') return;
 
         var delta = deltas[this.currZoom];
 
@@ -567,11 +574,7 @@ FBrowser.prototype.search_callback = function(rsp, points) {
             end = ((this.pageCurr)*this.perpage);
         }
         if(end > this.total) end = this.total;
-        var psgestr = msg_currpage;
-        psgestr = psgestr.replace('$1', start);
-        psgestr = psgestr.replace('$2', end);
-        psgestr = psgestr.replace('$3', this.total);
-        pageDiv.pageInfo.innerHTML = ' '+psgestr;
+        pageDiv.pageInfo.innerHTML = ' '+msg_currpage.replace('$1', start).replace('$2', end).replace('$3', this.total);;
 
         this.clearOverlays();
 
@@ -715,9 +718,9 @@ FPhotoMarkerGadget.prototype.onPopupPhoto = function(photo, width, height, src) 
                 '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
                 '<img style="margin-bottom:4px;" src="'+src+'"/><br />'+
                 '<a style="float:right;" target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/><img style="width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>'+
-                '<i>Posted by <a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a></i><br />'+
-                '<i>Taken on '+datetaken+'</i><br />'+
-                '<a target="_blank" href="'+flickr.pageurl(photo)+'">View this photo on flickr</a>'+
+                '<i>'+msg_postby.replace('$1','<a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a>')+'</i><br />'+
+                '<i>'+msg_takenon.replace('$1', datetaken)+'</i><br />'+
+                '<a target="_blank" href="'+flickr.pageurl(photo)+'">'+msg_viewonflickr+'</a>'+
             '</div>'+
         '</div>');
     return photoctx;
