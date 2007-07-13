@@ -16,4 +16,5 @@
 <msg name="takenon">於 $1</msg>
 <msg name="postby">由 $1 拍攝</msg>
 <msg name="viewonflickr">連至 flickr 顯示</msg>
+<msg name="viewonsite">連至 $1 顯示</msg>
 </messagebundle>
