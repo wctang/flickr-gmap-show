@@ -47,6 +47,9 @@ img {
 a.btn {
     cursor:pointer;
 }
+a.right {
+    float:right;
+}
 a.btn img {
     cursor:pointer;
 }
@@ -116,10 +119,12 @@ var imgs = {
 //    popup_hover   : imgdir+'simple_new_window_hover.gif',
 //    popup_selected: imgdir+'simple_new_window_selected.gif',
 
+    updown_default : imgdir+'simple_updown_default.gif',
+    updown_hover   : imgdir+'simple_updown_hover.gif',
+    updown_selected: imgdir+'simple_updown_selected.gif',
     prev_default  : imgdir+'simple_prev_default.gif',
     prev_hover    : imgdir+'simple_prev_hover.gif',
     prev_selected : imgdir+'simple_prev_selected.gif',
-
     next_default  : imgdir+'simple_next_default.gif',
     next_hover    : imgdir+'simple_next_hover.gif',
     next_selected : imgdir+'simple_next_selected.gif'
@@ -160,16 +165,15 @@ function $extend(subc,basec) {
     function inheritance(){}; inheritance.prototype=basec.prototype; subc.prototype=new inheritance(); 
     subc.prototype.constructor = subc; subc.prototype.baseConstructor = basec; subc.superClass = basec.prototype;
 };
-function $cbtn(n, title, href, target) {
+function $cbtn(n, title, clickfun) {
     var a = $dom('<a class="btn"><img src="'+imgs[n+'_default'].src+'"/></a>');
     a.n=n;
     a.onmouseout=function(){ this.firstChild.src = imgs[this.n+'_default'].src;};
     a.onmouseover=function(){ this.firstChild.src = imgs[this.n+'_hover'].src;};
     a.onmousedown=function(){ this.firstChild.src = imgs[this.n+'_selected'].src;};
     a.onmouseup=function(){ this.firstChild.src = imgs[this.n+'_hover'].src;};
+    a.onclick=clickfun;
     if(title) a.title=title;
-    if(href) a.href=href;
-    if(target) a.target=target;
     return a;
 };
 var icons=[];
@@ -330,11 +334,9 @@ FPhotoMarker.prototype.onClick = function() {
         var imags = ctx_.childNodes[1]
         var ctrl = ctx_.childNodes[2];
 
-        var pre = $cbtn('prev','Previous photo');
-        var nex = $cbtn('next','Next photo');
+        var pre = $cbtn('prev','Previous photo', this.prevImg);
+        var nex = $cbtn('next','Next photo', this.nextImg);
         nex.marker = pre.marker = this;
-        pre.onclick = this.prevImg;
-        nex.onclick = this.nextImg;
         ctrl.appendChild(pre);
         ctrl.appendChild(nex);
 
@@ -452,11 +454,9 @@ function FBrowser() {
     ysel.map = msel.map = ssel.map = sform.map = this;
     ysel.onchange = msel.onchange = ssel.onchange = sform.onsubmit = this.changeSetting;
 
-    var pre = $cbtn('prev','Previous Page');
-    var nex = $cbtn('next','Next Page');
+    var pre = $cbtn('prev','Previous Page', this.prevPage);
+    var nex = $cbtn('next','Next Page', this.nextPage);
     var pageInfo = $dom('<span/>');
-    pre.onclick = this.prevPage;
-    nex.onclick = this.nextPage;
     pageDiv.appendChild(pre);
     pageDiv.appendChild(nex);
     pageDiv.appendChild(pageInfo);
@@ -631,6 +631,13 @@ FBrowser.prototype.search_callback = function(rsp, points) {
 var mapDiv = $('mapDiv');
 var pageDiv = $('pageDiv');
 var settingDiv = $('settingDiv');
+function toggle() {
+    if(settingDiv.style.display == 'none') settingDiv.style.display='block';
+    else settingDiv.style.display='none';
+};
+var upbtn = $cbtn('updown','', toggle);
+upbtn.className += ' right';
+pageDiv.appendChild(upbtn);
 
 var prefs = new _IG_Prefs(__MODULE_ID__);
 
