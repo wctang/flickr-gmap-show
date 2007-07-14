@@ -2,6 +2,6 @@
 = Flickr GMap Show, Mapplet =
 _Browse flickr photos on Google map with Google Mapplet_
 
-  * [http://maps.google.com/ig/directory?synd=mpl&pid=mpl&url=http://flickr-gmap-show.googlecode.com/svn/trunk/fgs.mapplet.xml http://buttons.googlesyndication.com/fusion/add.gif]
+  * [http://maps.google.com/ig/directory?synd=mpl&url=http://flickr-gmap-show.googlecode.com/svn/trunk/fgs.mapplet.xml http://buttons.googlesyndication.com/fusion/add.gif]
 
 [http://www.flickr.com/photos/wctang/746075051/ http://farm2.static.flickr.com/1322/746075051_1516ae0522_o.jpg]
