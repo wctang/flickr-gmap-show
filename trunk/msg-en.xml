@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <messagebundle>
 <msg name="title">Flickr Gmap Show</msg>
-<msg name="description">Browse flickr geotagged photos on Google map</msg>
+<msg name="description">Browse flickr (and Panoramio) geotagged photos on Google map</msg>
 <msg name="date">Date: </msg>
 <msg name="sort">Sort: </msg>
 <msg name="search">Search: </msg>
@@ -17,4 +17,5 @@
 <msg name="postby">Posted by $1</msg>
 <msg name="viewonflickr">View this photo on flickr</msg>
 <msg name="viewonsite">View this photo on $1</msg>
+<msg name="usepanoramio">Add Panoramio source</msg>
 </messagebundle>

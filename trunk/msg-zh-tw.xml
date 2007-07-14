@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <messagebundle>
 <msg name="title">Flickr Gmap Show</msg>
-<msg name="description">在 Google Map 上瀏覽 flickr 照片</msg>
+<msg name="description">在 Google Map 上瀏覽 flickr（和 Panoramio）的照片</msg>
 <msg name="date">日期：</msg>
 <msg name="sort">排序：</msg>
 <msg name="search">搜尋：</msg>
@@ -17,4 +17,5 @@
 <msg name="postby">由 $1 拍攝</msg>
 <msg name="viewonflickr">連至 flickr 顯示</msg>
 <msg name="viewonsite">連至 $1 顯示</msg>
+<msg name="usepanoramio">加入 Panoramio 來源</msg>
 </messagebundle>
