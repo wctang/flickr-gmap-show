@@ -8,8 +8,11 @@ thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thu
   <Locale messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-en.xml"/>
   <Locale lang="zh-TW" messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-zh-tw.xml"/>
   <Require feature="sharedmap"/>
+  <Require feature="setprefs"/>
   <Require feature="analytics"/>
+  <Require feature="minimessage"/>
 </ModulePrefs>
+<UserPref name="usepanoramio" display_name="__MSG_usepanoramio__" datatype="bool" default_value="true"/>
 
 <Content type="html"><![CDATA[
 <style type="text/css">
@@ -57,8 +60,14 @@ a.btn img {
     width:255px; 
     background:white;
 }
-.photoPanel .photos img {
-    margin:5px;
+.photoPanel .photos img.flickr {
+    margin:4px;
+    border:solid 1px #FF0084;
+    cursor:pointer;
+}
+.photoPanel .photos img.panoramio {
+    margin:4px;
+    border:solid 1px #006BB8;
     cursor:pointer;
 }
 
@@ -78,6 +87,9 @@ a.btn img {
 <script type="text/javascript">
 var _uacct = "UA-359113-4";
 
+var msg = new _IG_MiniMessage(__MODULE_ID__);
+var prefs = new _IG_Prefs(__MODULE_ID__);
+
 var msg_date = '__MSG_date__';
 var msg_sort = '__MSG_sort__';
 var msg_datetakendesc = '__MSG_datetakendesc__';
@@ -89,7 +101,7 @@ var msg_interestingnessasc = '__MSG_interestingnessasc__';
 var msg_relevance = '__MSG_relevance__';
 var msg_search = '__MSG_search__';
 var msg_currpage = '__MSG_currpage__';
-var msg_viewonflickr = '__MSG_viewonflickr__';
+var msg_viewonsite = '__MSG_viewonsite__';
 var msg_takenon = '__MSG_takenon__';
 var msg_postby = '__MSG_postby__';
 
@@ -99,17 +111,11 @@ var msg_postby = '__MSG_postby__';
 //-- flickr gmap show common api --
 //---------------------------------
 
+var isIE = (window.navigator.appName.indexOf('Internet Explorer')!=-1);
+
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
     loading : imgdir+'loading.gif',
-
-//    close_default  : imgdir+'simple_close_default.gif',
-//    close_hover    : imgdir+'simple_close_hover.gif',
-//    close_selected : imgdir+'simple_close_selected.gif',
-//    popup_default : imgdir+'simple_new_window_default.gif',
-//    popup_hover   : imgdir+'simple_new_window_hover.gif',
-//    popup_selected: imgdir+'simple_new_window_selected.gif',
-
     updown_default : imgdir+'simple_updown_default.gif',
     updown_hover   : imgdir+'simple_updown_hover.gif',
     updown_selected: imgdir+'simple_updown_selected.gif',
@@ -145,6 +151,7 @@ var deltas = [0,0,0,0,0,
 0.0000494593408794467];
 var MAX_ZOOM = 19;
 var MIN_ZOOM = 5;
+var PER_PAGE = 100;
 
 
 // utility
@@ -193,8 +200,22 @@ function $icon(n) {
 
 // flickr
 flickr = {
+name:'flickr',
 _api_key : "ebed0eef1b25b738b1903ef93b8f25ee",
 _secret_key : "4260ccd8c3f7837e",
+
+gettitle : function(photo) {return photo.title;},
+iconurl: function(photo) {return'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_s.jpg';},
+smallurl: function(photo) {return'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_m.jpg';},
+pageurl : function(photo) {return 'http://www.flickr.com/photo.gne?id='+photo.id;},
+owner: function(photo) {return photo.ownername ? photo.ownername : photo.owner;},
+ownerurl: function(photo) {return 'http://www.flickr.com/photos/'+photo.owner+'/';},
+hasbuddy: true,
+buddyurl : function(photo) {
+    if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
+    else return 'http://www.flickr.com/images/buddyicon.jpg';
+},
+date: function(photo) { return photo.datetaken.substr(0,10); },
 _url : function(args, sign) {
     var url = 'http://api.flickr.com/services/rest/?'
     var signature = flickr._secret_key;
@@ -223,25 +244,59 @@ callapi : function(args, obj, callback, parms, sign) {
         var rsp = null;
         try {
             if(str) rsp = eval('(' + str + ')');
+            if(!rsp || rsp.stat != 'ok') rsp = null;
         } finally {
-            callback.call(obj, rsp, parms);
+            var photos = null;
+            var total = 0;
+            if(rsp) photos = rsp.photos.photo;
+            if(rsp) total = parseInt(rsp.photos.total);
+            callback.call(obj, flickr, photos, total, parms);
         }
     });
-},
-photourl : function(photo,t) {
-    if(!t) return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret;
-    else if(t=='.') return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'.jpg';
-    else   return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_'+t+'.jpg';
-},
-pageurl : function(photo) {
-    return 'http://www.flickr.com/photo.gne?id='+photo.id;
-},
-buddyurl : function(photo) {
-    if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
-    else return 'http://www.flickr.com/images/buddyicon.jpg';
 }
 };
 
+
+// panoramio
+panoramio = {
+name:'panoramio',
+gettitle : function(photo) {return photo.photo_title;},
+iconurl: function(photo) {return photo.photo_file_url.replace('medium','square');},
+smallurl: function(photo) {return photo.photo_file_url.replace('medium','small');},
+pageurl : function(photo) {return photo.photo_url;},
+owner: function(photo) {return photo.owner_name;},
+ownerurl: function(photo) {return photo.owner_url;},
+hasbuddy: false,
+date: function(photo) { return photo.upload_date; },
+_url : function(args, sign) {
+    var url = 'http://www.panoramio.com/map/get_panoramas.php?'
+    var keys = [];
+    for (var k in args) { keys.push(k); }
+    keys.sort();
+    for (var i=0; i<keys.length; i++) {
+        var k = keys[i];
+        var v = args[k];
+        url += (i>0?'&':'') + _esc(k) + '=' + _esc(v);
+    }
+    return url;
+},
+callapi : function(args, obj, callback, parms, sign) {
+    _IG_FetchContent(panoramio._url(args, sign), function(str) {
+        var rsp = null;
+        try {
+            if(str && (str != 'Error on arguments.')) {
+                rsp = eval('(' + str + ')');
+            }
+        } finally {
+            var photos = null;
+            var total = 0;
+            if(rsp) photos = rsp.photos;
+            if(rsp) total = rsp.count;
+            callback.call(obj, panoramio, photos, total, parms);
+        }
+    });
+}
+};
 
 
 // FPhotoMarker
@@ -264,7 +319,7 @@ FPhotoMarker.prototype.refreshImgList = function(dir) {
     if( end > imags.length) end = imags.length;
     for( var i = this.currpos; i<end; ++i) {
         var img = imags[i];
-        if(!img.src) img.src=flickr.photourl(img.photo,'s');
+        if(!img.src) img.src=img.photo.api.iconurl(img.photo);
     }
 
     function disappear() {
@@ -277,33 +332,33 @@ FPhotoMarker.prototype.refreshImgList = function(dir) {
         var s=img.style;
         
         var attr=null;
-        if(dir==0) {
+        if(dir==0 || isIE) {
             switch(i) {
-                case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; break;
+                case c-1: s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; break;
                 case c  : s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; break;
-                case c+1: s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; break;
+                case c+1: s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; break;
                 default:  s.display='none'; break;
             }
         } else if(dir>0) {
             switch(i) {
-                case c-2: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; attr={width:{to:0},height:{to:0}}; break;
-                case c-1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:0}}; break;
-                case c  : s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; attr={left:{to:85}};break;
-                case c+1: s.display='inline'; s.left='245px';s.top='75px';s.width=s.height='0px';  attr={left:{to:170},top:{to:0},width:{to:75},height:{to:75}}; break;
+                case c-2: s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; attr={left:{to:0},top:{to:0},width:{to:0},height:{to:0}}; break;
+                case c-1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:8},top:{to:8},width:{to:60},height:{to:60}}; break;
+                case c  : s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; attr={left:{to:85},top:{to:0},width:{to:75},height:{to:75}};break;
+                case c+1: s.display='inline'; s.left='245px';s.top='75px';s.width=s.height='0px';  attr={left:{to:178},top:{to:8},width:{to:60},height:{to:60}}; break;
                 default:  s.display='none'; break;
             }
         } else if(dir<0) {
             var attr=null;
             switch(i) {
-                case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='0px';  attr={width:{to:75},height:{to:75}}; break;
-                case c  : s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='75px'; attr={left:{to:85}}; break;
-                case c+1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:170}};break;
-                case c+2: s.display='inline'; s.left='170px';s.top='0px'; s.width=s.height='75px'; attr={left:{to:245},top:{to:75},width:{to:0},height:{to:0}}; break;
+                case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='0px';  attr={left:{to:8},top:{to:8},width:{to:60},height:{to:60}}; break;
+                case c  : s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; attr={left:{to:85},top:{to:0},width:{to:75},height:{to:75}}; break;
+                case c+1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:{to:178},top:{to:8},width:{to:60},height:{to:60}};break;
+                case c+2: s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; attr={left:{to:245},top:{to:75},width:{to:0},height:{to:0}}; break;
                 default:  s.display='none'; break;
             }
         }
         if(attr) {
-            var myAnim = new YAHOO.util.Motion(img, attr,.2, YAHOO.util.Easing.easeOutStrong);
+            var myAnim = new YAHOO.util.Motion(img, attr,.5, YAHOO.util.Easing.easeOutStrong);
             if((i==this.currpos-2) || (i==this.currpos+2)) myAnim.onComplete.subscribe(disappear);
             myAnim.animate();
         }
@@ -339,7 +394,8 @@ FPhotoMarker.prototype.onClick = function() {
             var photo = this.photos[i];
 
             var img = $c('img');
-            img.alt = photo.title;
+            img.alt = photo.api.gettitle(photo);
+            img.className = photo.api.name;
             img.photo=photo;
             img.marker=this;
             img.onclick = this.onPhotoClick;
@@ -355,9 +411,9 @@ FPhotoMarker.prototype.onClick = function() {
 
     this.refreshImgList(0);
     this.onOpenInfoWindow();
-};
+}; 
 FPhotoMarker.prototype.nextImg = function() {
-    if( this.marker.currpos >= this.marker.ctx.imags.length-1) return;
+    if(this.marker.currpos >= this.marker.ctx.imags.length-1) return;
 
     this.marker.currpos++;
     this.marker.refreshImgList(1);
@@ -389,7 +445,7 @@ FPhotoMarker.prototype.onPhotoClick = function() {
     overlay.imgPreloader = imgPreloader;
     imgPreloader.overlay = overlay;
     imgPreloader.imglnk=this;
-    imgPreloader.src = flickr.photourl(this.photo,'m');
+    imgPreloader.src = this.photo.api.smallurl(this.photo);
 
     overlay.onclick=function() {
         this.removed=true;
@@ -413,6 +469,8 @@ function FBrowser() {
     this.pageTotal = 1;
     this.currZoom = 0;
     this._lastcenter = null;
+    this.cleardata = false;
+    this.currBounds = null;
 
     GEvent.addListener(this, "dragend", this.ondragend);
     GEvent.addListener(this, "zoomend", this.onzoomend);
@@ -536,78 +594,106 @@ FBrowser.prototype.refreshData = function(bound) {
     points.push(new GLatLng(s,e));
     points.push(new GLatLng(n,e));
 
-    this.clearPanel();
-    this.closeInfoWindow();
+    this.cleardata = true;
     if(_trim(searchtxt)) {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:100}, this, this.search_callback, points);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points]);
     } else {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:100}, this, this.search_callback, points);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points]);
+    }
+
+    if( prefs.getBool('usepanoramio')) {
+        var psort = null;
+        var pset = null;
+        if(sort == 'interestingness-desc' || sort == 'interestingness-asc' || sort == 'relevance') {
+            psort = 'popularity';
+            pset = 'public';
+        } else {
+            psort = 'upload_date';
+            pset = 'full';
+        }
+        panoramio.callapi({from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, order:psort, set:pset, minx:w, miny:s, maxx:e, maxy:n}, this, this.search_callback, [points]);
     }
 };
-FBrowser.prototype.search_callback = function(rsp, points) {
+FBrowser.prototype.search_callback = function(api, photos, total, params) {
     try {
-        if(!rsp || rsp.stat != 'ok') return;
+        var points = params[0];
+        if(!photos) return;
 
-        var delta = deltas[this.currZoom];
-
-        var photoset = rsp.photos;
-        var photos = photoset.photo;
-        this.pageCurr = parseInt(photoset.page);
-        this.pageTotal = parseInt(photoset.pages);
-        this.total = parseInt(photoset.total);
-        this.perpage = parseInt(photoset.perpage);
-
-        var start, end;
-        if(this.total == 0) {
-            start = end = 0;
-        } else {
-            start = ((this.pageCurr-1)*this.perpage)+1;
-            end = ((this.pageCurr)*this.perpage);
+        if(this.cleardata) {
+            this.cleardata = false;
+            this.currBounds = new Array();
+            this.clearOverlays();
+            this.total = 0;
+            this.start = 0;
+            this.end = 0;
         }
-        if(end > this.total) end = this.total;
-        pageDiv.pageInfo.innerHTML = ' '+msg_currpage.replace('$1', start).replace('$2', end).replace('$3', this.total);;
 
-        this.clearOverlays();
+        var pp = total/PER_PAGE;
+        if( pp > this.pageTotal) this.pageTotal = pp;
+        this.total += total;
 
-        this.addOverlay(new GPolyline(points, '#0000FF', 1, .3));
+        if( photos.length == 0)
+            this.start += total;
+        else
+            this.start += ((this.pageCurr-1)*PER_PAGE);
 
-        var temp_bounds = new Array();
-        var temp_photos = new Array();
+        this.end += photos.length;
+        
+        var start = this.start+1;
+        var end = this.start + this.end;
+        if(start > end) start = end;
+        
+        pageDiv.pageInfo.innerHTML = ' '+msg_currpage.replace('$1', start).replace('$2', end).replace('$3', this.total);
+
         for (var i=0,len=photos.length; i<len; i++) {
-            var photo = photos[i];
-            var lat = parseFloat(photo.latitude);
-            var lon = parseFloat(photo.longitude);
-            if(lat == 0 && lon == 0) { continue; }
-
-            var pos = new GLatLng(lat, lon);
-
-            var isMerged = false;
-            for (var j=0,len2=temp_bounds.length; j<len2; j++) {
-                var bb = temp_bounds[j];
-                if( bb.contains(pos)) {
-                    isMerged = true;
-                    var ps = temp_photos[j];
-                    ps[ps.length] = photo;
-                    break;
-                }
-            }
-
-            if(!isMerged) {
-                var ps = new Array();
-                ps[0] = photo;
-                
-                var bound = new GLatLngBounds(new GLatLng(pos.lat()-delta, pos.lng()-delta), new GLatLng(pos.lat()+delta, pos.lng()+delta));
-                temp_bounds[temp_bounds.length] = bound;
-                temp_photos[temp_photos.length] = ps;
-            }
+            photos[i].api = api;
         }
-
-        for (var i=0,len=temp_photos.length; i<len ; i++) {
-            if(temp_photos[i].length == 0) { continue; }
-            this.addOverlay(this.newMaker($icon(temp_photos[i].length), temp_photos[i], temp_bounds[i]));
-        }
+        
+        this.update_photos(api, photos, points);
     } finally {
         this.onReceivedData();
+    }
+};
+FBrowser.prototype.update_photos = function(api, photos, points) {
+    var delta = deltas[this.currZoom];
+
+    var temp_bounds = this.currBounds;
+    for (var i=0,len=photos.length; i<len; i++) {
+        var photo = photos[i];
+        var lat = parseFloat(photo.latitude);
+        var lon = parseFloat(photo.longitude);
+        if(lat == 0 && lon == 0) { continue; }
+
+        var pos = new GLatLng(lat, lon);
+
+        var isMerged = false;
+        for (var j=0,len2=temp_bounds.length; j<len2; j++) {
+            var b = temp_bounds[j];
+            if( b.contains(pos)) {
+                isMerged = true;
+                b.photos.push(photo);
+                break;
+            }
+        }
+
+        if(!isMerged) {
+            var b = new GLatLngBounds(new GLatLng(pos.lat()-delta, pos.lng()-delta), new GLatLng(pos.lat()+delta, pos.lng()+delta));
+            b.photos=new Array();
+            b.photos.push(photo);
+            temp_bounds.push(b);
+        }
+    }
+
+    this.clearPanel();
+    //this.closeInfoWindow();
+    this.addOverlay(new GPolyline(points, '#0000FF', 1, .3));
+
+    for (var i=0,len=temp_bounds.length; i<len ; i++) {
+        var b = temp_bounds[i];
+        if(b.photos.length == 0) { continue; }
+        if(b.maker) this.removeOverlay(b.maker);
+        b.maker = this.newMaker($icon(b.photos.length), b.photos, b);
+        this.addOverlay(b.maker);
     }
 };
 
@@ -687,19 +773,18 @@ FPhotoMarkerMapplet.prototype.onOpenInfoWindow = function() {
     if(this.photos.length<2) rand = 0;
     else rand = Math.round((this.photos.length-1)*Math.random());
     var photo = this.photos[rand];
-    var owner = photo.ownername;
-    if(!owner) owner = photo.owner;
-    var datetaken = photo.datetaken.substr(0,10);
 
     // !! css style can't apply to info window !!
     var infowin = 
         '<div style="font-size:12px; width:240px;">'+
-            '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
-            '<img style="margin-bottom:4px;" src="' + flickr.photourl(photo,'m') + '"/><br />'+
-            '<a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/><img style="float:right;width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>'+
-            '<i>'+msg_postby.replace('$1','<a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a>')+'</i><br />'+
-            '<i>'+msg_takenon.replace('$1', datetaken)+'</i><br />'+
-            '<a target="_blank" href="'+flickr.pageurl(photo)+'">'+msg_viewonflickr+'</a></div>';
+            '<b style="display: block; margin-bottom: 4px;">'+photo.api.gettitle(photo)+'</b>'+
+            '<img style="margin-bottom:4px;" src="' + photo.api.smallurl(photo) + '"/><br />';
+    if(photo.api.hasbuddy)
+        infowin += '<a style="float:right;" target="_blank" href="'+photo.api.ownerurl(photo)+'"/><img style="width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>';
+    infowin += 
+            '<i>'+msg_postby.replace('$1','<a target="_blank" href="'+photo.api.ownerurl(photo)+'"/>'+photo.api.owner(photo)+'</a>')+'</i><br />'+
+            '<i>'+msg_takenon.replace('$1', photo.api.date(photo))+'</i><br />'+
+            '<a target="_blank" href="'+photo.api.pageurl(photo)+'">'+msg_viewonsite.replace('$1',photo.api.name)+'</a></div>';
     this.openInfoWindowHtml(infowin, {disableGoogleLinks:true});
 };
 FPhotoMarkerMapplet.prototype.onPopupPhoto = function(photo, width, height, src) {
@@ -709,21 +794,20 @@ FPhotoMarkerMapplet.prototype.onPopupPhoto = function(photo, width, height, src)
 
     var hei = 50;
 
-    var owner = photo.ownername;
-    if(!owner) owner = photo.owner;
-    var datetaken = photo.datetaken.substr(0,10);
-    var photoctx = $dom(
+    var photoctx =
         '<div class="popup" style="position:absolute; top:'+hei+'px; left:'+lef+'px; width:'+w+'px;">'+
             '<div style="margin:10px;">'+
-                '<b style="display: block; margin-bottom: 4px;">'+photo.title+'</b>'+
-                '<img style="margin-bottom:4px;" src="'+src+'"/><br />'+
-                '<a style="float:right;" target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/><img style="width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>'+
-                '<i>'+msg_postby.replace('$1','<a target="_blank" href="http://www.flickr.com/photos/'+photo.owner+'/"/>'+owner+'</a>')+'</i><br />'+
-                '<i>'+msg_takenon.replace('$1', datetaken)+'</i><br />'+
-                '<a target="_blank" href="'+flickr.pageurl(photo)+'">'+msg_viewonflickr+'</a>'+
+                '<b style="display: block; margin-bottom: 4px;">'+photo.api.gettitle(photo)+'</b>'+
+                '<img style="margin-bottom:4px;" src="'+src+'"/><br />';
+    if(photo.api.hasbuddy)
+        photoctx += '<a style="float:right;" target="_blank" href="'+photo.api.ownerurl(photo)+'"/><img style="width:48px;height:48px;border:0px;" src="'+flickr.buddyurl(photo)+'"/></a>';
+    photoctx += 
+                '<i>'+msg_postby.replace('$1','<a target="_blank" href="'+photo.api.ownerurl(photo)+'"/>'+photo.api.owner(photo)+'</a>')+'</i><br />'+
+                '<i>'+msg_takenon.replace('$1', photo.api.date(photo))+'</i><br />'+
+                '<a target="_blank" href="'+photo.api.pageurl(photo)+'">'+msg_viewonsite.replace('$1',photo.api.name)+'</a>'+
             '</div>'+
-        '</div>');
-    return photoctx;
+        '</div>';
+    return $dom(photoctx);
 };
 
 
