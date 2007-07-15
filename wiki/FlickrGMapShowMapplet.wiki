@@ -4,4 +4,9 @@ _Browse flickr photos on Google map with Google Mapplet_
 
   * [http://maps.google.com/ig/directory?synd=mpl&url=http://flickr-gmap-show.googlecode.com/svn/trunk/fgs.mapplet.xml http://buttons.googlesyndication.com/fusion/add.gif]
 
+=== Change log ===
+  * r88. Add Panoramio support.
+  * r84, Add toggle control panel function.
+
+=== Screen shot ===
 [http://www.flickr.com/photos/wctang/746075051/ http://farm2.static.flickr.com/1322/746075051_1516ae0522_o.jpg]
