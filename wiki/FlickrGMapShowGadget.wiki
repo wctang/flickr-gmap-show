@@ -4,4 +4,9 @@ _Browse flickr photos on Google map with Google Map on iGoogle_
 
   * [http://www.google.com.tw/ig/directory?url=http://flickr-gmap-show.googlecode.com/svn/trunk/fgs.gadget.xml http://buttons.googlesyndication.com/fusion/add.gif]
 
+=== Change log ===
+  * r88. Add Panoramio support.
+  * r84, Add toggle control panel function.
+
+=== Screen shots ===
 [http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_preview.png]
