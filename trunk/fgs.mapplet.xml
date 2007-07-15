@@ -248,8 +248,10 @@ callapi : function(args, obj, callback, parms, sign) {
         } finally {
             var photos = null;
             var total = 0;
-            if(rsp) photos = rsp.photos.photo;
-            if(rsp) total = parseInt(rsp.photos.total);
+            if(rsp && typeof rsp == 'object') {
+                photos = rsp.photos.photo;
+                total = parseInt(rsp.photos.total);
+            }
             callback.call(obj, flickr, photos, total, parms);
         }
     });
@@ -259,7 +261,7 @@ callapi : function(args, obj, callback, parms, sign) {
 
 // panoramio
 panoramio = {
-name:'panoramio',
+name:'Panoramio',
 gettitle : function(photo) {return photo.photo_title;},
 iconurl: function(photo) {return photo.photo_file_url.replace('medium','square');},
 smallurl: function(photo) {return photo.photo_file_url.replace('medium','small');},
@@ -290,8 +292,10 @@ callapi : function(args, obj, callback, parms, sign) {
         } finally {
             var photos = null;
             var total = 0;
-            if(rsp) photos = rsp.photos;
-            if(rsp) total = rsp.count;
+            if(rsp && typeof rsp == 'object') {
+                photos = rsp.photos;
+                total = rsp.count;
+            }
             callback.call(obj, panoramio, photos, total, parms);
         }
     });
@@ -470,6 +474,7 @@ function FBrowser() {
     this.currZoom = 0;
     this._lastcenter = null;
     this.cleardata = false;
+    this.timestamp = 0;
     this.currBounds = null;
 
     GEvent.addListener(this, "dragend", this.ondragend);
@@ -595,10 +600,11 @@ FBrowser.prototype.refreshData = function(bound) {
     points.push(new GLatLng(n,e));
 
     this.cleardata = true;
+    this.timestamp = new Date().getTime();
     if(_trim(searchtxt)) {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points]);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points, this.timestamp]);
     } else {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points]);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points, this.timestamp]);
     }
 
     if( prefs.getBool('usepanoramio')) {
@@ -611,14 +617,17 @@ FBrowser.prototype.refreshData = function(bound) {
             psort = 'upload_date';
             pset = 'full';
         }
-        panoramio.callapi({from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, order:psort, set:pset, minx:w, miny:s, maxx:e, maxy:n}, this, this.search_callback, [points]);
+        panoramio.callapi({from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, order:psort, set:pset, minx:w, miny:s, maxx:e, maxy:n}, this, this.search_callback, [points, this.timestamp]);
     }
 };
 FBrowser.prototype.search_callback = function(api, photos, total, params) {
-    try {
-        var points = params[0];
-        if(!photos) return;
+    var points = params[0];
+    var timestamp = params[1];
+    if(!photos) return;
 
+    if(timestamp != this.timestamp) return;
+
+    try {
         if(this.cleardata) {
             this.cleardata = false;
             this.currBounds = new Array();
