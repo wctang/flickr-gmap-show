@@ -15,7 +15,9 @@
 <msg name="currpage">$1 ~ $2 張，共 $3 張</msg>
 <msg name="takenon">於 $1</msg>
 <msg name="postby">由 $1 拍攝</msg>
-<msg name="viewonflickr">連至 flickr 顯示</msg>
 <msg name="viewonsite">連至 $1 顯示</msg>
 <msg name="usepanoramio">加入 Panoramio 來源</msg>
+<msg name="prevpage">上一頁</msg>
+<msg name="nextpage">下一頁</msg>
+<msg name="toggle">切換控制面板</msg>
 </messagebundle>

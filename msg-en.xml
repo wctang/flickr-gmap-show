@@ -15,7 +15,9 @@
 <msg name="currpage">$1 ~ $2 of $3 photos</msg>
 <msg name="takenon">Taken on $1</msg>
 <msg name="postby">Posted by $1</msg>
-<msg name="viewonflickr">View this photo on flickr</msg>
 <msg name="viewonsite">View this photo on $1</msg>
 <msg name="usepanoramio">Add Panoramio source</msg>
+<msg name="prevpage">Previous Page</msg>
+<msg name="nextpage">Next Page</msg>
+<msg name="toggle">Toggle Control Panel</msg>
 </messagebundle>
