@@ -4,7 +4,7 @@
 author="wctang" author_photo="http://farm1.static.flickr.com/219/buddyicons/81718017@N00.jpg" author_email="wctang+fgsfeedback@gmail.com"
 author_link="http://blog.wctang.info/" author_location="Kaohsiung, Taiwan" author_affiliation="wctang.info"
 title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_preview.png"
-thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thumb.png" height="430" scrolling="true" category="tools">
+thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thumb.png" height="400" scrolling="true" category="tools">
   <Locale messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-en.xml"/>
   <Locale lang="zh-TW" messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-zh-tw.xml"/>
   <Require feature="setprefs"/>
@@ -19,11 +19,11 @@ thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thum
 <Content type="html"><![CDATA[
 <style type="text/css">
 #mapDiv {
-    border:1px solid #979797;
+/*    border:1px solid #979797; */
     margin-top:10px;
     margin-bottom:10px;
-    width:98%;
-    height:300px;
+    width:100%;
+    height:350px;
 }
 #settingDiv, #pageDiv {
     margin-bottom:5px;
@@ -56,6 +56,9 @@ a.btn img {
     cursor:pointer;
 }
 
+#popupall {
+}
+
 .photoPanel {
     height:140px;
     width:255px;
@@ -67,12 +70,14 @@ a.btn img {
     width:255px; 
     background:white;
 }
-.photoPanel .photos img.flickr {
+.photoPanel .photos img.flickr,
+#popupall img.flickr {
     margin:4px;
     border:solid 1px #FF0084;
     cursor:pointer;
 }
-.photoPanel .photos img.panoramio {
+.photoPanel .photos img.panoramio,
+#popupall img.panoramio {
     margin:4px;
     border:solid 1px #006BB8;
     cursor:pointer;
@@ -87,7 +92,7 @@ a.btn img {
 
 <div id="mapDiv"></div>
 <div id='pageDiv'></div>
-<div id="settingDiv"></div>
+<div style="display:none;" id="settingDiv"></div>
 
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x" type="text/javascript"></script>
 <script src="http://yui.yahooapis.com/2.2.2/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -112,6 +117,9 @@ var msg_currpage = '__MSG_currpage__';
 var msg_viewonsite = '__MSG_viewonsite__';
 var msg_takenon = '__MSG_takenon__';
 var msg_postby = '__MSG_postby__';
+var msg_prevpage = '__MSG_prevpage__';
+var msg_nextpage = '__MSG_nextpage__';
+var msg_toggle = '__MSG_toggle__';
 
 
 
@@ -124,6 +132,12 @@ var isIE = (window.navigator.appName.indexOf('Internet Explorer')!=-1);
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
     loading : imgdir+'loading.gif',
+    close_default : imgdir+'simple_close_default.gif',
+    close_hover   : imgdir+'simple_close_hover.gif',
+    close_selected: imgdir+'simple_close_selected.gif',
+    popup_default : imgdir+'simple_new_window_default.gif',
+    popup_hover   : imgdir+'simple_new_window_hover.gif',
+    popup_selected: imgdir+'simple_new_window_selected.gif',
     updown_default : imgdir+'simple_updown_default.gif',
     updown_hover   : imgdir+'simple_updown_hover.gif',
     updown_selected: imgdir+'simple_updown_selected.gif',
@@ -171,14 +185,18 @@ function $extend(subc,basec) {
     function inheritance(){}; inheritance.prototype=basec.prototype; subc.prototype=new inheritance(); 
     subc.prototype.constructor = subc; subc.prototype.baseConstructor = basec; subc.superClass = basec.prototype;
 };
-function $cbtn(n, title, clickfun) {
+function $cbtn(n, title, clickfun, targetObj) {
     var a = $dom('<a class="btn"><img src="'+imgs[n+'_default'].src+'"/></a>');
     a.n=n;
     a.onmouseout=function(){ this.firstChild.src = imgs[this.n+'_default'].src;};
     a.onmouseover=function(){ this.firstChild.src = imgs[this.n+'_hover'].src;};
     a.onmousedown=function(){ this.firstChild.src = imgs[this.n+'_selected'].src;};
     a.onmouseup=function(){ this.firstChild.src = imgs[this.n+'_hover'].src;};
-    a.onclick=clickfun;
+    if(clickfun && targetObj) {
+        a.onclick=function(){clickfun.call(targetObj);};
+    } else if(clickfun) {
+        a.onclick=clickfun;
+    }
     if(title) a.title=title;
     return a;
 };
@@ -242,7 +260,7 @@ _url : function(args, sign) {
 //    }
     return url;
 },
-callapi : function(args, obj, callback, parms, sign) {
+callapi : function(args, obj, callback, timestamp, parms, sign) {
     args.api_key = flickr._api_key;
     args.format = 'json';
     args.nojsoncallback = '1';
@@ -251,8 +269,10 @@ callapi : function(args, obj, callback, parms, sign) {
     _IG_FetchContent(flickr._url(args, sign), function(str) {
         var rsp = null;
         try {
-            if(str) rsp = eval('(' + str + ')');
-            if(!rsp || rsp.stat != 'ok') rsp = null;
+            if(timestamp == obj.timestamp && str) {
+                rsp = eval('(' + str + ')');
+                if(!rsp || rsp.stat != 'ok') rsp = null;
+            }
         } finally {
             var photos = null;
             var total = 0;
@@ -260,7 +280,7 @@ callapi : function(args, obj, callback, parms, sign) {
                 photos = rsp.photos.photo;
                 total = parseInt(rsp.photos.total);
             }
-            callback.call(obj, flickr, photos, total, parms);
+            callback.call(obj, flickr, photos, total, timestamp, parms);
         }
     });
 }
@@ -290,11 +310,11 @@ _url : function(args, sign) {
     }
     return url;
 },
-callapi : function(args, obj, callback, parms, sign) {
+callapi : function(args, obj, callback, timestamp, parms, sign) {
     _IG_FetchContent(panoramio._url(args, sign), function(str) {
         var rsp = null;
         try {
-            if(str && (str != 'Error on arguments.')) {
+            if(timestamp == obj.timestamp && str) {
                 rsp = eval('(' + str + ')');
             }
         } finally {
@@ -304,7 +324,7 @@ callapi : function(args, obj, callback, parms, sign) {
                 photos = rsp.photos;
                 total = rsp.count;
             }
-            callback.call(obj, panoramio, photos, total, parms);
+            callback.call(obj, panoramio, photos, total, timestamp, parms);
         }
     });
 }
@@ -379,7 +399,6 @@ FPhotoMarker.prototype.refreshImgList = function(dir) {
     this.ctx.titl.innerHTML=imags[this.currpos].alt;
     this.ctx.info.innerHTML=' ' + (this.currpos+1) + ' of ' + imags.length + ' ';
 };
-
 FPhotoMarker.prototype.onClick = function() {
     if(!this.ctx) {
         var ctx_ = $dom(
@@ -389,18 +408,21 @@ FPhotoMarker.prototype.onClick = function() {
                 '<div style="height:20px;"></div>'+
             '</div>');
         ctx_.titl = ctx_.childNodes[0];
-        var imags = ctx_.childNodes[1]
+        var imags = ctx_.childNodes[1];
         var ctrl = ctx_.childNodes[2];
 
-        var pre = $cbtn('prev','Previous photo', this.prevImg);
-        var nex = $cbtn('next','Next photo', this.nextImg);
-        nex.marker = pre.marker = this;
+        var mx = $cbtn('popup','Popup', this.onMax, this);
+        mx.className += ' right';
+        var pre = $cbtn('prev',msg_prevpage, this.prevImg, this);
+        var nex = $cbtn('next',msg_nextpage, this.nextImg, this);
+        ctrl.appendChild(mx);
         ctrl.appendChild(pre);
         ctrl.appendChild(nex);
 
         var info = $dom('<span/>');
         ctrl.appendChild(info);
         ctx_.info = info;
+
 
         for(var i = 0, len = this.photos.length; i < len; ++i) {
             var photo = this.photos[i];
@@ -425,16 +447,16 @@ FPhotoMarker.prototype.onClick = function() {
     this.onOpenInfoWindow();
 }; 
 FPhotoMarker.prototype.nextImg = function() {
-    if(this.marker.currpos >= this.marker.ctx.imags.length-1) return;
+    if(this.currpos >= this.ctx.imags.length-1) return;
 
-    this.marker.currpos++;
-    this.marker.refreshImgList(1);
+    this.currpos++;
+    this.refreshImgList(1);
 };
 FPhotoMarker.prototype.prevImg = function() {
-    if( this.marker.currpos <= 0) return;
+    if( this.currpos <= 0) return;
 
-    this.marker.currpos--;
-    this.marker.refreshImgList(-1);
+    this.currpos--;
+    this.refreshImgList(-1);
 };
 FPhotoMarker.prototype.onPhotoClick = function() {
     var w = document.body.clientWidth;
@@ -516,8 +538,8 @@ function FBrowser() {
     ysel.map = msel.map = ssel.map = sform.map = this;
     ysel.onchange = msel.onchange = ssel.onchange = sform.onsubmit = this.changeSetting;
 
-    var pre = $cbtn('prev','Previous Page', this.prevPage);
-    var nex = $cbtn('next','Next Page', this.nextPage);
+    var pre = $cbtn('prev',msg_prevpage, this.prevPage, this);
+    var nex = $cbtn('next',msg_nextpage, this.nextPage, this);
     var pageInfo = $dom('<span/>');
     pageDiv.appendChild(pre);
     pageDiv.appendChild(nex);
@@ -547,16 +569,14 @@ FBrowser.prototype.changeSetting = function() {
     return false;
 };
 FBrowser.prototype.prevPage = function() {
-    var map = this.map;
-    if( map.pageCurr <= 1) return;
+    if( this.pageCurr <= 1) return;
 
-    map.updateview(null, map.pageCurr-1);
+    this.updateview(null, this.pageCurr-1);
 };
 FBrowser.prototype.nextPage = function() {
-    var map = this.map;
-    if( map.pageCurr >= map.pageTotal) return;
+    if( this.pageCurr >= this.pageTotal) return;
 
-    map.updateview(null, map.pageCurr+1);
+    this.updateview(null, this.pageCurr+1);
 };
 FBrowser.prototype.onzoomend = function(oldLevel,newLevel) {
     this.updateview(null, null, newLevel);
@@ -610,9 +630,9 @@ FBrowser.prototype.refreshData = function(bound) {
     this.cleardata = true;
     this.timestamp = new Date().getTime();
     if(_trim(searchtxt)) {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points, this.timestamp]);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, this.timestamp, [points]);
     } else {
-        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, [points, this.timestamp]);
+        flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, this.timestamp, [points]);
     }
 
     if( prefs.getBool('usepanoramio')) {
@@ -625,15 +645,14 @@ FBrowser.prototype.refreshData = function(bound) {
             psort = 'upload_date';
             pset = 'full';
         }
-        panoramio.callapi({from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, order:psort, set:pset, minx:w, miny:s, maxx:e, maxy:n}, this, this.search_callback, [points, this.timestamp]);
+        panoramio.callapi({from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, order:psort, set:pset, minx:w, miny:s, maxx:e, maxy:n}, this, this.search_callback, this.timestamp, [points]);
     }
 };
-FBrowser.prototype.search_callback = function(api, photos, total, params) {
-    var points = params[0];
-    var timestamp = params[1];
+FBrowser.prototype.search_callback = function(api, photos, total, timestamp, params) {
     if(!photos) return;
-
     if(timestamp != this.timestamp) return;
+
+    var points = params[0];
 
     try {
         if(this.cleardata) {
@@ -661,6 +680,7 @@ FBrowser.prototype.search_callback = function(api, photos, total, params) {
         if(start > end) start = end;
         
         pageDiv.pageInfo.innerHTML = ' '+msg_currpage.replace('$1', start).replace('$2', end).replace('$3', this.total);
+        setTimeout('onsize()', 300);
 
         for (var i=0,len=photos.length; i<len; i++) {
             photos[i].api = api;
@@ -725,44 +745,53 @@ FBrowser.prototype.update_photos = function(api, photos, points) {
 var mapDiv = $('mapDiv');
 var pageDiv = $('pageDiv');
 var settingDiv = $('settingDiv');
-function toggle() {
-    if(settingDiv.style.display == 'none') {
-        settingDiv.style.display='block';
-        mapDiv.style.height = '300px';
+
+function onsize() {
+    if(settingDiv.style.display=='none') {
+        mapDiv.style.height = (document.body.clientHeight-pageDiv.offsetHeight-30)+'px';
         mapDiv.gmap.checkResize();
     } else {
-        settingDiv.style.display='none';
-        mapDiv.style.height = '380px';
+        mapDiv.style.height = (document.body.clientHeight-pageDiv.offsetHeight-settingDiv.offsetHeight-40)+'px';
         mapDiv.gmap.checkResize();
     }
 };
-var upbtn = $cbtn('updown','', toggle);
+window.onresize=onsize;
+function toggle() {
+    if(settingDiv.style.display=='none') {
+        settingDiv.style.display='block';
+    } else {
+        settingDiv.style.display='none';
+    }
+    onsize();
+};
+var upbtn = $cbtn('updown',msg_toggle, toggle);
 upbtn.className += ' right';
 pageDiv.appendChild(upbtn);
 
 
+
+
+
 // mask layer
-var masklayer = $dom(
+function mask(gmap) {
+    if(!mask.layer) {
+        mask.layer = $dom(
     '<div class="mask" style="position:absolute; top:0px; left:0px; cursor:wait; display:none;">'+
         '<div style="position:absolute; top:100px;">'+
             '<img src="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/loading.gif"/>'+
         '</div>'+
-    '</div>');
-masklayer.init=false;
-function mask(gmap) {
-    if(!masklayer.init) {
-        gmap.getPane(G_MAP_FLOAT_PANE).parentNode.parentNode.appendChild(masklayer);
-        masklayer.init = true;
+    '</div>')
+        mapDiv.appendChild(mask.layer);
     }
-    var w = document.body.clientWidth;
-    var h = document.body.clientHeight;
-    masklayer.style.width = w+'px';
-    masklayer.style.height = h+'px';
-    masklayer.firstChild.style.left = (w-32)/2 + 'px';
-    masklayer.style.display = 'block';
+    var w = mapDiv.clientWidth;
+    var h = mapDiv.clientHeight;
+    mask.layer.style.width = w+'px';
+    mask.layer.style.height = h+'px';
+    mask.layer.firstChild.style.left = (w-32)/2 + 'px';
+    mask.layer.style.display = 'block';
 };
 function unmask() {
-    masklayer.style.display = 'none';
+    mask.layer.style.display = 'none';
 };
 
 
@@ -831,6 +860,42 @@ FPhotoMarkerGadget.prototype.onPopupPhoto = function(photo, width, height, src) 
         '</div>';
     return $dom(photoctx);
 };
+FPhotoMarkerGadget.prototype.onMax = function() {
+    mapDiv.gmap.closeInfoWindow();
+    var popup = $dom(
+        '<div id="popupall" style="position:absolute;background:white;left:10px;top:10px;border:solid 1px black;">'+
+            '<div style="height:20px; margin:3px;"></div>'+
+            '<div style="overflow:auto;width:95%"><div></div></div>'+
+        '</div>');
+    popup.onclose = function() {this.parentNode.removeChild(this);};
+    var titlePanel = popup.childNodes[0];
+    var photoContainer = popup.childNodes[1];
+    var photoPanel = photoContainer.firstChild;
+    var closebtn = $cbtn('close','Close',popup.onclose,popup);
+    closebtn.className += ' right';
+    titlePanel.appendChild(closebtn);
+
+    popup.style.width=(document.body.clientWidth-20)+'px';
+    popup.style.height=(document.body.clientHeight-20)+'px';
+    photoContainer.style.height=(document.body.clientHeight-50)+'px';
+
+    var imags = this.ctx.imags;
+    for( var i=0,len=imags.length; i<len; ++i) {
+        var oimg = imags[i];
+        var img = $c('img');
+        img.alt = oimg.alt;
+        img.marker=oimg.marker;
+        img.photo = oimg.photo;
+        if(oimg.src) img.src = oimg.src;
+        else img.src=img.photo.api.iconurl(img.photo);
+        img.onclick = this.onPhotoClick;
+        img.className = img.photo.api.name;
+        img.style.width=img.style.height='75px';
+        photoPanel.appendChild(img);
+    }
+    
+    document.body.appendChild(popup);
+};
 
 
 
@@ -874,7 +939,6 @@ FBrowserGadget.prototype.newMaker = function(icon, photos, bound) {
 FBrowserGadget.prototype.onReceivedData = function() {
     unmask();
 };
-
 
 
         var zoom = parseInt(prefs.getString('zoom'));
