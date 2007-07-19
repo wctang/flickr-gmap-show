@@ -18,97 +18,96 @@ thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thum
 <Content type="html"><![CDATA[
 <style type="text/css">
 body {
-    margin:0;
-    padding:0;
-    height:100%;
+  margin:0;
+  padding:0;
+  height:100%;
 }
 #mapDiv {
-/*    border:1px solid #979797; */
-    width:100%;
-    height:350px;
+  width:100%;
+  height:350px;
 }
 #controlDiv {
-    width:100%;
-    background:white;
-    z-index:100;
+  width:100%;
+  background:white;
+  z-index:100;
 }
 #pageDiv {
-    margin-bottom:5px;
+  margin-bottom:5px;
 }
 #settingDiv {
-    margin-bottom:5px;
-    overflow:hidden;
+  margin-bottom:5px;
+  overflow:hidden;
 }
 #fgs_search_form {
-    display:inline;
+  display:inline;
 }
 
 img {
-    border:0px;
+  border:0px;
 }
 
 .mask {
-    background:black;
-    opacity:.8;
-    -moz-opacity:.8;
-    filter:alpha(opacity=80);
-    z-index:200;
+  background:black;
+  opacity:.8;
+  -moz-opacity:.8;
+  filter:alpha(opacity=80);
+  z-index:200;
 }
 .mask div {
-    background:white;
+  background:white;
 }
 
 .popup {
-    font-size: 12px; 
-    background:white;
-    opacity:0;
-    -moz-opacity:0;
-    filter:alpha(opacity=0);
-    z-index:300;
+  font-size: 12px; 
+  background:white;
+  opacity:0;
+  -moz-opacity:0;
+  filter:alpha(opacity=0);
+  z-index:300;
 }
 
 a.btn {
-    cursor:pointer;
+  cursor:pointer;
 }
 .left {
-    float:left;
+  float:left;
 }
 .right {
-    float:right;
+  float:right;
 }
 a.btn img {
-    cursor:pointer;
+  cursor:pointer;
 }
 
 #popupall {
-    z-index:150;
+  z-index:150;
 }
 
 .photoPanel {
-    height:140px;
-    width:255px;
-    border:0px;
+  height:140px;
+  width:255px;
+  border:0px;
 }
 .photoPanel div {
-    position:relative; 
-    left:0px; 
-    width:255px; 
-    background:white;
+  position:relative; 
+  left:0px; 
+  width:255px; 
+  background:white;
 }
 .photoPanel .photos img {
-    background:url(http://flickr-gmap-show.googlecode.com/svn/trunk/pics/loading.gif) no-repeat bottom right;
+  background:url(http://flickr-gmap-show.googlecode.com/svn/trunk/pics/loading.gif) no-repeat bottom right;
 }
 .photoPanel .photos img.flickr,
 #popupall img.flickr {
-    margin:4px;
-    border:solid 1px #FF0084;
-    cursor:pointer;
+  margin:4px;
+  border:solid 1px #FF0084;
+  cursor:pointer;
 }
 .photoPanel .photos img.panoramio,
 #popupall img.panoramio {
-    margin:4px;
-    border:solid 1px #006BB8;
-    cursor:pointer;
+  margin:4px;
+  border:solid 1px #006BB8;
+  cursor:pointer;
 }
 
 
@@ -157,22 +156,22 @@ var msg_toggle = '__MSG_toggle__';
 
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs = {
-  loading : _IG_GetImage(imgdir+'loading.gif'),
-  close_default : _IG_GetImage(imgdir+'simple_close_default.gif'),
-  close_hover   : _IG_GetImage(imgdir+'simple_close_hover.gif'),
-  close_selected: _IG_GetImage(imgdir+'simple_close_selected.gif'),
-  popup_default : _IG_GetImage(imgdir+'simple_new_window_default.gif'),
-  popup_hover   : _IG_GetImage(imgdir+'simple_new_window_hover.gif'),
-  popup_selected: _IG_GetImage(imgdir+'simple_new_window_selected.gif'),
-  updown_default : _IG_GetImage(imgdir+'simple_updown_default.gif'),
-  updown_hover   : _IG_GetImage(imgdir+'simple_updown_hover.gif'),
-  updown_selected: _IG_GetImage(imgdir+'simple_updown_selected.gif'),
-  prev_default  : _IG_GetImage(imgdir+'simple_prev_default.gif'),
-  prev_hover    : _IG_GetImage(imgdir+'simple_prev_hover.gif'),
-  prev_selected : _IG_GetImage(imgdir+'simple_prev_selected.gif'),
-  next_default  : _IG_GetImage(imgdir+'simple_next_default.gif'),
-  next_hover    : _IG_GetImage(imgdir+'simple_next_hover.gif'),
-  next_selected : _IG_GetImage(imgdir+'simple_next_selected.gif'),
+  loading         : _IG_GetImage(imgdir+'loading.gif'),
+  close_default   : _IG_GetImage(imgdir+'simple_close_default.gif'),
+  close_hover     : _IG_GetImage(imgdir+'simple_close_hover.gif'),
+  close_selected  : _IG_GetImage(imgdir+'simple_close_selected.gif'),
+  popup_default   : _IG_GetImage(imgdir+'simple_new_window_default.gif'),
+  popup_hover     : _IG_GetImage(imgdir+'simple_new_window_hover.gif'),
+  popup_selected  : _IG_GetImage(imgdir+'simple_new_window_selected.gif'),
+  updown_default  : _IG_GetImage(imgdir+'simple_updown_default.gif'),
+  updown_hover    : _IG_GetImage(imgdir+'simple_updown_hover.gif'),
+  updown_selected : _IG_GetImage(imgdir+'simple_updown_selected.gif'),
+  prev_default    : _IG_GetImage(imgdir+'simple_prev_default.gif'),
+  prev_hover      : _IG_GetImage(imgdir+'simple_prev_hover.gif'),
+  prev_selected   : _IG_GetImage(imgdir+'simple_prev_selected.gif'),
+  next_default    : _IG_GetImage(imgdir+'simple_next_default.gif'),
+  next_hover      : _IG_GetImage(imgdir+'simple_next_hover.gif'),
+  next_selected   : _IG_GetImage(imgdir+'simple_next_selected.gif'),
   prevpg_default  : _IG_GetImage(imgdir+'simple_prev_default.gif'),
   prevpg_hover    : _IG_GetImage(imgdir+'simple_prev_hover.gif'),
   prevpg_selected : _IG_GetImage(imgdir+'simple_prev_selected.gif'),
@@ -188,7 +187,6 @@ var PER_PAGE = 100;
 
 
 // utility
-function $c(e) { return document.createElement(e); };
 function $extend(subc,basec) {
     var inh=function(){}; inh.prototype=basec.prototype; subc.prototype=new inh(); subc.prototype.constructor=subc; 
     subc.superclass=basec.prototype;
@@ -202,21 +200,15 @@ function $cbtn(n, title, clickfun, targetObj) {
         $cbtn.mousedown=function(){ this.firstChild.src=imgs[this.n+'_selected'].src;};
         $cbtn.mouseup=function(){ this.firstChild.src=imgs[this.n+'_hover'].src;};
     }
-    var a = $('<a class="btn"><img/></a>').get(0);
-    a.n=n;
-    a.isdown=false;
-    a.onmouseout=$cbtn.mouseout;
-    a.onmouseover=$cbtn.mouseover;
-    a.onmousedown=$cbtn.mousedown;
-    a.onmouseup=$cbtn.mouseup;
-    a.onmouseout.call(a);
-    if(clickfun && targetObj) {
-        a.onclick=function(){clickfun.call(targetObj);};
-    } else if(clickfun) {
-        a.onclick=clickfun;
-    }
-    if(title) a.title=title;
-    return a;
+    var a = $('<a class="btn"><img/></a>').mouseout($cbtn.mouseout).mouseover($cbtn.mouseover).mousedown($cbtn.mousedown)
+                .mouseup($cbtn.mouseup);
+    if(clickfun && targetObj) a.click(function(){clickfun.call(targetObj);});
+    else if(clickfun)       a.click(clickfun);
+
+    if(title) a.attr('title',title);
+    a.get(0).n = n;
+    a.trigger('mouseout');
+    return a.get(0);
 };
 
 
@@ -375,8 +367,6 @@ callapi : function(args, obj, callback, timestamp, parms, sign) {
 
 
 // FGS.Marker
-//   overwrite function
-//     onOpenInfoWindow
 FGS.Marker=function(icon, photos, bounds) {
   var position = bounds.getCenter();
 
@@ -384,12 +374,55 @@ FGS.Marker=function(icon, photos, bounds) {
 
   this.photos = photos;
   this.currpos = 0;
-  this.ctx = null;
+  this.infowin = null;
   GEvent.addListener(this, 'click', this.onClick);
 };
 $extend(FGS.Marker, GMarker);
-FGS.Marker.prototype.refreshImgList = function(dir) {
-  var imags = this.ctx.imags;
+FGS.Marker.prototype.onClick = function() {
+  if(document.body.clientWidth < 280) {
+    return this.photolist_open();
+  }
+  if(!this.infowin) {
+    var infowin = $(
+      '<div class="photoPanel">'+
+        '<div style="height:40px; text-align:center;"></div>'+
+        '<div style="height:85px;" class="photos"></div>'+
+        '<div style="height:20px;"></div>'+
+      '</div>').get(0);
+    infowin.titl = infowin.childNodes[0];
+    var imags = infowin.childNodes[1];
+    var ctrl = infowin.childNodes[2];
+
+    var mx = $cbtn('popup','Popup', this.photolist_open, this);
+    $(mx).addClass('right');
+    var pre = $cbtn('prevpg',msg_prevpage, this.infowin_prev_img, this);
+    var nex = $cbtn('nextpg',msg_nextpage, this.infowin_next_img, this);
+    ctrl.appendChild(mx);
+    ctrl.appendChild(pre);
+    ctrl.appendChild(nex);
+
+    var info = $('<span/>').get(0);
+    ctrl.appendChild(info);
+    infowin.info = info;
+
+
+    var cssprop = {position:'absolute', width:75, height:75, display:'none'};
+    for(var i = 0, len = this.photos.length; i < len; ++i) {
+      var photo = this.photos[i];
+      var img = $('<img/>').attr('alt',photo.api.gettitle(photo)).addClass(photo.api.name).css(cssprop).bind('click',this.onPhotoClick).get(0);
+      img.photo=photo;
+      img.marker=this;
+      imags.appendChild(img);
+    }
+    this.infowin=infowin;
+    this.infowin.imags=imags.childNodes;
+  }
+
+  this.infowin_refresh_imglist(0);
+  this.infowin_open();
+}; 
+FGS.Marker.prototype.infowin_refresh_imglist = function(dir) {
+  var imags = this.infowin.imags;
 
   var end = this.currpos + 5;
   if( end > imags.length) end = imags.length;
@@ -399,150 +432,91 @@ FGS.Marker.prototype.refreshImgList = function(dir) {
   }
 
   function disappear() {
-      this.style.display='none';
+    $(this).hide();
   };
 
   var c = this.currpos;
+  var plmst = {left:0,top:0,width:0,height:0};
+  var pleft = {left:8,top:8,width:60,height:60};
+  var pcent = {left:85,top:0,width:75,height:75};
+  var prigt = {left:178,top:8,width:60,height:60};
+  var prmst = {left:245,top:75,width:0,height:0};
+  var speed=200;
   for( var i = 0; i < imags.length; i++ ) {
-    var img=imags[i];
-    var s=img.style;
+    var img=$(imags[i]);
 
-    var attr=null;
     if(dir==0) {
       switch(i) {
-        case c-1: s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; break;
-        case c  : s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; break;
-        case c+1: s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; break;
-        default:  s.display='none'; break;
+        case c-1: img.css(pleft).show(); break;
+        case c  : img.css(pcent).show(); break;
+        case c+1: img.css(prigt).show(); break;
+        default:  img.hide(); break;
       }
     } else if(dir>0) {
       switch(i) {
-        case c-2: s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; attr={left:0,top:0,width:0,height:0}; break;
-        case c-1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:8,top:8,width:60,height:60}; break;
-        case c  : s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; attr={left:85,top:0,width:75,height:75};break;
-        case c+1: s.display='inline'; s.left='245px';s.top='75px';s.width=s.height='0px';  attr={left:178,top:8,width:60,height:60}; break;
-        default:  s.display='none'; break;
+        case c-2: img.css(pleft).show().animate(plmst,speed,null,disappear); break;
+        case c-1: img.css(pcent).show().animate(pleft,speed); break;
+        case c  : img.css(prigt).show().animate(pcent,speed); break;
+        case c+1: img.css(prmst).show().animate(prigt,speed); break;
+        default:  img.hide(); break;
       }
     } else if(dir<0) {
-      var attr=null;
       switch(i) {
-        case c-1: s.display='inline'; s.left='0px';  s.top='0px'; s.width=s.height='0px';  attr={left:8,top:8,width:60,height:60}; break;
-        case c  : s.display='inline'; s.left='8px';  s.top='8px'; s.width=s.height='60px'; attr={left:85,top:0,width:75,height:75}; break;
-        case c+1: s.display='inline'; s.left='85px'; s.top='0px'; s.width=s.height='75px'; attr={left:178,top:8,width:60,height:60};break;
-        case c+2: s.display='inline'; s.left='178px';s.top='8px'; s.width=s.height='60px'; attr={left:245,top:75,width:0,height:0}; break;
-        default:  s.display='none'; break;
-      }
-    }
-    if(attr) {
-      if((i==this.currpos-2) || (i==this.currpos+2)) {
-        $(img).animate(attr,200,null,disappear);
-      } else {
-        $(img).animate(attr,200);
+        case c-1: img.css(plmst).show().animate(pleft,speed); break;
+        case c  : img.css(pleft).show().animate(pcent,speed); break;
+        case c+1: img.css(pcent).show().animate(prigt,speed); break;
+        case c+2: img.css(prigt).show().animate(prmst,speed,null,disappear); break;
+        default:  img.hide(); break;
       }
     }
   }
 
-  this.ctx.titl.innerHTML=imags[this.currpos].alt;
-  this.ctx.info.innerHTML=' ' + (this.currpos+1) + ' of ' + imags.length + ' ';
+  this.infowin.titl.innerHTML=imags[this.currpos].alt;
+  this.infowin.info.innerHTML=' ' + (this.currpos+1) + ' of ' + imags.length + ' ';
 };
-FGS.Marker.prototype.onClick = function() {
-  if(document.body.clientWidth < 280) {
-    return this.onMax();
-  }
-  
-  if(!this.ctx) {
-    var ctx_ = $(
-      '<div class="photoPanel">'+
-        '<div style="height:40px; text-align:center;"></div>'+
-        '<div style="height:85px;" class="photos"></div>'+
-        '<div style="height:20px;"></div>'+
-      '</div>').get(0);
-    ctx_.titl = ctx_.childNodes[0];
-    var imags = ctx_.childNodes[1];
-    var ctrl = ctx_.childNodes[2];
-
-    var mx = $cbtn('popup','Popup', this.onMax, this);
-    mx.className += ' right';
-    var pre = $cbtn('prevpg',msg_prevpage, this.prevImg, this);
-    var nex = $cbtn('nextpg',msg_nextpage, this.nextImg, this);
-    ctrl.appendChild(mx);
-    ctrl.appendChild(pre);
-    ctrl.appendChild(nex);
-
-    var info = $('<span/>').get(0);
-    ctrl.appendChild(info);
-    ctx_.info = info;
-
-
-    for(var i = 0, len = this.photos.length; i < len; ++i) {
-      var photo = this.photos[i];
-      var img = $c('img');
-      img.alt = photo.api.gettitle(photo);
-      img.className = photo.api.name;
-      img.photo=photo;
-      img.marker=this;
-      img.onclick = this.onPhotoClick;
-      img.style.position='absolute';
-      img.style.width=img.style.height='75px';
-      img.style.display='none';
-      imags.appendChild(img);
-    }
-    this.ctx=ctx_;
-    this.ctx.imags=imags.childNodes;
-  }
-
-  this.refreshImgList(0);
-  this.onOpenInfoWindow();
-}; 
-FGS.Marker.prototype.nextImg = function() {
-  if(this.currpos >= this.ctx.imags.length-1) return;
+FGS.Marker.prototype.infowin_next_img = function() {
+  if(this.currpos >= this.infowin.imags.length-1) return;
 
   this.currpos++;
-  this.refreshImgList(1);
+  this.infowin_refresh_imglist(1);
 };
-FGS.Marker.prototype.prevImg = function() {
+FGS.Marker.prototype.infowin_prev_img = function() {
   if( this.currpos <= 0) return;
 
   this.currpos--;
-  this.refreshImgList(-1);
+  this.infowin_refresh_imglist(-1);
 };
 FGS.Marker.prototype.onPhotoClick = function() {
   var w = document.body.clientWidth;
   var h = document.body.clientHeight;
   var overlay = $(
     '<div><div class="mask" style="position:absolute; top:0px; left:0px; width:'+w+'px; height:'+h+'px;">'+
-      '<div style="position:absolute; top:100px; left:'+(w-32)/2+'px;">'+
-      '</div>'+
+      '<div style="position:absolute; top:100px; left:'+(w-32)/2+'px;"></div>'+
     '</div></div>').get(0);
   overlay.firstChild.firstChild.appendChild(imgs['loading']);
 
   var imgPreloader = new Image();
+  imgPreloader.overlay = overlay;
+  imgPreloader.imglnk=this;
   imgPreloader.onload=function(){
     if( this.overlay.removed) return;
 
-    var photopopup = this.imglnk.marker.onPopupPhoto.call(this.imglnk.marker, this.imglnk.photo, this.width, this.height, this.src);
-    this.overlay.firstChild.firstChild.style.display='none';
-    this.overlay.appendChild(photopopup);
-    $(photopopup).fadeTo('slow',1);
+    var photopopup = this.imglnk.marker.photo_showup.call(this.imglnk.marker, this.imglnk.photo, this.width, this.height, this.src);
+    $(this.overlay.firstChild.firstChild).hide();
+    $(photopopup).appendTo(this.overlay).fadeTo('slow',1);
   };
-  overlay.imgPreloader = imgPreloader;
-  imgPreloader.overlay = overlay;
-  imgPreloader.imglnk=this;
   imgPreloader.src = this.photo.api.smallurl(this.photo);
 
-  overlay.onclick=function() {
+  $(overlay).click(function(){
     this.removed=true;
-    if(overlay.childNodes.length==1) {
-      $(overlay.firstChild).fadeTo('normal',0,function(){
-        this.parentNode.parentNode.removeChild(this.parentNode);
-      });
-    } else {
-      $(overlay.childNodes[1]).fadeTo('normal',0,function(){
-        this.parentNode.parentNode.removeChild(this.parentNode);
-      });
+    var fadeobj = overlay.firstChild;
+    if(overlay.childNodes.length>1) {
+      fadeobj = overlay.childNodes[1];
     }
-  };
-  document.body.appendChild(overlay);
+    $(fadeobj).fadeTo('normal',0,function(){
+      this.parentNode.parentNode.removeChild(this.parentNode);
+    });
+  }).appendTo(document.body);
 };
 
 
@@ -557,7 +531,7 @@ FGS.Browser=function() {
   this.pageCurr = 1;
   this.pageTotal = 1;
   this.currZoom = 0;
-  this._lastcenter = null;
+  this.lastcenter = null;
   this.n_call = 0;
   this.timestamp = 0;
   this.currBounds = null;
@@ -596,15 +570,8 @@ FGS.Browser=function() {
   var upd = $cbtn('updown',msg_toggle, this.toggle, this);
   var pre = $cbtn('prev',msg_prevpage, this.prevPage, this);
   var nex = $cbtn('next',msg_nextpage, this.nextPage, this);
-  upd.style.textAlign='right';
-  pre.style.textAlign='left';
-  nex.style.textAlign='left';
   var pageInfo = $('<span/>').get(0);
-  pageInfo.style.textAlign='center';
-  pageDiv.appendChild(upd);
-  pageDiv.appendChild(pre);
-  pageDiv.appendChild(nex);
-  pageDiv.appendChild(pageInfo);
+  $(pageDiv).append(upd).append(pre).append(nex).append(pageInfo);
   pageDiv.pageInfo = pageInfo;
   pre.map = nex.map = this;
 };
@@ -640,11 +607,7 @@ FGS.Browser.prototype.nextPage = function() {
   this.updateview(null, this.pageCurr+1);
 };
 FGS.Browser.prototype.toggle = function() {
-  if(settingDiv.style.display=='none') {
-    settingDiv.style.display='block';
-  } else {
-    settingDiv.style.display='none';
-  }
+  $(settingDiv).toggle();
   onsize();
 };
 FGS.Browser.prototype.onzoomend = function(oldLevel,newLevel) {
@@ -676,7 +639,6 @@ FGS.Browser.prototype.refreshData = function(bound) {
   n-=hig/5;
   s+=hig/5;
 
-  
   var year = $('#fgs_select_year').get(0).value;
   var month = $('#fgs_select_month').get(0).value;
   var sort = $('#fgs_select_sort').get(0).value;
@@ -689,16 +651,11 @@ FGS.Browser.prototype.refreshData = function(bound) {
     min_date = year+'-'+month+'-01'; max_date = year+'-'+month+'-31';
   }
 
-  var points = [];
-  points.push(new GLatLng(n,e));
-  points.push(new GLatLng(n,w));
-  points.push(new GLatLng(s,w));
-  points.push(new GLatLng(s,e));
-  points.push(new GLatLng(n,e));
+  var points = [new GLatLng(n,e),new GLatLng(n,w),new GLatLng(s,w),new GLatLng(s,e),new GLatLng(n,e)];
 
   this.n_call = 0;
   this.timestamp = new Date().getTime();
-  if(_trim(searchtxt)) {
+  if($.trim(searchtxt)) {
     flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n, text:_trim(searchtxt), min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, this.timestamp, [points, 2]);
   } else {
     flickr.callapi({method: 'flickr.photos.search',  extras:'geo,date_taken,owner_name,icon_server', bbox:w+','+s+','+e+','+n,                        min_taken_date:min_date, max_taken_date:max_date, sort:sort, page:this.pageCurr, per_page:PER_PAGE}, this, this.search_callback, this.timestamp, [points, 2]);
@@ -728,7 +685,7 @@ FGS.Browser.prototype.search_callback = function(api, photos, total, timestamp, 
   try {
     this.n_call++;
     if(this.n_call==1) {
-      this.currBounds = new Array();
+      this.currBounds = [];
       this.clearOverlays();
       this.addOverlay(new GPolyline(points, '#0000FF', 1, .3));
       this.total = 0;
@@ -786,7 +743,7 @@ FGS.Browser.prototype.update_photos = function(api, photos, points) {
 
     if(!isMerged) {
       var b = new GLatLngBounds(new GLatLng(pos.lat()-delta, pos.lng()-delta), new GLatLng(pos.lat()+delta, pos.lng()+delta));
-      b.photos=new Array();
+      b.photos=[];
       b.photos.push(photo);
       temp_bounds.push(b);
     }
@@ -836,24 +793,19 @@ $(window).resize(onsize);
 
 // mask layer
 function mask(gmap) {
+  var p = document.body;
   if(!mask.layer) {
     mask.layer = $(
       '<div class="mask" style="position:absolute; top:0px; left:0px; cursor:wait; display:none;">'+
         '<div style="position:absolute; top:100px;">'+
           '<img src="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/loading.gif"/>'+
         '</div>'+
-      '</div>').get(0);
-    mapDiv.appendChild(mask.layer);
+      '</div>').appendTo(p).get(0);
   }
-  var w = mapDiv.clientWidth;
-  var h = mapDiv.clientHeight;
-  mask.layer.style.width = w+'px';
-  mask.layer.style.height = h+'px';
-  mask.layer.firstChild.style.left = (w-32)/2 + 'px';
-  mask.layer.style.display = 'block';
+  $(mask.layer).width(p.clientWidth).height(p.clientHeight).show().children().css('left',(p.clientWidth-32)/2);
 };
 function unmask() {
-  mask.layer.style.display = 'none';
+  $(mask.layer).hide();
 };
 
 
@@ -870,28 +822,30 @@ ExtBrowser.prototype.updateviewCallback = function(bound) {
   if(!bound) {
     bound = this.getBounds();
   }
-  this._lastcenter = bound.getCenter();
+  this.lastcenter = bound.getCenter();
 
-  prefs.set('lat', this._lastcenter.lat()+'');
-  prefs.set('lng', this._lastcenter.lng()+'');
+  prefs.set('lat', this.lastcenter.lat()+'');
+  prefs.set('lng', this.lastcenter.lng()+'');
   prefs.set('zoom', this.currZoom+'');
 
   this.refreshData(bound);
 };
 ExtBrowser.prototype.ondragend = function() {
+  var map = this;
   var bound = this.getBounds();
   var center = bound.getCenter();
   var span   = bound.toSpan();
 
-  if(this._lastcenter) {
-    var deltaX  = Math.abs(center.lng() - this._lastcenter.lng());
-    var deltaY  = Math.abs(center.lat() - this._lastcenter.lat());
+  if(map.lastcenter) {
+    var deltaX  = Math.abs(center.lng() - map.lastcenter.lng());
+    var deltaY  = Math.abs(center.lat() - map.lastcenter.lat());
     var boundsX = span.lng();
     var boundsY = span.lat();
-    if ((deltaX < 0.3*boundsX) && (deltaY < 0.3*boundsY)) {      return;
+    if ((deltaX < 0.3*boundsX) && (deltaY < 0.3*boundsY)) {
+      return;
     }
   }
-  this.updateview(bound);
+  map.updateview(bound);
 };
 ExtBrowser.prototype.clearPanel = function() {
 };
@@ -908,10 +862,10 @@ function FPhotoMarkerGadget() {
 };
 var ExtMarker = FPhotoMarkerGadget;
 $extend(ExtMarker, FGS.Marker);
-ExtMarker.prototype.onOpenInfoWindow = function() {
-  this.openInfoWindow(this.ctx);
+ExtMarker.prototype.infowin_open = function() {
+  this.openInfoWindow(this.infowin);
 };
-ExtMarker.prototype.onPopupPhoto = function(photo, width, height, src) {
+ExtMarker.prototype.photo_showup = function(photo, width, height, src) {
   var w = width+20;
   var lef = (document.body.clientWidth-w)/2;
   if(lef < 0) lef=0;
@@ -934,7 +888,7 @@ ExtMarker.prototype.onPopupPhoto = function(photo, width, height, src) {
     '</div>';
   return $(photoctx).get(0);
 };
-ExtMarker.prototype.onMax = function() {
+ExtMarker.prototype.photolist_open = function() {
   mapDiv.gmap.closeInfoWindow();
   if(!this.popupCtx) {
     var popup = $(
@@ -947,23 +901,17 @@ ExtMarker.prototype.onMax = function() {
     var photoContainer = popup.childNodes[1];
     var photoPanel = photoContainer.firstChild;
     var closebtn = $cbtn('close','Close',popup.onclose,popup);
-    closebtn.className += ' right';
+    $(closebtn).addClass('right');
     titlePanel.appendChild(closebtn);
 
-    popup.style.width=(document.body.clientWidth-20)+'px';
-    popup.style.height=(document.body.clientHeight-20)+'px';
-    photoContainer.style.height=(document.body.clientHeight-50)+'px';
+    $(popup).width(document.body.clientWidth-20).height(document.body.clientHeight-20);
+    $(photoContainer).height(document.body.clientHeight-50);
 
     for(var i = 0, len = this.photos.length; i < len; ++i) {
       var photo = this.photos[i];
-      var img = $c('img');
-      img.alt = photo.api.gettitle(photo);
-      img.className = photo.api.name;
+      var img = $('<img/>').width(75).height(75).attr('alt',photo.api.gettitle(photo)).attr('src',photo.api.iconurl(photo)).addClass(photo.api.name).bind('click',this.onPhotoClick).get(0);
       img.photo=photo;
       img.marker=this;
-      img.src=img.photo.api.iconurl(img.photo);
-      img.onclick = this.onPhotoClick;
-      img.style.width=img.style.height='75px';
       photoPanel.appendChild(img);
     }
     this.popupCtx = popup;
