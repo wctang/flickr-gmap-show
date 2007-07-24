@@ -7,6 +7,7 @@ title_url="http://code.google.com/p/flickr-gmap-show/" screenshot="http://flickr
 thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_gadget_thumb.png" height="400" scrolling="true" category="tools">
   <Locale messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-en.xml"/>
   <Locale lang="zh-TW" messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-zh-tw.xml"/>
+  <Require feature="analytics"/>
   <Require feature="setprefs"/>
   <Require feature="minimessage"/>
 </ModulePrefs>
@@ -123,9 +124,10 @@ a.btn img {
 <div id="settingDiv" style="display:none;"></div>
 </div>
 
-<script type="text/javascript" src="http://maps.google.com/maps?file=api&amp;v=2.x" type="text/javascript"></script>
+<script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2.x" type="text/javascript"></script>
 <script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.3.1.pack.js"></script>
 <script type="text/javascript">
+var _uacct = 'UA-359113-4';
 
 var msg = new _IG_MiniMessage(__MODULE_ID__);
 var prefs = new _IG_Prefs(__MODULE_ID__);
@@ -594,6 +596,7 @@ FGS.Browser.prototype.updateview = function(bound, currPage, level) {
 };
 FGS.Browser.prototype.changeSetting = function() {
   this.map.updateview();
+  _IG_Analytics(_uacct, '/fgs/gadget/changeSetting');
   return false;
 };
 FGS.Browser.prototype.prevPage = function() {
@@ -957,6 +960,8 @@ FGS.init=function() {
   gmap.addControl(new GSmallZoomControl());
   gmap.addControl(new GMapTypeControl());
   gmap.setCenter(mapCenterLatLng, zoom);
+  
+  _IG_Analytics(_uacct, '/fgs/gadget/init');
 };
 
 _IG_RegisterOnloadHandler(FGS.init);
