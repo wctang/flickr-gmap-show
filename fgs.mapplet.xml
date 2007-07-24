@@ -8,6 +8,7 @@ thumbnail="http://flickr-gmap-show.googlecode.com/svn/trunk/pics/fgs_mapplet_thu
   <Locale messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-en.xml"/>
   <Locale lang="zh-TW" messages="http://flickr-gmap-show.googlecode.com/svn/trunk/msg-zh-tw.xml"/>
   <Require feature="sharedmap"/>
+  <Require feature="analytics"/>
   <Require feature="setprefs"/>
   <Require feature="minimessage"/>
 </ModulePrefs>
@@ -106,6 +107,7 @@ a.btn img {
 
 <script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.3.1.pack.js"></script>
 <script type="text/javascript">
+var _uacct = 'UA-359113-4';
 
 var msg = new _IG_MiniMessage(__MODULE_ID__);
 var prefs = new _IG_Prefs(__MODULE_ID__);
@@ -574,6 +576,7 @@ FGS.Browser.prototype.updateview = function(bound, currPage, level) {
 };
 FGS.Browser.prototype.changeSetting = function() {
   this.map.updateview();
+  _IG_Analytics(_uacct, '/fgs/mapplet/changeSetting');
   return false;
 };
 FGS.Browser.prototype.prevPage = function() {
@@ -926,6 +929,7 @@ FGS.init=function() {
       m.updateview(null, null, z);
     }
   });
+  _IG_Analytics(_uacct, '/fgs/mapplet/init');
 };
 
 _IG_RegisterOnloadHandler(FGS.init);
