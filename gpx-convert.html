@@ -1,0 +1,667 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title></title>
+<script type="text/javascript">//<![CDATA[
+document.oldwrite = document.write;
+document.write = function(str) {
+  if(document.oldwrite && window.GLoad && (typeof window.GLoad == 'function')) {
+    eval('var gloadstr=window.GLoad.toString(); gloadstr=gloadstr.replace(/\\n/,""); gloadstr=gloadstr.replace(/^\\s*function\\s*GLoad\\s*\\(\\)\\s*{/,""); gloadstr=gloadstr.replace(/}\\s*$/,""); gloadstr=gloadstr.replace(/GValidateKey\\("[0-9a-z]*"\\)/,"true"); window.GLoad=new Function(gloadstr);');
+    document.write=document.oldwrite;
+  }
+  document.oldwrite(str);
+};
+
+function submitform(form) {
+try {
+
+  if(!form.photoset_id.value) {
+    alert('must set photoset_id');
+    return;
+  }
+
+  var res = null;
+  if(form.gpx.value) {
+    var jgpx = $(GXml.parse(form.gpx.value));
+  
+    res = '{trk:[';
+    $.each(jgpx.find('trk'),function(i,trk){
+      var jtrk = $(trk);
+      res += '{trkseg:[';
+      $.each(jtrk.children('trkseg'),function(j,trkseg){
+        var jtrkseg = $(trkseg);
+        if(j!=0) res+=',';
+        res += '{trkpt:[';
+        $.each(jtrkseg.children('trkpt'),function(k,trkpt){
+          if(k!=0) res+=',';
+          var jtrkpt = $(trkpt);
+          res += '['+jtrkpt.attr('lat')+','+jtrkpt.attr('lon')+']';
+        });
+        res += ']}';
+      });
+      res += ']}';
+    });
+    res += ']}';
+
+    res = res.replace(/{/g,'(').replace(/}/g,')').replace(/\[/g,'$').replace(/\]/g,';');
+  }
+
+  var loc = 'http://flickr-gmap-show.googlecode.com/svn/trunk/flickr-gmap-photoset.html?photoset_id='+form.photoset_id.value;
+  if(form.no_control.checked) {
+    loc += '&no_control=1';
+  }
+  if(res) {
+    loc += '&gpx='+encodeURI(res);
+  }
+  location.href=loc;
+} finally {
+  return false;
+}
+};
+//]]>
+</script>
+<script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2.x&key=ABQIAAAA5iyLqLpUbk1qBe2volmsqxQh1uCj5d-3TWVrUZG2gdqg70DksRQmyqOhA768P8Rr3I-QKGf0waEoCw"></script>
+<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.3.1.pack.js"></script>
+</head>
+<body>
+<form onsubmit="return submitform(this);">
+    photoset_id: <input name="photoset_id" type="text" value="72157600408114274"/><br />
+    no map control:<input type="checkbox" name="no_control"/><br />
+    gpx:<br /><textarea name="gpx" cols="120" rows="30">
+<gpx
+   version="1.1"
+   creator="PhoGPXion"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns="http://www.topografix.com/GPX/1/1"
+   xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" >
+   <metadata>
+      <name>GBG.gpx</name>
+      <author>
+         <name>PhoGPXion</name>
+      </author>
+      <time>2007-05-19T11:51:07+01:00</time>
+   </metadata>
+
+   <trk>
+      <name>G?teborg </name>
+      <src>HOLUX </src>
+      <trkseg>
+         <trkpt
+            lat="57.668144"
+            lon="11.923362">
+            <ele>40.4</ele>
+            <time>2007-05-19T09:51:21Z</time>
+
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 1</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>08</sat>
+         </trkpt>
+
+         <trkpt
+            lat="57.670555"
+            lon="11.923334">
+            <ele>53.3</ele>
+            <time>2007-05-19T09:54:01Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 2</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.672726"
+            lon="11.924297">
+            <ele>51.7</ele>
+            <time>2007-05-19T09:54:36Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 3</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.674202"
+            lon="11.925235">
+            <ele>41.3</ele>
+
+            <time>2007-05-19T09:55:11Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 4</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.675087"
+            lon="11.925597">
+            <ele>40.1</ele>
+            <time>2007-05-19T09:55:46Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 5</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67693"
+            lon="11.933687">
+            <ele>18.6</ele>
+            <time>2007-05-19T09:56:21Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 6</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67962"
+            lon="11.936363">
+            <ele>20.0</ele>
+
+            <time>2007-05-19T09:56:56Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 7</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.680767"
+            lon="11.942791">
+            <ele>18.7</ele>
+            <time>2007-05-19T09:57:31Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 8</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.681477"
+            lon="11.947433">
+            <ele>11.8</ele>
+            <time>2007-05-19T09:58:06Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 9</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.685"
+            lon="11.951868">
+            <ele>14.1</ele>
+
+            <time>2007-05-19T09:58:41Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 10</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.686024"
+            lon="11.953096">
+            <ele>21.3</ele>
+            <time>2007-05-19T09:59:16Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 11</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.684723"
+            lon="11.955727">
+            <ele>28.7</ele>
+            <time>2007-05-19T09:59:51Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 12</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.683544"
+            lon="11.960473">
+            <ele>47.0</ele>
+
+            <time>2007-05-19T10:00:26Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 13</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>08</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.68488"
+            lon="11.964039">
+            <ele>48.1</ele>
+            <time>2007-05-19T10:01:01Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 14</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.688023"
+            lon="11.966925">
+            <ele>57.1</ele>
+            <time>2007-05-19T10:01:36Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 15</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.689915"
+            lon="11.970208">
+            <ele>56.3</ele>
+
+            <time>2007-05-19T10:02:11Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 16</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.689896"
+            lon="11.973186">
+            <ele>47.0</ele>
+            <time>2007-05-19T10:02:51Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 17</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.693264"
+            lon="11.973637">
+            <ele>40.8</ele>
+            <time>2007-05-19T10:04:01Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 18</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>08</sat>
+         </trkpt>
+         <trkpt
+            lat="57.694027"
+            lon="11.974909">
+            <ele>38.3</ele>
+
+            <time>2007-05-19T10:04:36Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 19</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.695557"
+            lon="11.976588">
+            <ele>30.9</ele>
+            <time>2007-05-19T10:05:11Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 20</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.697536"
+            lon="11.979711">
+            <ele>20.6</ele>
+            <time>2007-05-19T10:05:51Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 21</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.698284"
+            lon="11.981623">
+            <ele>16.6</ele>
+
+            <time>2007-05-19T10:06:26Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 22</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.69689"
+            lon="11.985845">
+            <ele>44.3</ele>
+            <time>2007-05-19T10:07:36Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 23</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69632"
+            lon="11.987597">
+            <ele>16.3</ele>
+            <time>2007-05-19T10:08:16Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 24</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69717"
+            lon="11.990354">
+            <ele>10.9</ele>
+
+            <time>2007-05-19T10:09:31Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 25</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.697277"
+            lon="11.991673">
+            <ele>15.5</ele>
+            <time>2007-05-19T10:10:11Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 26</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69755"
+            lon="11.995384">
+            <ele>7.4</ele>
+            <time>2007-05-19T10:10:46Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 27</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.697865"
+            lon="11.998089">
+            <ele>9.3</ele>
+
+            <time>2007-05-19T10:11:21Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 28</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.698402"
+            lon="12.000703">
+            <ele>9.1</ele>
+            <time>2007-05-19T10:11:56Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 29</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.699326"
+            lon="12.007945">
+            <ele>25.2</ele>
+            <time>2007-05-19T10:12:31Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 30</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.700676"
+            lon="12.015773">
+            <ele>16.9</ele>
+
+            <time>2007-05-19T10:13:06Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 31</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.702225"
+            lon="12.022689">
+            <ele>18.8</ele>
+            <time>2007-05-19T10:13:41Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 32</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.70606"
+            lon="12.024774">
+            <ele>20.3</ele>
+            <time>2007-05-19T10:14:21Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 2 WayPoint 33</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>11</sat>
+         </trkpt>
+         <trkpt
+            lat="57.71007"
+            lon="12.023822">
+            <ele>19.5</ele>
+
+            <time>2007-05-19T10:14:56Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 34</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>10</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.71146"
+            lon="12.025161">
+            <ele>28.9</ele>
+            <time>2007-05-19T10:15:31Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 2 WayPoint 35</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+      </trkseg>
+      <trkseg>
+         <trkpt
+            lat="57.71146"
+            lon="12.025136">
+            <ele>36.6</ele>
+
+            <time>2007-05-19T10:31:36Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 1</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.71257"
+            lon="12.024079">
+            <ele>33.9</ele>
+            <time>2007-05-19T10:32:46Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 2</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>09</sat>
+         </trkpt>
+         <trkpt
+            lat="57.716286"
+            lon="12.025386">
+            <ele>24.5</ele>
+            <time>2007-05-19T10:33:21Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 3 WayPoint 3</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+         </trkpt>
+         <trkpt
+            lat="57.717743"
+            lon="12.025353">
+            <ele>26.2</ele>
+
+            <time>2007-05-19T10:33:56Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 4</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.71856"
+            lon="12.020772">
+            <ele>30.2</ele>
+            <time>2007-05-19T10:34:31Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 5</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>08</sat>
+         </trkpt>
+         <trkpt
+            lat="57.717274"
+            lon="12.01367">
+            <ele>26.7</ele>
+            <time>2007-05-19T10:35:06Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 3 WayPoint 6</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.716736"
+            lon="12.006569">
+            <ele>18.6</ele>
+
+            <time>2007-05-19T10:35:41Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 7</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.716652"
+            lon="12.004447">
+            <ele>13.2</ele>
+            <time>2007-05-19T10:36:16Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 8</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>08</sat>
+         </trkpt>
+         <trkpt
+            lat="57.715157"
+            lon="12.003018">
+            <ele>12.4</ele>
+            <time>2007-05-19T10:36:51Z</time>
+            <geoidheight>M</geoidheight>
+
+            <name>G?teborg  Segment 3 WayPoint 9</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>08</sat>
+         </trkpt>
+         <trkpt
+            lat="57.7134"
+            lon="12.000221">
+            <ele>15.5</ele>
+
+            <time>2007-05-19T10:38:36Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 10</name>
+            <src>HOLUX </src>
+            <fix>3d</fix>
+            <sat>09</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.70974"
+            lon="11.998095">
+            <ele>11.2</ele>
+            <time>2007-05-19T10:39:11Z</time>
+            <geoidheight>M</geoidheight>
+            <name>G?teborg  Segment 3 WayPoint 11</name>
+            <src>HOLUX </src>
+
+            <fix>3d</fix>
+            <sat>10</sat>
+         </trkpt>
+      </trkseg>
+   </trk>
+</gpx>
+</textarea><br />
+    <input type="submit"/>
+</form>
+</body>
+</html>
