@@ -555,7 +555,7 @@ BrowseMap.prototype.regroupphotos=function() {
       var photo=photos[i];
       totalbound.extend(photo.pos);
     }
-    
+
     for (var i=0,len=this.tracks.length; i<len; i++) {
       var track = this.tracks[i];
       for (var j=0,len2=track.length; j<len2; j++) {
@@ -567,16 +567,24 @@ BrowseMap.prototype.regroupphotos=function() {
     this.setCenter(totalbound.getCenter(), zoom);
     return;
   }
-  
-  this.clearOverlays();
 
-  for(var i = 0,len = this.tracks.length; i<len; ++i) {
-    this.addOverlay(new window.GPolyline(this.tracks[i]));
+  if(this.tracks.length > 0) {
+    for(var i=0,len=this.tracks.length; i<len; ++i) {
+      this.addOverlay(new window.GPolyline(this.tracks[i]));
+    }
+    this.tracks = [];
   }
   
+  //this.clearOverlays();
+  if(this.temp_bounds && this.temp_bounds.length) {
+    for (var i=0,len=this.temp_bounds.length; i<len ; i++) {
+      this.removeOverlay(this.temp_bounds[i].maker);
+    }
+  }
+
   var delta=deltas[this.getZoom()];
   
-  var temp_bounds=[];
+  var temp_bounds=this.temp_bounds=[];
   for (var i=0,len=photos.length; i<len; i++) {
     var photo=photos[i];
     var pos = photo.pos;
