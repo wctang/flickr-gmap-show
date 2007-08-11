@@ -450,7 +450,7 @@ var BrowseMap=window.BrowseMap=function(container, opts){
     var cb = 'cb_' + (new Date()).getTime();
     var gmap = this;
     window[cb] = function(){gmap.gpxurl_callback.apply(gmap,arguments)};
-    var path = 'http://pipes.yahoo.com/pipes/pipe.run?_id=lv1f5bpH3BG5jwzq8TxBKg&_render=json&_callback='+cb+'&url='+decodeURIComponent(this.gpxurl);
+    var path = 'http://pipes.yahoo.com/pipes/pipe.run?_id=lv1f5bpH3BG5jwzq8TxBKg&_render=json&_callback='+cb+'&url='+(this.gpxurl);
     loadscript(path);
   }
 
