@@ -1,0 +1,1138 @@
+<?xml version="1.0"?>
+<gpx
+   version="1.1"
+   creator="PhoGPXion"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns="http://www.topografix.com/GPX/1/1"
+   xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" >
+   <metadata>
+      <name>TISDAG.gpx</name>
+      <author>
+         <name>PhoGPXion</name>
+      </author>
+      <time>2007-05-22T10:07:24+01:00</time>
+   </metadata>
+
+   <trk>
+      <name>Till stan</name>
+      <src>HOLUX GPSlim236</src>
+      <trkseg>
+         <trkpt
+            lat="57.66875"
+            lon="11.923887">
+            <ele>29.1</ele>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 1</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+         </trkpt>
+         <trkpt
+            lat="57.66903"
+            lon="11.924716">
+            <ele>31.6</ele>
+
+            <time>2007-05-22T08:09:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 2</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.669514"
+            lon="11.924605">
+            <ele>38.7</ele>
+            <time>2007-05-22T08:09:50Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 3</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.670017"
+            lon="11.924813">
+            <ele>31.7</ele>
+            <time>2007-05-22T08:10:00Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 4</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.670593"
+            lon="11.925031">
+            <ele>22.9</ele>
+
+            <time>2007-05-22T08:10:10Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 5</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.67118"
+            lon="11.925534">
+            <ele>28.8</ele>
+            <time>2007-05-22T08:10:20Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 6</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.671875"
+            lon="11.92622">
+            <ele>39.8</ele>
+            <time>2007-05-22T08:10:30Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 7</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.672257"
+            lon="11.927016">
+            <ele>43.4</ele>
+
+            <time>2007-05-22T08:10:40Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 8</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.671703"
+            lon="11.928103">
+            <ele>37.8</ele>
+            <time>2007-05-22T08:10:50Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 9</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.671425"
+            lon="11.929041">
+            <ele>36.6</ele>
+            <time>2007-05-22T08:11:00Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 10</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.671528"
+            lon="11.929987">
+            <ele>29.8</ele>
+
+            <time>2007-05-22T08:11:10Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 11</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.672276"
+            lon="11.930556">
+            <ele>31.4</ele>
+            <time>2007-05-22T08:11:20Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 12</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67269"
+            lon="11.930944">
+            <ele>31.7</ele>
+            <time>2007-05-22T08:11:25Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 13</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67335"
+            lon="11.931569">
+            <ele>22.2</ele>
+
+            <time>2007-05-22T08:11:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 14</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.673855"
+            lon="11.93127">
+            <ele>24.1</ele>
+            <time>2007-05-22T08:11:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 15</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>04</sat>
+         </trkpt>
+         <trkpt
+            lat="57.674515"
+            lon="11.930634">
+            <ele>18.1</ele>
+            <time>2007-05-22T08:11:55Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 16</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+         </trkpt>
+         <trkpt
+            lat="57.674965"
+            lon="11.93023">
+            <ele>29.1</ele>
+
+            <time>2007-05-22T08:12:00Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 17</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.675713"
+            lon="11.92982">
+            <ele>35.7</ele>
+            <time>2007-05-22T08:12:10Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 18</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>2d</fix>
+            <sat>03</sat>
+         </trkpt>
+         <trkpt
+            lat="57.676163"
+            lon="11.929364">
+            <ele>33.0</ele>
+            <time>2007-05-22T08:12:22Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 19</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>1</fix>
+            <sat>04</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67686"
+            lon="11.928781">
+            <ele>32.9</ele>
+
+            <time>2007-05-22T08:12:30Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 20</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>04</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.677433"
+            lon="11.928529">
+            <ele>35.6</ele>
+            <time>2007-05-22T08:12:40Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 21</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67745"
+            lon="11.929792">
+            <ele>18.5</ele>
+            <time>2007-05-22T08:12:55Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 22</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.677345"
+            lon="11.930953">
+            <ele>16.2</ele>
+
+            <time>2007-05-22T08:13:05Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 23</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.677258"
+            lon="11.932034">
+            <ele>14.7</ele>
+            <time>2007-05-22T08:13:15Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 24</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.677555"
+            lon="11.93298">
+            <ele>19.5</ele>
+            <time>2007-05-22T08:13:30Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 25</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.677883"
+            lon="11.934116">
+            <ele>21.4</ele>
+
+            <time>2007-05-22T08:13:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 26</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.678387"
+            lon="11.934655">
+            <ele>28.3</ele>
+            <time>2007-05-22T08:13:55Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 27</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.678993"
+            lon="11.935037">
+            <ele>29.8</ele>
+            <time>2007-05-22T08:14:05Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 28</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67948"
+            lon="11.935321">
+            <ele>30.1</ele>
+
+            <time>2007-05-22T08:14:15Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 29</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.679565"
+            lon="11.936187">
+            <ele>35.1</ele>
+            <time>2007-05-22T08:14:30Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 30</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.679672"
+            lon="11.937196">
+            <ele>23.1</ele>
+            <time>2007-05-22T08:14:40Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 31</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.679775"
+            lon="11.938294">
+            <ele>21.3</ele>
+
+            <time>2007-05-22T08:14:50Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 32</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.679897"
+            lon="11.939427">
+            <ele>21.4</ele>
+            <time>2007-05-22T08:15:00Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 33</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.67988"
+            lon="11.940489">
+            <ele>24.1</ele>
+            <time>2007-05-22T08:15:10Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 34</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.680157"
+            lon="11.941456">
+            <ele>29.0</ele>
+
+            <time>2007-05-22T08:15:25Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 35</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.680523"
+            lon="11.942081">
+            <ele>32.7</ele>
+            <time>2007-05-22T08:15:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 36</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.680836"
+            lon="11.942837">
+            <ele>39.5</ele>
+            <time>2007-05-22T08:15:45Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 37</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.680904"
+            lon="11.944041">
+            <ele>22.8</ele>
+
+            <time>2007-05-22T08:15:55Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 38</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.680836"
+            lon="11.945078">
+            <ele>21.2</ele>
+            <time>2007-05-22T08:16:05Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 39</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.680557"
+            lon="11.945886">
+            <ele>19.3</ele>
+            <time>2007-05-22T08:16:15Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 40</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.68106"
+            lon="11.946856">
+            <ele>21.2</ele>
+
+            <time>2007-05-22T08:16:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 41</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.681545"
+            lon="11.947578">
+            <ele>15.8</ele>
+            <time>2007-05-22T08:16:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 42</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.682083"
+            lon="11.948336">
+            <ele>12.4</ele>
+            <time>2007-05-22T08:16:55Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 43</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.68262"
+            lon="11.94905">
+            <ele>15.5</ele>
+
+            <time>2007-05-22T08:17:05Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 44</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.68323"
+            lon="11.949835">
+            <ele>23.9</ele>
+            <time>2007-05-22T08:17:15Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 45</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.68377"
+            lon="11.950475">
+            <ele>27.3</ele>
+            <time>2007-05-22T08:17:25Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 46</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.684254"
+            lon="11.951055">
+            <ele>24.1</ele>
+
+            <time>2007-05-22T08:17:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 47</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.684776"
+            lon="11.95166">
+            <ele>25.8</ele>
+            <time>2007-05-22T08:17:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 48</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.685246"
+            lon="11.952224">
+            <ele>26.4</ele>
+            <time>2007-05-22T08:17:55Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 49</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.685715"
+            lon="11.952829">
+            <ele>21.6</ele>
+
+            <time>2007-05-22T08:18:05Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 50</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.68611"
+            lon="11.9533005">
+            <ele>25.2</ele>
+            <time>2007-05-22T08:18:16Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 51</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>1</fix>
+            <sat>03</sat>
+         </trkpt>
+         <trkpt
+            lat="57.686737"
+            lon="11.953134">
+            <ele>19.1</ele>
+            <time>2007-05-22T08:18:30Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 52</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.687363"
+            lon="11.9531555">
+            <ele>17.8</ele>
+
+            <time>2007-05-22T08:18:40Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 53</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.687954"
+            lon="11.953216">
+            <ele>15.5</ele>
+            <time>2007-05-22T08:18:50Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 54</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.68849"
+            lon="11.953572">
+            <ele>15.5</ele>
+            <time>2007-05-22T08:19:00Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 55</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.68889"
+            lon="11.953114">
+            <ele>14.1</ele>
+
+            <time>2007-05-22T08:19:10Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 56</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.689358"
+            lon="11.953161">
+            <ele>15.0</ele>
+            <time>2007-05-22T08:19:20Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 57</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.690086"
+            lon="11.953392">
+            <ele>14.8</ele>
+            <time>2007-05-22T08:19:35Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 58</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.6908"
+            lon="11.953648">
+            <ele>57.6</ele>
+
+            <time>2007-05-22T08:19:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 59</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.69125"
+            lon="11.953991">
+            <ele>48.3</ele>
+            <time>2007-05-22T08:19:55Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 60</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.691772"
+            lon="11.954464">
+            <ele>50.1</ele>
+            <time>2007-05-22T08:20:05Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 61</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.692154"
+            lon="11.954978">
+            <ele>48.4</ele>
+
+            <time>2007-05-22T08:20:15Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 62</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.692554"
+            lon="11.955822">
+            <ele>27.1</ele>
+            <time>2007-05-22T08:21:00Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 63</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.693127"
+            lon="11.956451">
+            <ele>34.8</ele>
+            <time>2007-05-22T08:21:15Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 64</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.693752"
+            lon="11.956927">
+            <ele>74.4</ele>
+
+            <time>2007-05-22T08:21:25Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 65</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.694324"
+            lon="11.95745">
+            <ele>91.5</ele>
+            <time>2007-05-22T08:21:35Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 66</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69476"
+            lon="11.95768">
+            <ele>82.1</ele>
+            <time>2007-05-22T08:21:45Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 67</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.695297"
+            lon="11.957819">
+            <ele>38.0</ele>
+
+            <time>2007-05-22T08:22:15Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 68</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.697014"
+            lon="11.958838">
+            <ele>323.2</ele>
+            <time>2007-05-22T08:22:25Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 69</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.697693"
+            lon="11.959323">
+            <ele>403.5</ele>
+            <time>2007-05-22T08:22:35Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 70</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.698284"
+            lon="11.960063">
+            <ele>474.4</ele>
+
+            <time>2007-05-22T08:22:45Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 71</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.698734"
+            lon="11.960586">
+            <ele>491.1</ele>
+            <time>2007-05-22T08:22:55Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 72</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69887"
+            lon="11.961586">
+            <ele>309.6</ele>
+            <time>2007-05-22T08:23:45Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 73</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69877"
+            lon="11.962469">
+            <ele>292.0</ele>
+
+            <time>2007-05-22T08:23:55Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 74</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>05</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.69877"
+            lon="11.963403">
+            <ele>269.2</ele>
+            <time>2007-05-22T08:24:10Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 75</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69887"
+            lon="11.964442">
+            <ele>248.5</ele>
+            <time>2007-05-22T08:24:20Z</time>
+            <geoidheight>40.2</geoidheight>
+
+            <name>Till stan Segment 1 WayPoint 76</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+         </trkpt>
+         <trkpt
+            lat="57.698925"
+            lon="11.965504">
+            <ele>230.1</ele>
+
+            <time>2007-05-22T08:24:30Z</time>
+            <geoidheight>40.2</geoidheight>
+            <name>Till stan Segment 1 WayPoint 77</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>06</sat>
+
+         </trkpt>
+      </trkseg>
+   </trk>
+   <trk>
+      <name>Whereever</name>
+      <src>HOLUX GPSlim236</src>
+      <trkseg>
+         <trkpt
+            lat="57.699184"
+            lon="11.9710045">
+
+            <ele>24.8</ele>
+            <time>2007-05-22T08:57:33Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 1</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+
+            <sat>05</sat>
+         </trkpt>
+         <trkpt
+            lat="57.69988"
+            lon="11.972119">
+            <ele>22.2</ele>
+            <time>2007-05-22T08:58:18Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 2</name>
+
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.700367"
+            lon="11.9734545">
+            <ele>14.4</ele>
+            <time>2007-05-22T08:58:33Z</time>
+
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 3</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+
+         <trkpt
+            lat="57.700832"
+            lon="11.974513">
+            <ele>15.5</ele>
+            <time>2007-05-22T08:58:53Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 4</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.70141"
+            lon="11.973344">
+            <ele>33.1</ele>
+            <time>2007-05-22T08:59:13Z</time>
+            <geoidheight>40.1</geoidheight>
+
+            <name>Whereever Segment 1 WayPoint 5</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.70205"
+            lon="11.972332">
+            <ele>35.7</ele>
+
+            <time>2007-05-22T08:59:38Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 6</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.70273"
+            lon="11.971614">
+            <ele>13.1</ele>
+            <time>2007-05-22T08:59:53Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 7</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.703125"
+            lon="11.971071">
+            <ele>7.8</ele>
+            <time>2007-05-22T09:00:03Z</time>
+            <geoidheight>40.1</geoidheight>
+
+            <name>Whereever Segment 1 WayPoint 8</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.70373"
+            lon="11.970221">
+            <ele>7.7</ele>
+
+            <time>2007-05-22T09:00:18Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 9</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.704323"
+            lon="11.969388">
+            <ele>9.7</ele>
+            <time>2007-05-22T09:00:33Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 10</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.70495"
+            lon="11.968752">
+            <ele>27.3</ele>
+            <time>2007-05-22T09:00:48Z</time>
+            <geoidheight>40.1</geoidheight>
+
+            <name>Whereever Segment 1 WayPoint 11</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+         <trkpt
+            lat="57.705696"
+            lon="11.968291">
+            <ele>31.9</ele>
+
+            <time>2007-05-22T09:01:03Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 12</name>
+            <src>HOLUX GPSlim236</src>
+            <fix>3d</fix>
+            <sat>07</sat>
+
+         </trkpt>
+         <trkpt
+            lat="57.706528"
+            lon="11.967959">
+            <ele>23.6</ele>
+            <time>2007-05-22T09:01:23Z</time>
+            <geoidheight>40.1</geoidheight>
+            <name>Whereever Segment 1 WayPoint 13</name>
+            <src>HOLUX GPSlim236</src>
+
+            <fix>3d</fix>
+            <sat>07</sat>
+         </trkpt>
+      </trkseg>
+   </trk>
+</gpx>

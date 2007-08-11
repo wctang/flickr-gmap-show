@@ -4,14 +4,14 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
 <title></title>
 <script type="text/javascript">//<![CDATA[
-document.oldwrite = document.write;
-document.write = function(str) {
-  if(document.oldwrite && window.GLoad && (typeof window.GLoad == 'function')) {
-    eval('var gloadstr=window.GLoad.toString(); gloadstr=gloadstr.replace(/\\n/,""); gloadstr=gloadstr.replace(/^\\s*function\\s*GLoad\\s*\\(\\)\\s*{/,""); gloadstr=gloadstr.replace(/}\\s*$/,""); gloadstr=gloadstr.replace(/GValidateKey\\("[0-9a-z]*"\\)/,"true"); window.GLoad=new Function(gloadstr);');
-    document.write=document.oldwrite;
-  }
-  document.oldwrite(str);
-};
+//document.oldwrite = document.write;
+//document.write = function(str) {
+//  if(document.oldwrite && window.GLoad && (typeof window.GLoad == 'function')) {
+//    eval('var gloadstr=window.GLoad.toString(); gloadstr=gloadstr.replace(/\\n/,""); gloadstr=gloadstr.replace(/^\\s*function\\s*GLoad\\s*\\(\\)\\s*{/,""); gloadstr=gloadstr.replace(/}\\s*$/,""); gloadstr=gloadstr.replace(/GValidateKey\\("[0-9a-z]*"\\)/,"true"); window.GLoad=new Function(gloadstr);');
+//    document.write=document.oldwrite;
+//  }
+//  document.oldwrite(str);
+//};
 
 function submitform(form) {
 try {
@@ -48,10 +48,13 @@ try {
   }
 
   var loc = 'http://flickr-gmap-show.googlecode.com/svn/trunk/flickr-gmap-photoset.html?photoset_id='+form.photoset_id.value;
+  //var loc = 'http://viking.wctang.info/show/flickr-gmap-photoset.html?photoset_id='+form.photoset_id.value;
   if(form.no_control.checked) {
     loc += '&no_control=1';
   }
-  if(res) {
+  if(form.gpxurl.value) {
+    loc += ('&gpxurl='+encodeURIComponent(form.gpxurl.value));
+  } else if(res) {
     loc += '&gpx='+encodeURI(res);
   }
   location.href=loc;
@@ -68,6 +71,7 @@ try {
 <form onsubmit="return submitform(this);">
     photoset_id: <input name="photoset_id" type="text" value="72157600408114274"/><br />
     no map control:<input type="checkbox" name="no_control"/><br />
+    gpxurl:<input name="gpxurl" type="text" size="120" value="http://flickr-gmap-show.googlecode.com/svn/trunk/gpx-sample.gpx"/><br />
     gpx:<br /><textarea name="gpx" cols="120" rows="30">
 <gpx
    version="1.1"
