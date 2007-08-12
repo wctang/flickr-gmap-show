@@ -565,6 +565,11 @@ BrowseMap.prototype.regroupphotos=function() {
     
     var zoom = this.getBoundsZoomLevel(totalbound);
     this.setCenter(totalbound.getCenter(), zoom);
+
+    if(this.defmaptype) {
+      this.setMapType(this.defmaptype);
+    }
+
     return;
   }
 
@@ -646,6 +651,7 @@ function load() {
   var no_control;
   var gpx;
   var gpxurl;
+  var maptype;
   if(location.href.indexOf("?")!=-1) {
     var queryString = location.href.substring(location.href.indexOf("?")+1);
     var parameters = queryString.split("&");
@@ -670,6 +676,9 @@ function load() {
       }
       if(paraName == 'gpxurl') {
         gpxurl = paraValue;
+      }
+      if(paraName == 'maptype') {
+        maptype = paraValue;
       }
     }
   }
@@ -702,6 +711,14 @@ function load() {
     map.enableDoubleClickZoom();
     map.enableContinuousZoom();
     map.enableScrollWheelZoom();
+    
+    if(maptype) {
+      switch(maptype.toLowerCase()) {
+      case 'normal': map.defmaptype=G_NORMAL_MAP; break;
+      case 'satellite': map.defmaptype=G_SATELLITE_MAP; break;
+      case 'hybrid':  map.defmaptype=G_HYBRID_MAP; break;
+      }
+    }
   }
 }
 //]]>
