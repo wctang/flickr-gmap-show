@@ -113,7 +113,7 @@ owner: function(photo) {return photo.ownername ? photo.ownername : photo.owner;}
 ownerurl: function(photo) {return 'http://www.flickr.com/photos/'+photo.owner+'/';},
 hasbuddy: true,
 buddyurl : function(photo) {
-  if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
+  if(photo.iconserver&&parseInt(photo.iconserver)) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
   else return 'http://www.flickr.com/images/buddyicon.jpg';
 },
 date: function(photo) { return photo.datetaken.substr(0,10); },
@@ -541,7 +541,7 @@ try {
     var lon=parseFloat(photo.longitude);
     if(!lat && !lon) { continue; }
 
-    var p = {id:photo.id,secret:photo.secret,title:photo.title,pos:new window.GLatLng(lat, lon),api:flickr,datetaken:photo.datetaken,owner:photo.owner||photoset.owner,farm:photo.farm,server:photo.server,iconfarm:photo.iconfarm,iconserver:photo.iconserver};
+    var p = {id:photo.id,secret:photo.secret,title:photo.title,pos:new window.GLatLng(lat, lon),api:flickr,datetaken:photo.datetaken,owner:photo.owner||photoset.owner,ownername:photo.ownername||photoset.owner,farm:photo.farm,server:photo.server,iconfarm:photo.iconfarm,iconserver:photo.iconserver};
     this.photos.push(p);
   }
   
@@ -736,7 +736,7 @@ function load() {
 //]]>
 </script>
 <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2.x&key=ABQIAAAA5iyLqLpUbk1qBe2volmsqxQh1uCj5d-3TWVrUZG2gdqg70DksRQmyqOhA768P8Rr3I-QKGf0waEoCw"></script>
-<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.3.1.pack.js"></script>
+<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.4.pack.js"></script>
 
 </head>
 <body onload="load()" onunload="GUnload()">
