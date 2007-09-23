@@ -249,6 +249,7 @@ var PhotoMap=window.PhotoMap=function(container, opts){
   this.photo_id=opts.photo_id;
   this.gpx = opts.gpx;
   this.gpxurl = opts.gpxurl;
+  this.defmaptype=opts.defmaptype; 
 
   this.tracks = [];
   if(this.gpx) {
@@ -299,6 +300,10 @@ PhotoMap.prototype.photoinfo_callback=function(rsp){
 
   this.setCenter(center, zoom);
   this.addOverlay(marker);
+
+  if(this.defmaptype) {
+    this.setMapType(this.defmaptype);
+  }
 };
 PhotoMap.prototype.searchresult_click=function() {
   this.win.savelocation_display();
@@ -384,7 +389,13 @@ function load() {
         opt.gpxurl = paraValue;
       }
       if(paraName == 'maptype') {
-        opt.maptype = paraValue;
+        if(paraValue) {
+          switch(paraValue.toLowerCase()) {
+            case 'normal': opt.defmaptype=G_NORMAL_MAP; break;
+            case 'satellite': opt.defmaptype=G_SATELLITE_MAP; break;
+            case 'hybrid':  opt.defmaptype=G_HYBRID_MAP; break;
+          }
+        }
       }
     }
   }
@@ -410,14 +421,6 @@ function load() {
     map.enableDoubleClickZoom();
     map.enableContinuousZoom();
     map.enableScrollWheelZoom();
-    
-    if(opt.maptype) {
-      switch(opt.maptype.toLowerCase()) {
-      case 'normal': map.defmaptype=G_NORMAL_MAP; break;
-      case 'satellite': map.defmaptype=G_SATELLITE_MAP; break;
-      case 'hybrid':  map.defmaptype=G_HYBRID_MAP; break;
-      }
-    }
   }
 };
 //]]>

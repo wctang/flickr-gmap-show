@@ -420,6 +420,7 @@ var BrowseMap=window.BrowseMap=function(container, opts){
   this.pageCurr = 1;
   this.pageTotal = 1;
   this.datetracking=!opts.no_tracking;
+  this.defmaptype=opts.defmaptype; 
 
   var options=this.options=$(
     '<div class="option" style="position:absolute;top:6px; left:80px;">'+
@@ -689,7 +690,13 @@ function load() {
         opt.gpxurl = paraValue;
       }
       if(paraName == 'maptype') {
-        opt.maptype = paraValue;
+        if(paraValue) {
+          switch(paraValue.toLowerCase()) {
+            case 'normal': opt.defmaptype=G_NORMAL_MAP; break;
+            case 'satellite': opt.defmaptype=G_SATELLITE_MAP; break;
+            case 'hybrid':  opt.defmaptype=G_HYBRID_MAP; break;
+          }
+        }
       }
     }
   }
@@ -715,14 +722,6 @@ function load() {
     map.enableDoubleClickZoom();
     map.enableContinuousZoom();
     map.enableScrollWheelZoom();
-    
-    if(opt.maptype) {
-      switch(opt.maptype.toLowerCase()) {
-      case 'normal': map.defmaptype=G_NORMAL_MAP; break;
-      case 'satellite': map.defmaptype=G_SATELLITE_MAP; break;
-      case 'hybrid':  map.defmaptype=G_HYBRID_MAP; break;
-      }
-    }
   }
 };
 //]]>
