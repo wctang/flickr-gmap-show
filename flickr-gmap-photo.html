@@ -90,7 +90,7 @@ function $setupbtn(a,n,title,clickfun) {
   return a;
 };
 function $cbtn(n, title, clickfun) {
-  return $setupbtn($('<span class="btn"><img/></span>').get(0),n,title,clickfun);
+  return $setupbtn($('<span class="btn"><img></img></span>').get(0),n,title,clickfun);
 };
 function hideself(){this.style.display='none';};
 
@@ -182,7 +182,7 @@ $extend(PhotoMarker, window.GMarker);
 PhotoMarker.prototype.onphotoclick=function(){
   var overlay = $(
     '<div><div class="screenmask" style="width:100%; height:100%">'+
-      '<div style="margin-top:-16px;top:50%"><img src="'+imgs['loading'].src+'"/></div>'+
+      '<div style="margin-top:-16px;top:50%"><img src="'+imgs['loading'].src+'"></img></div>'+
     '</div></div>').get(0);
   this.overlay = overlay;
 
@@ -198,9 +198,9 @@ PhotoMarker.prototype.onphotoclick_callback=function(rsp){
 
   var sizes = rsp.sizes.size;
 
-  var jmap = $(this.gmap.getContainer());
-  var ww = jmap.width()-20;
-  var hh = jmap.height()-40;
+  var mapc = this.marker.gmap.getContainer();
+  var ww = mapc.clientWidth-20;
+  var hh = mapc.clientHeight-40;
 
   var imgPreloader = new window.Image();
   imgPreloader.overlay = this.overlay;
@@ -222,9 +222,9 @@ PhotoMarker.prototype.onphotoclick_callback=function(rsp){
       '<div class="popup" style="position:absolute; top:'+hei+'px; left:'+lef+'px; width:'+w+'px;">'+
         '<div style="margin:10px;">'+
           '<b style="display: block; margin-bottom: 4px;">'+photo.api.gettitle(photo)+'</b>'+
-          '<img style="margin-bottom:4px;" src="'+this.src+'"/><br />'+
-          '<i>Posted by <a target="_blank" href="'+photo.api.ownerurl(photo)+'"/>'+photo.api.owner(photo)+'</a></i><br />'+
-          '<i>Taken on '+photo.api.date(photo)+'</i><br />'+
+          '<img style="margin-bottom:4px;" src="'+this.src+'"></img><br>'+
+          '<i>Posted by <a target="_blank" href="'+photo.api.ownerurl(photo)+'">'+photo.api.owner(photo)+'</a></i><br>'+
+          '<i>Taken on '+photo.api.date(photo)+'</i><br>'+
           '<a target="_blank" href="'+photo.api.pageurl(photo)+'">View this photo on '+photo.api.name+'</a>'+
         '</div>'+
       '</div>';
@@ -354,11 +354,7 @@ PhotoMap.prototype.removelocation_callback=function(str) {
 
 
 function load() {
-  var photo_id;
-  var no_control;
-  var gpx;
-  var gpxurl;
-  var maptype;
+  var opt = {};
   if(location.href.indexOf("?")!=-1) {
     var queryString = location.href.substring(location.href.indexOf("?")+1);
     var parameters = queryString.split("&");
@@ -371,43 +367,39 @@ function load() {
       paraValue = parameters[i].substring(pos + 1);
             
       if(paraName == 'photo_id') {
-        photo_id = paraValue;
+        opt.photo_id = paraValue;
       }
       if(paraName == 'no_control') {
-        no_control = paraValue;
+        opt.no_control = paraValue;
+      }
+      if(paraName == 'no_tracking') {
+        opt.no_tracking = paraValue;
       }
       if(paraName == 'gpx') {
         var gpxstr = decodeURI(paraValue);
         gpxstr=gpxstr.replace(/\(/g,'{').replace(/\)/g,'}').replace(/\$/g,'[').replace(/;/g,']');
-        gpx = eval('('+gpxstr+')');
+        opt.gpx = eval('('+gpxstr+')');
       }
       if(paraName == 'gpxurl') {
-        gpxurl = paraValue;
+        opt.gpxurl = paraValue;
       }
       if(paraName == 'maptype') {
-        maptype = paraValue;
+        opt.maptype = paraValue;
       }
     }
   }
 
   var jmap = $('#map');
-  if(!photo_id) {
+  if(!opt.photo_id) {
     jmap.html('not set photoset_id');
     return;
-  }
-
-  var opt = {photo_id:photo_id};
-  if(gpx) {
-    opt.gpx = gpx;
-  } else if(gpxurl) {
-    opt.gpxurl = gpxurl;
   }
 
   init();
 
   if (GBrowserIsCompatible()) {
     var map = new PhotoMap(jmap.get(0),opt);
-    if(!no_control) {
+    if(!opt.no_control) {
       map.addControl(new GMapTypeControl());
       if(jmap.height() >= 300) {
         map.addControl(new GLargeMapControl());
@@ -419,8 +411,8 @@ function load() {
     map.enableContinuousZoom();
     map.enableScrollWheelZoom();
     
-    if(maptype) {
-      switch(maptype.toLowerCase()) {
+    if(opt.maptype) {
+      switch(opt.maptype.toLowerCase()) {
       case 'normal': map.defmaptype=G_NORMAL_MAP; break;
       case 'satellite': map.defmaptype=G_SATELLITE_MAP; break;
       case 'hybrid':  map.defmaptype=G_HYBRID_MAP; break;
@@ -431,7 +423,7 @@ function load() {
 //]]>
 </script>
 <script type="text/javascript" src="http://maps.google.com/maps?file=api&v=2.x&key=ABQIAAAA5iyLqLpUbk1qBe2volmsqxQh1uCj5d-3TWVrUZG2gdqg70DksRQmyqOhA768P8Rr3I-QKGf0waEoCw"></script>
-<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.1.4.pack.js"></script>
+<script type="text/javascript" src="http://jqueryjs.googlecode.com/files/jquery-1.2.1.pack.js"></script>
 
 </head>
 <body onload="load()" onunload="GUnload()">
