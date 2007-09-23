@@ -448,6 +448,7 @@ var BrowseMap=window.BrowseMap=function(container, opts){
     }
   }
   if(this.gpxurl) {
+    this.datetracking=false;
     var cb = 'cb_' + (new Date()).getTime();
     var gmap = this;
     window[cb] = function(){gmap.gpxurl_callback.apply(gmap,arguments)};
@@ -490,6 +491,7 @@ BrowseMap.prototype.gpx_parsetrk=function(trk) {
   } else {
     this.gpx_parsetrkseg(trk.trkseg);
   }
+  this.regroupphotos();
 };
 BrowseMap.prototype.gpxurl_callback=function(rsp) {
   if(!rsp || !rsp.count || !rsp.value) return;
@@ -498,8 +500,6 @@ BrowseMap.prototype.gpxurl_callback=function(rsp) {
   var item = items[0];
   if(!item || !item.trk) return;
   
-  this.datetracking=false;
-
   if(item.trk.length) {
     for(var i=0,len=item.trk.length; i<len; ++i) {
       var trk = item.trk[i];
@@ -508,6 +508,7 @@ BrowseMap.prototype.gpxurl_callback=function(rsp) {
   } else {
     this.gpx_parsetrk(item.trk);
   }
+  this.regroupphotos();
 };
 BrowseMap.prototype.getinfo_callback=function(rsp) {
   if(!rsp||rsp.stat != 'ok') return;

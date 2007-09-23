@@ -261,6 +261,7 @@ var PhotoMap=window.PhotoMap=function(container, opts){
     }
   }
   if(this.gpxurl) {
+    this.datetracking=false;
     var cb = 'cb_' + (new Date()).getTime();
     var gmap = this;
     window[cb] = function(){gmap.gpxurl_callback.apply(gmap,arguments)};
