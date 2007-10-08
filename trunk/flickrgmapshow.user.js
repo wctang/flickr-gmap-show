@@ -32,8 +32,7 @@ var scriptname = 'Flickr Gmap Show';
 var installurl = 'http://userscripts.org/scripts/source/9450.user.js';
 var currVer = '2.8';
 
-//var js_jquery = 'http://jqueryjs.googlecode.com/files/jquery-1.2.1.min.js';
-var js_jquery = 'http://jqueryjs.googlecode.com/files/jquery-1.2.1.js';
+var js_jquery = 'http://jqueryjs.googlecode.com/files/jquery-1.2.1.min.js';
 var js_gmap = 'http://maps.google.com/maps?file=api&v=2.x';
 var js_analytics = 'http://www.google-analytics.com/urchin.js';
 
@@ -41,54 +40,14 @@ var EMBEDDED_URL = 'http://flickr-gmap-show.googlecode.com/svn/trunk/';
 
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
 var imgs_src = {
+	flickr_loading  : {src:'http://l.yimg.com/www.flickr.com/images/pulser2.gif'},
 	marker_img      : {src:imgdir+'marker_image.png'},
 	marker_shw      : {src:imgdir+'marker_shadow.png'},
 	marker_trans    : {src:imgdir+'marker_transparent.png'},
 	loading         : {src:imgdir+'loading.gif'},
-	flickr_loading  : {src:'http://l.yimg.com/www.flickr.com/images/pulser2.gif'},
-	close_default   : {src:imgdir+'fgs_close_default.gif',w:15,h:15},
-	close_hover     : {src:imgdir+'fgs_close_hover.gif'},
-	close_selected  : {src:imgdir+'fgs_close_selected.gif'},
-	max_default     : {src:imgdir+'fgs_max_default.gif',w:15,h:15},
-	max_hover       : {src:imgdir+'fgs_max_hover.gif'},
-	max_selected    : {src:imgdir+'fgs_max_selected.gif'},
-	search_default  : {src:imgdir+'fgs_search_default.gif',w:15,h:15},
-	search_hover    : {src:imgdir+'fgs_search_hover.gif'},
-	search_selected : {src:imgdir+'fgs_search_selected.gif'},
-	prev_default    : {src:imgdir+'fgs_prev_default.gif',w:15,h:15},
-	prev_hover      : {src:imgdir+'fgs_prev_hover.gif'},
-	prev_selected   : {src:imgdir+'fgs_prev_selected.gif'},
-	next_default    : {src:imgdir+'fgs_next_default.gif',w:15,h:15},
-	next_hover      : {src:imgdir+'fgs_next_hover.gif'},
-	next_selected   : {src:imgdir+'fgs_next_selected.gif'},
-	updown_default  : {src:imgdir+'fgs_toggle_default.gif',w:15,h:15},
-	updown_hover    : {src:imgdir+'fgs_toggle_hover.gif'},
-	updown_selected : {src:imgdir+'fgs_toggle_selected.gif'},
-	action_default  : {src:imgdir+'fgs_action_default.gif',w:15,h:15},
-	action_hover    : {src:imgdir+'fgs_action_hover.gif'},
-	action_selected : {src:imgdir+'fgs_action_selected.gif'},
-	emblnk_default  : {src:imgdir+'fgs_emblnk_default.gif',w:15,h:15},
-	emblnk_hover    : {src:imgdir+'fgs_emblnk_hover.gif'},
-	emblnk_selected : {src:imgdir+'fgs_emblnk_selected.gif'},
-	about_default   : {src:imgdir+'fgs_about_default.gif',w:15,h:15},
-	about_hover     : {src:imgdir+'fgs_about_hover.gif'},
-	about_selected  : {src:imgdir+'fgs_about_selected.gif'},
-	p_default       : {src:imgdir+'p_default.gif',w:12,h:75},
-	p_hover         : {src:imgdir+'p_hover.gif'},
-	p_selected      : {src:imgdir+'p_selected.gif'},
-	pp_default      : {src:imgdir+'pp_default.gif',w:12,h:75},
-	pp_hover        : {src:imgdir+'pp_hover.gif'},
-	pp_selected     : {src:imgdir+'pp_selected.gif'},
-	r_default       : {src:imgdir+'r_default.gif',w:12,h:75},
-	r_hover         : {src:imgdir+'r_hover.gif'},
-	r_selected      : {src:imgdir+'r_selected.gif'},
-	rr_default      : {src:imgdir+'rr_default.gif',w:12,h:75},
-	rr_hover        : {src:imgdir+'rr_hover.gif'},
-	rr_selected     : {src:imgdir+'rr_selected.gif'},
 	shadow_main     : {src:imgdir+'shadow-main.png'},
 	shadow_top      : {src:imgdir+'shadow-top.png'},
 	shadow_left     : {src:imgdir+'shadow-left.png'},
-	icon_shadow     : {src:imgdir+'icon_shadow.png'},
 	icon1           : {src:imgdir+'icon1.png'},
 	icon2           : {src:imgdir+'icon2.png'},
 	icon3           : {src:imgdir+'icon3.png'}
@@ -174,8 +133,7 @@ document.write = function(str) {
 	}
 };
 
-
-
+var btnbackgnd = 'background:transparent url('+imgdir+'icons.png) no-repeat scroll ';
 var FGS_STYLE=
 '<style type="text/css">'+
 'img {border:0;text-decoration:none;} '+
@@ -207,6 +165,34 @@ var FGS_STYLE=
 'table.shadow td.main {border:0;background:url('+imgs_src['shadow_main'].src+') no-repeat bottom right;} '+
 'table.shadow td.top  {border:0;height:12px; background:url('+imgs_src['shadow_top'].src+') no-repeat right top;} '+
 'table.shadow td.left {border:0;width:10px; background:url('+imgs_src['shadow_left'].src+') no-repeat left bottom;} '+
+'a.closebtn,a.maxbtn,a.searchbtn,a.actionbtn,a.embedbtn,a.aboutbtn,a.updnbtn,a.prevbtn,a.nextbtn {cursor:pointer;width:15px;height:15px; text-indent:-999em;} '+
+'a.p_btn,a.pp_btn,a.r_btn,a.rr_btn {cursor:pointer;height:75px;width:12px; text-indent:-999em;} '+
+'a.closebtn        {'+btnbackgnd+' 0px 0px;} '+
+'a.closebtn:hover  {'+btnbackgnd+' -15px 0px; } '+
+'a.maxbtn          {'+btnbackgnd+' 0px   -15px; } '+
+'a.maxbtn:hover    {'+btnbackgnd+' -15px -15px; } '+
+'a.searchbtn       {'+btnbackgnd+' 0px   -30px; } '+
+'a.searchbtn:hover {'+btnbackgnd+' -15px -30px; } '+
+'a.actionbtn       {'+btnbackgnd+' 0px   -45px; } '+
+'a.actionbtn:hover {'+btnbackgnd+' -15px -45px; } '+
+'a.embedbtn        {'+btnbackgnd+' 0px   -60px; } '+
+'a.embedbtn:hover  {'+btnbackgnd+' -15px -60px; } '+
+'a.aboutbtn        {'+btnbackgnd+' 0px   -75px; } '+
+'a.aboutbtn:hover  {'+btnbackgnd+' -15px -75px; } '+
+'a.updnbtn         {'+btnbackgnd+' 0px   -90px; } '+
+'a.updnbtn:hover   {'+btnbackgnd+' -15px -90px; } '+
+'a.prevbtn         {'+btnbackgnd+' 0px   -105px; } '+
+'a.prevbtn:hover   {'+btnbackgnd+' -15px -105px; } '+
+'a.nextbtn         {'+btnbackgnd+' 0px   -120px; } '+
+'a.nextbtn:hover   {'+btnbackgnd+' -15px -120px; } '+
+'a.p_btn           {'+btnbackgnd+' 0px   -135px; } '+
+'a.p_btn:hover     {'+btnbackgnd+' -12px -135px; } '+
+'a.pp_btn          {'+btnbackgnd+' 0px   -210px; } '+
+'a.pp_btn:hover    {'+btnbackgnd+' -12px -210px; } '+
+'a.r_btn           {'+btnbackgnd+' 0px   -285px; } '+
+'a.r_btn:hover     {'+btnbackgnd+' -12px -285px; } '+
+'a.rr_btn          {'+btnbackgnd+' 0px   -360px; } '+
+'a.rr_btn:hover    {'+btnbackgnd+' -12px -360px; } '+
 '</style>';
 
 
@@ -249,20 +235,6 @@ var geocode={
 	}
 };
 
-function setupbtn(a,n,title,clickfun) {
-	var $a = $(a).mouseout(setupbtn.mouseout).mouseover(setupbtn.mouseover).mousedown(setupbtn.mousedown).mouseup(setupbtn.mouseup);
-	if(clickfun) $a.click(clickfun);
-	if(title) $a.attr('title',title);
-	a.img=$a.children('img').width(imgs_src[n+'_default'].w).height(imgs_src[n+'_default'].h).get(0);
-	a.n=n;
-	$a.trigger('mouseout');
-	return a;
-};
-setupbtn.mouseout=function(){ this.img.src=imgs[this.n+'_default'].src;};
-setupbtn.mouseover=function(){ this.img.src=imgs[this.n+'_hover'].src;};
-setupbtn.mousedown=function(){ this.img.src=imgs[this.n+'_selected'].src;};
-setupbtn.mouseup=function(){ this.img.src=imgs[this.n+'_hover'].src;};
-
 
 function create_mapwindow(wid,hei,opt) {
 	opt = opt || {};
@@ -276,26 +248,26 @@ function create_mapwindow(wid,hei,opt) {
 				'<div class="mask"   style="position:absolute;left:5px;top:27px; display:none;"><div><img src="'+imgs['loading'].src+'"></img></div></div>'+ // mask
 				'<div class="msg"    style="position:absolute;left:5px;bottom:24px;height:20px;"><a class="btn" style="display:none;">Load last location? </a><a class="btn" style="display:none;">Save location? </a></div>'+ // msg
 				'<div                style="position:absolute;left:5px;bottom:24px;height:85px; display:none;">'+
-					'<span class="btn" style="position:absolute;left: 0px;top:5px;height:75px;width:12px;"><img></img></span>'+
-					'<span class="btn" style="position:absolute;left:13px;top:5px;height:75px;width:12px;"><img></img></span>'+
+					'<a class="pp_btn" style="position:absolute;left: 0px;top:5px;"></a>'+
+					'<a class="p_btn" style="position:absolute;left:13px;top:5px;"></a>'+
 					'<div  style="position:absolute;left:27px;top:5px;height:80px;width:455px; overflow:hidden;"></div>'+
-					'<span class="btn" style="position:absolute;right:13px;top:5px;height:75px;width:12px;"><img></img></span>'+
-					'<span class="btn" style="position:absolute;right: 0px;top:5px;height:75px;width:12px;"><img></img></span>'+
+					'<a class="r_btn" style="position:absolute;right:13px;top:5px;"></a>'+
+					'<a class="rr_btn" style="position:absolute;right: 0px;top:5px;"></a>'+
 					'<div  class="progress" style="position:absolute;left:27px;top:0px;width:455px; overflow:hidden;">'+
 						'<div class="progressbar" style="position:relative;width:10px;"></div>'+
 					'</div>'+
 				'</div>'+ // photo panel
 				'<div class="info"   style="position:absolute;left:9px;bottom:8px;"></div>'+ // info
 				'<div class="locate" style="position:absolute;right:12px;bottom:8px;"></div>'+ // locate div
-				'<span class="btn"   style="position:absolute;right:12px;top:6px;"><img></img></span>'+ // close btn
-				'<span class="btn"   style="position:absolute;right:32px;top:6px; display:none;"><img></img></span>'+ // max btn
-				'<span class="btn"   style="position:absolute;right:52px;top:6px;"><img></img></span>'+ // search btn
+				'<a class="closebtn" style="position:absolute;right:12px;top:6px;"></a>'+ // close btn
+				'<a class="maxbtn"   style="position:absolute;right:32px;top:6px; display:none;"></a>'+ // close btn
+				'<a class="searchbtn" style="position:absolute;right:52px;top:6px;"></a>'+ // search btn
 				'<div class="search" style="position:absolute;left:15px;top:37px; display:none;"><div style="margin:10px;"><form id="geocode_search">Google Geo Search: <input id="geocode_search_input" name="s_str"><input type="submit"></form><br><div id="geocode_result" style="overflow:auto;width:100%;"></div></div></div>'+ //search
-				'<span class="btn"   style="position:absolute;right:72px;top:6px;"><img></img></span>'+ // action btn
+				'<a class="actionbtn" style="position:absolute;right:72px;top:6px;"></a>'+ // action btn
 				'<div class="action" style="position:absolute;right:5px;top:25px;width:150px; display:none;"></div>'+ // action panel
-				'<span class="btn"   style="position:absolute;right:92px;top:6px; display:none;"><img></img></span>'+ // embedded link btn
+				'<a class="embedbtn" style="position:absolute;right:92px;top:6px; display:none;"></a>'+ // embedded link btn
 				'<div class="embeddedlink" style="position:absolute;left:15px;top:37px; display:none;"><div style="margin:10px;">Paste HTML to embed in website:<br><input style="width:100%;" id="embbed_link"></div></div>'+ //embedded link
-				'<span class="btn"   style="position:absolute;right:12px;bottom:6px; display:none;"><img></img></span>'+ // about btn
+				'<a class="aboutbtn" style="position:absolute;right:12px;bottom:6px; display:none;"></a>'+ // about btn
 				'<div class="about"  style="position:absolute;right:15px;bottom:37px;width:200px;height:180px; display:none;"><div style="text-align:center; padding:3px;"><p><b>Flickr GMap Show</b></p><p><a href="http://code.google.com/p/flickr-gmap-show/">Project page</a><br><a href="http://userscripts.org/scripts/show/9450">Script page</a></p><p>Author: <a href="mailto:wctang@gmail.com">wctang</a></p><p><a target="_blank" href="https://www.paypal.com/xclick/business=wctang%40gmail%2ecom&item_name=fgs_donation&no_note=1&currency_code=USD"><img src="http://www.pspad.com/img/paypal_en.gif"></img></a></p></div></div>'+ //about
 			'</div>'+
 		'</div>').get(0);
@@ -344,34 +316,48 @@ function create_mapwindow(wid,hei,opt) {
 	win.aboutbtn = w[16];
 	win.$aboutdiv = $(w[17]);
 
+	win.link=opt.link;
+	win.link.win=win;
 	win.m_width=wid;
 	win.m_height=hei;
-	win.m_max=true;
 	win.m_fixmax=!!opt.fixmax;
+	if(win.m_fixmax) {
+		win.m_max=true;
+	} else {
+		win.m_max=false;
+		var ofst = $(win.link).offset();
+		win.m_top=ofst.top-win.m_height-10;
+		win.m_left=ofst.left-(win.m_width*.85);
+		if(win.m_left < 10) win.m_left = 10;
+	}
 	win.m_readonly=!!opt.readonly;
 
 	win.searchdiv.form.win = win;
-	setupbtn(win.clsbtn,'close','Close',win.f_close).win=win;
-	setupbtn(win.searchbtn,'search','Location Search',win.f_search_toggle).win=win;
-	setupbtn(win.actionbtn,'action','Action',win.f_action_toggle).win=win;
+	win.searchdiv.form.onsubmit=win.f_search_submit;
+
+	win.clsbtn.win=win.searchbtn.win=win.actionbtn.win=win;
+	$(win.clsbtn).click(win.f_close);
+	$(win.searchbtn).click(win.f_search_toggle);
+	$(win.actionbtn).click(win.f_action_toggle);
 	if(!win.m_fixmax) {
-		setupbtn(win.maxbtn,'max','Maximize/Restore',win.f_max_toggle).win=win;
-		$(win.maxbtn).show();
+		win.maxbtn.win=win;
+		$(win.maxbtn).click(win.f_max_toggle).show();
 	}
 	if(!!opt.bottompanel) {
 		var bs = win.$bottompanel.get(0).childNodes;
-		setupbtn(bs[0],'pp','First', win.f_first).win=win;
-		setupbtn(bs[1],'p','Prev', win.f_prev).win=win;
-		setupbtn(bs[3],'r','Next', win.f_next).win=win;
-		setupbtn(bs[4],'rr','Last', win.f_last).win=win;
-	}
-	if(!!opt.about) {
-		setupbtn(win.aboutbtn,'about','About',win.f_about_toggle).win=win;
-		$(win.aboutbtn).show();
+		bs[0].win=bs[1].win=bs[3].win=bs[4].win=win;
+		$(bs[0]).click(win.f_frst);
+		$(bs[1]).click(win.f_prev);
+		$(bs[3]).click(win.f_next);
+		$(bs[4]).click(win.f_last);
 	}
 	if(!!opt.embedlink) {
-		setupbtn(win.embeddlinkbtn,'emblnk','Embedded Link',win.f_embeddedlink_toggle).win=win;
-		$(win.embeddlinkbtn).show();
+		win.embeddlinkbtn.win=win;
+		$(win.embeddlinkbtn).click(win.f_embeddedlink_toggle).show();
+	}
+	if(!!opt.about) {
+		win.aboutbtn.win=win;
+		$(win.aboutbtn).click(win.f_about_toggle).show();
 	}
 	if(!!opt.loadlast) {
 		win.f_action_append('Load Last Location',win.loadlastlocation_click).win=win;
@@ -380,12 +366,10 @@ function create_mapwindow(wid,hei,opt) {
 		win.f_action_append('Save Location',win.savelocation_click).win=win;
 		win.f_action_append('Remove Location',win.removelocation_click).win=win;
 	}
-
-	win.searchdiv.form.onsubmit=win.f_search_submit;
-
 	return win;
 };
 create_mapwindow.f_open=function(){
+	this.f_refreshsize();
 	$(this).fadeIn('fast');
 };
 create_mapwindow.f_close=function(){
@@ -453,12 +437,6 @@ create_mapwindow.f_max_toggle=function(){
 		this.m_max=true;
 	} else {
 		this.m_max=!this.m_max;
-	}
-	if(!this.m_max) {
-		var ofst = $(this.link).offset();
-		this.m_top=ofst.top-this.m_height-10;
-		this.m_left=ofst.left-(this.m_width*.85);
-		if(this.m_left < 10) this.m_left = 10;
 	}
 	this.f_refreshsize();
 };
@@ -653,7 +631,7 @@ create_mapwindow.f_loading=function(msg){this.$loadingdiv.show(); if(msg) { this
 create_mapwindow.f_closeloading=function(){this.$loadingdiv.hide();};
 create_mapwindow.f_settitle=function(t){this.titlediv.innerHTML = t;};
 // photopanel
-create_mapwindow.f_first=function(){ if(this.win) return arguments.callee.apply(this.win,arguments); this.f_refreshlist(-Infinity); };
+create_mapwindow.f_frst=function(){ if(this.win) return arguments.callee.apply(this.win,arguments); this.f_refreshlist(-Infinity); };
 create_mapwindow.f_prev=function(){ if(this.win) return arguments.callee.apply(this.win,arguments); this.f_refreshlist(-1); };
 create_mapwindow.f_next=function(){ if(this.win) return arguments.callee.apply(this.win,arguments); this.f_refreshlist(1); };
 create_mapwindow.f_last=function(){ if(this.win) return arguments.callee.apply(this.win,arguments); this.f_refreshlist(Infinity); };
@@ -684,7 +662,6 @@ create_mapwindow.f_refreshlist=function(dif){
 	if(dif == Infinity) {
 		currpos+=parseInt((phocnt-currpos-1)/widcnt)*widcnt;
 	} else if(dif == -Infinity) {
-		$photopanel.css('left', 0);
 		currpos=0;
 	} else if(dif > 0) {
 		if(currpos + widcnt >= phocnt) return;
@@ -841,7 +818,7 @@ PhotoGroupMarker.prototype.onclick=function(){
 };
 PhotoGroupMarker.prototype.showpanelstr = 
 	'<div style="width:505px;height:270px;">'+
-		'<div style="position:absolute;left:  5px;top:  5px;"><a class="title" target="_blank"></a></div>'+
+		'<div style="position:absolute;left:  5px;top:  5px;"><a class="maxbtn" style="float:left;" target="_blank"></a><a class="title" target="_blank"></a></div>'+
 		'<div style="position:absolute;left:  5px;top: 25px;width:240px;height:180px; overflow:hidden;"></div>'+
 		'<div style="position:absolute;left:  5px;top:215px;width:240px;">'+
 			'<img id="authicn" style="float:left; margin-right:5px;"></img> Taken on <span id="datelnk" target="_blank"></span><br>by <a id="authlnk" target="_blank"></a>'+
@@ -851,7 +828,8 @@ PhotoGroupMarker.prototype.showpanelstr =
 PhotoGroupMarker.prototype.onphotoclick=function(){
 	if(!this.marker.showpanel) {
 		var showpanel= $(this.marker.showpanelstr).get(0);
-		showpanel.titl    = showpanel.childNodes[0].firstChild;
+		showpanel.icon    = showpanel.childNodes[0].childNodes[0];
+		showpanel.titl    = showpanel.childNodes[0].childNodes[1];
 		showpanel.mapctnr = showpanel.childNodes[1];
 		showpanel.authinfo = showpanel.childNodes[2];
 		var $authinfo = $(showpanel.authinfo);
@@ -884,7 +862,9 @@ PhotoGroupMarker.prototype.onphotoclick=function(){
 	}
 	this.marker.currphoto=photo;
 
-	$(showpanel.titl).html('<img src="'+imgs['max_default'].src+'"> '+photo.api.gettitle(photo)).attr('href',photo.api.pageurl(photo));
+	var href=photo.api.pageurl(photo);
+	$(showpanel.icon).attr('href',href);
+	$(showpanel.titl).html(photo.api.gettitle(photo)).attr('href',href);
 	$(showpanel.imgctnr).empty();
 	$('<img></img>').attr('src',photo.api.smallurl(photo)).appendTo(showpanel.imgctnr);
 	$(showpanel.authinfo.authicn).attr('src',photo.api.buddyurl(photo));
@@ -900,6 +880,7 @@ var PhotoMap=fgs.PhotoMap=function(container, opts){
 	this.superconstructor.apply(this, arguments);
 	opts = opts || {};
 	this.win=opts.win;
+	this.win.gmap=this;
 	this.photo_id=opts.photo_id;
 	this.win.f_mask();
 	this.b_saveloc=false;
@@ -1032,6 +1013,7 @@ var PhotoSetMap=fgs.PhotoSetMap=function(container, opts){
 	this.superconstructor.apply(this, arguments);
 	opts = opts||{};
 	this.win=opts.win;
+	this.win.gmap=this;
 	this.photoset_id=opts.photoset_id;
 	this.datetracking=true;
 
@@ -1177,6 +1159,7 @@ var BrowseMap=fgs.BrowseMap=function(container, opts){
 	this.superconstructor.apply(this, arguments);
 	opts = opts || {};
 	this.win=opts.win;
+	this.win.gmap=this;
 	this.user_id=opts.user_id;
 	this.group_id=opts.group_id;
 	this.lastcenter = null;
@@ -1186,17 +1169,14 @@ var BrowseMap=fgs.BrowseMap=function(container, opts){
 
 	var options=this.options=$(
 		'<div class="option" style="position:absolute;top:6px; left:80px;">'+
-			'<span>'+
-				'<span class="btn"><img></img></span>'+
-				'<span class="btn"><img></img></span>'+
-				'<span class="btn"><img></img></span>'+
-			'</span>'+
+			'<a class="updnbtn" style="float:left;"></a>'+
+			'<a class="prevbtn" style="float:left;"></a>'+
+			'<a class="nextbtn" style="float:left;"></a>'+
 			'<span style="margin-left:5px;"></span>'+
 			'<div style="padding-top:10px;"></div>'+
 		'</div>').get(0);
-	options.ctrl=options.childNodes[0];
-	options.info=options.childNodes[1];
-	options.pane=options.childNodes[2];
+	options.info=options.childNodes[3];
+	options.pane=options.childNodes[4];
 
 	var nowy = new Date().getFullYear();
 	var datestr = 
@@ -1234,13 +1214,13 @@ var BrowseMap=fgs.BrowseMap=function(container, opts){
 	options.optionYear.gmap=options.optionMonth.gmap=options.optionSort.gmap=options.optionSearchForm.gmap=this;
 	options.optionYear.onchange=options.optionMonth.onchange=options.optionSort.onchange=options.optionSearchForm.onsubmit=this.changeOption;
 
-	var tog=options.ctrl.childNodes[0];
-	var pre=options.ctrl.childNodes[1];
-	var nex=options.ctrl.childNodes[2];
+	var tog=options.childNodes[0];
+	var pre=options.childNodes[1];
+	var nex=options.childNodes[2];
 	pre.gmap=nex.gmap=tog.gmap=this;
-	setupbtn(tog,'updown','Option Panel', this.togglePanel);
-	setupbtn(pre,'prev','Previous Page', this.prevPage);
-	setupbtn(nex,'next','Next Page', this.nextPage);
+	$(tog).click(this.togglePanel);
+	$(pre).click(this.prevPage);
+	$(nex).click(this.nextPage);
 	this.updateOptionInfo();
 	this.getContainer().appendChild(options);
 
@@ -1566,38 +1546,35 @@ try {
 			this.win.f_close();
 		} else {
 			this.win.f_open();
-			this.win.f_refreshsize();
 		}
 		return;
 	}
 
+	var win=null;
 	if(this.photo_id) {
-		this.win=create_mapwindow(516,313,{embedlink:true,loadlast:true});
+		win=create_mapwindow(516,313,{link:this,embedlink:true,loadlast:true});
 	} else if(this.photoset_id) {
-		this.win=create_mapwindow(0,0,{fixmax:true,bottompanel:true,readonly:true,embedlink:true,about:true});
+		win=create_mapwindow(0,0,{link:this,fixmax:true,bottompanel:true,readonly:true,embedlink:true,about:true});
 	} else {
-		this.win=create_mapwindow(0,0,{fixmax:true,bottompanel:true,readonly:true,loadlast:true,about:true});
+		win=create_mapwindow(0,0,{link:this,fixmax:true,bottompanel:true,readonly:true,loadlast:true,about:true});
 	}
-	var win=this.win;
-	win.link=this;
-	//$(win).hide();
-	win.f_max_toggle();
-	$(win).insertBefore(document.body.firstChild);
+	$(document.body).prepend(win);
 	win.f_open();
 
+	var mapdiv = win.mapdiv;
 	var opt = {win:win, photo_id:this.photo_id, user_id:this.user_id, group_id:this.group_id, photoset_id:this.photoset_id};
 
 	if(opt.photo_id) {
-		var gmap=win.gmap=new fgs.PhotoMap(win.mapdiv, opt);
+		var gmap=new fgs.PhotoMap(mapdiv, opt);
 		gmap.addControl(new gobj.GMapTypeControl());
 		gmap.addControl(new gobj.GSmallMapControl());
 	} else if(opt.photoset_id) {
-		var gmap=win.gmap=new fgs.PhotoSetMap(win.mapdiv, opt);
+		var gmap=new fgs.PhotoSetMap(mapdiv, opt);
 		gmap.addControl(new gobj.GMapTypeControl());
 		gmap.addControl(new gobj.GLargeMapControl());
 		gmap.addControl(new gobj.GOverviewMapControl());
 	} else {
-		var gmap=win.gmap=new fgs.BrowseMap(win.mapdiv, opt);
+		var gmap=new fgs.BrowseMap(mapdiv, opt);
 		gmap.addControl(new gobj.GMapTypeControl());
 		gmap.addControl(new gobj.GLargeMapControl());
 		gmap.addControl(new gobj.GOverviewMapControl());
@@ -1612,7 +1589,8 @@ try {
 }},
 
 
-checkup : function(SCRIPT){ try {
+checkup : function(SCRIPT) {
+try {
 	if (!GM_getValue) return;
 	var DOS_PREVENTION_TIME = 2*60*1000;
 	var isSomeoneChecking = GM_getValue('CHECKING', null);
@@ -1638,7 +1616,8 @@ checkup : function(SCRIPT){ try {
 		}
 	});
 	GM_setValue('LAST_CHECKED', now.toString());
-} catch (ex) {}},
+} catch (ex) {}
+},
 
 onload: function() {
 	this.checkup({name:scriptname, url:installurl, version:currVer});
