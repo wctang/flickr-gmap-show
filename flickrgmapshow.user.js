@@ -45,9 +45,6 @@ var imgs_src = {
 	marker_shw      : {src:imgdir+'marker_shadow.png'},
 	marker_trans    : {src:imgdir+'marker_transparent.png'},
 	loading         : {src:imgdir+'loading.gif'},
-	shadow_main     : {src:imgdir+'shadow-main.png'},
-	shadow_top      : {src:imgdir+'shadow-top.png'},
-	shadow_left     : {src:imgdir+'shadow-left.png'},
 	icon1           : {src:imgdir+'icon1.png'},
 	icon2           : {src:imgdir+'icon2.png'},
 	icon3           : {src:imgdir+'icon3.png'}
@@ -133,7 +130,8 @@ document.write = function(str) {
 	}
 };
 
-var btnbackgnd = 'background:transparent url('+imgdir+'icons.png) no-repeat scroll ';
+var btnbackgnd = 'background:transparent url('+imgdir+'icons.png?v=2.8) no-repeat scroll ';
+var shadwbkgnd = 'background:transparent url('+imgdir+'shadow-main.png) no-repeat scroll ';
 var FGS_STYLE=
 '<style type="text/css">'+
 'img {border:0;text-decoration:none;} '+
@@ -162,11 +160,12 @@ var FGS_STYLE=
 '.option {border:solid 1px black; background-color:white; padding:5px; text-align:left; border-radius:9px;-moz-border-radius:9px;-webkit-border-radius:9px;} '+
 '.popup {z-index:2000; background-color:white; font:14px arial; text-align:left;} '+
 'table.shadow {position:absolute;width:100%;height:100%;left:6px;top:6px;border-collapse:collapse;border:0;} '+
-'table.shadow td.main {border:0;background:url('+imgs_src['shadow_main'].src+') no-repeat bottom right;} '+
-'table.shadow td.top  {border:0;height:12px; background:url('+imgs_src['shadow_top'].src+') no-repeat right top;} '+
-'table.shadow td.left {border:0;width:10px; background:url('+imgs_src['shadow_left'].src+') no-repeat left bottom;} '+
+'table.shadow td.main {border:0;             '+shadwbkgnd+' bottom right;} '+
+'table.shadow td.top  {border:0;height:12px; '+shadwbkgnd+' right top;} '+
+'table.shadow td.left {border:0;width:10px;  '+shadwbkgnd+' left bottom;} '+
 'a.closebtn,a.maxbtn,a.searchbtn,a.actionbtn,a.embedbtn,a.aboutbtn,a.updnbtn,a.prevbtn,a.nextbtn {cursor:pointer;width:15px;height:15px; text-indent:-999em;} '+
-'a.p_btn,a.pp_btn,a.r_btn,a.rr_btn {cursor:pointer;height:75px;width:12px; text-indent:-999em;} '+
+'a.p_btn,a.r_btn   {cursor:pointer;height:48px;width:25px; text-indent:-999em;} '+
+'a.pp_btn,a.rr_btn {cursor:pointer;height:32px;width:25px; text-indent:-999em;} '+
 'a.closebtn        {'+btnbackgnd+' 0px 0px;} '+
 'a.closebtn:hover  {'+btnbackgnd+' -15px 0px; } '+
 'a.maxbtn          {'+btnbackgnd+' 0px   -15px; } '+
@@ -185,14 +184,14 @@ var FGS_STYLE=
 'a.prevbtn:hover   {'+btnbackgnd+' -15px -105px; } '+
 'a.nextbtn         {'+btnbackgnd+' 0px   -120px; } '+
 'a.nextbtn:hover   {'+btnbackgnd+' -15px -120px; } '+
-'a.p_btn           {'+btnbackgnd+' 0px   -135px; } '+
-'a.p_btn:hover     {'+btnbackgnd+' -12px -135px; } '+
-'a.pp_btn          {'+btnbackgnd+' 0px   -210px; } '+
-'a.pp_btn:hover    {'+btnbackgnd+' -12px -210px; } '+
-'a.r_btn           {'+btnbackgnd+' 0px   -285px; } '+
-'a.r_btn:hover     {'+btnbackgnd+' -12px -285px; } '+
-'a.rr_btn          {'+btnbackgnd+' 0px   -360px; } '+
-'a.rr_btn:hover    {'+btnbackgnd+' -12px -360px; } '+
+'a.p_btn           {'+btnbackgnd+' 0px -135px; } '+
+'a.p_btn:hover     {'+btnbackgnd+' 0px -183px; } '+
+'a.pp_btn          {'+btnbackgnd+' 0px -231px; } '+
+'a.pp_btn:hover    {'+btnbackgnd+' 0px -263px; } '+
+'a.r_btn           {'+btnbackgnd+' 0px -295px; } '+
+'a.r_btn:hover     {'+btnbackgnd+' 0px -343px; } '+
+'a.rr_btn          {'+btnbackgnd+' 0px -391px; } '+
+'a.rr_btn:hover    {'+btnbackgnd+' 0px -423px; } '+
 '</style>';
 
 
@@ -236,7 +235,7 @@ var geocode={
 };
 
 
-function create_mapwindow(wid,hei,opt) {
+function create_mapwindow(opt) {
 	opt = opt || {};
 	var win= $(
 		'<div class="mapwin" style="position:absolute;z-index:1000; display:none;">'+
@@ -248,11 +247,11 @@ function create_mapwindow(wid,hei,opt) {
 				'<div class="mask"   style="position:absolute;left:5px;top:27px; display:none;"><div><img src="'+imgs['loading'].src+'"></img></div></div>'+ // mask
 				'<div class="msg"    style="position:absolute;left:5px;bottom:24px;height:20px;"><a class="btn" style="display:none;">Load last location? </a><a class="btn" style="display:none;">Save location? </a></div>'+ // msg
 				'<div                style="position:absolute;left:5px;bottom:24px;height:85px; display:none;">'+
-					'<a class="pp_btn" style="position:absolute;left: 0px;top:5px;"></a>'+
-					'<a class="p_btn" style="position:absolute;left:13px;top:5px;"></a>'+
+					'<a class="pp_btn" style="position:absolute;left:1px;top:48px;"></a>'+
+					'<a class="p_btn" style="position:absolute; left:1px;top:0px;"></a>'+
 					'<div  style="position:absolute;left:27px;top:5px;height:80px;width:455px; overflow:hidden;"></div>'+
-					'<a class="r_btn" style="position:absolute;right:13px;top:5px;"></a>'+
-					'<a class="rr_btn" style="position:absolute;right: 0px;top:5px;"></a>'+
+					'<a class="r_btn" style="position:absolute; right:1px;top:0px;"></a>'+
+					'<a class="rr_btn" style="position:absolute;right:1px;top:48px;"></a>'+
 					'<div  class="progress" style="position:absolute;left:27px;top:0px;width:455px; overflow:hidden;">'+
 						'<div class="progressbar" style="position:relative;width:10px;"></div>'+
 					'</div>'+
@@ -318,14 +317,14 @@ function create_mapwindow(wid,hei,opt) {
 
 	win.link=opt.link;
 	win.link.win=win;
-	win.m_width=wid;
-	win.m_height=hei;
 	win.m_fixmax=!!opt.fixmax;
 	if(win.m_fixmax) {
 		win.m_max=true;
 	} else {
 		win.m_max=false;
 		var ofst = $(win.link).offset();
+		win.m_width=opt.width;
+		win.m_height=opt.height;
 		win.m_top=ofst.top-win.m_height-10;
 		win.m_left=ofst.left-(win.m_width*.85);
 		if(win.m_left < 10) win.m_left = 10;
@@ -369,8 +368,8 @@ function create_mapwindow(wid,hei,opt) {
 	return win;
 };
 create_mapwindow.f_open=function(){
-	this.f_refreshsize();
 	$(this).fadeIn('fast');
+	this.f_refreshsize();
 };
 create_mapwindow.f_close=function(){
 	if(this.win) return arguments.callee.apply(this.win,arguments);
@@ -433,12 +432,11 @@ create_mapwindow.f_refreshsize=function(nomove) {
 create_mapwindow.f_max_toggle=function(){
 	if(this.win) return arguments.callee.apply(this.win,arguments);
 
-	if(this.m_fixmax) {
-		this.m_max=true;
-	} else {
+	if(!this.m_fixmax) {
 		this.m_max=!this.m_max;
+		if(this.gmap.on_max_toggle) this.gmap.on_max_toggle(this.m_max);
+		this.f_refreshsize();
 	}
-	this.f_refreshsize();
 };
 create_mapwindow.onwindowresize=function(){
 	if(this.style.display == 'none' || !this.m_max) return;
@@ -850,7 +848,7 @@ PhotoGroupMarker.prototype.onphotoclick=function(){
 
 		$(showpanel.mapctnr).empty();
 		var map = new gobj.GMap2($('<div style="width:240px;height:180px;"></div>').appendTo(showpanel.mapctnr).get(0));
-		map.addControl(new gobj.GSmallMapControl());
+		map.addControl(new gobj.GSmallZoomControl());
 		map.addControl(new gobj.GMapTypeControl());
 		map.setCenter(photo.pos, photo.accuracy);
 		map.marker=new gobj.GMarker(photo.pos);
@@ -954,7 +952,21 @@ try {
 	this.win.f_unmask();
 }
 };
-
+PhotoMap.prototype.on_max_toggle=function(ismax) {
+	if(ismax) {
+		if(!this.ctrl_large) {
+			this.ctrl_large=new gobj.GLargeMapControl();
+			this.ctrl_overview=new gobj.GOverviewMapControl();
+		}
+		this.removeControl(this.ctrl_small);
+		this.addControl(this.ctrl_large);
+		this.addControl(this.ctrl_overview);
+	} else {
+		if(this.ctrl_overview) this.removeControl(this.ctrl_overview);
+		if(this.ctrl_large) this.removeControl(this.ctrl_large);
+		this.addControl(this.ctrl_small);
+	}
+};
 PhotoMap.prototype.searchresult_click=function() {
 	this.win.savelocation_display();
 };
@@ -1552,11 +1564,11 @@ try {
 
 	var win=null;
 	if(this.photo_id) {
-		win=create_mapwindow(516,313,{link:this,embedlink:true,loadlast:true});
+		win=create_mapwindow({link:this,fixmax:false,width:516,height:313,embedlink:true,loadlast:true});
 	} else if(this.photoset_id) {
-		win=create_mapwindow(0,0,{link:this,fixmax:true,bottompanel:true,readonly:true,embedlink:true,about:true});
+		win=create_mapwindow({link:this,fixmax:true,bottompanel:true,readonly:true,embedlink:true,about:true});
 	} else {
-		win=create_mapwindow(0,0,{link:this,fixmax:true,bottompanel:true,readonly:true,loadlast:true,about:true});
+		win=create_mapwindow({link:this,fixmax:true,bottompanel:true,readonly:true,loadlast:true,about:true});
 	}
 	$(document.body).prepend(win);
 	win.f_open();
@@ -1567,7 +1579,8 @@ try {
 	if(opt.photo_id) {
 		var gmap=new fgs.PhotoMap(mapdiv, opt);
 		gmap.addControl(new gobj.GMapTypeControl());
-		gmap.addControl(new gobj.GSmallMapControl());
+		gmap.ctrl_small=new gobj.GSmallMapControl();
+		gmap.addControl(gmap.ctrl_small);
 	} else if(opt.photoset_id) {
 		var gmap=new fgs.PhotoSetMap(mapdiv, opt);
 		gmap.addControl(new gobj.GMapTypeControl());
