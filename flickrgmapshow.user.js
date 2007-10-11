@@ -124,7 +124,7 @@ document.write = function(str) {
 	}
 };
 
-var btnbackgnd = 'background:transparent url('+imgdir+'icons.png?v=2.8) no-repeat scroll ';
+var btnbackgnd = 'background:transparent url('+imgdir+'icons.png?v=2.9) no-repeat scroll ';
 var shadwbkgnd = 'background:transparent url('+imgdir+'shadow-main.png) no-repeat scroll ';
 var FGS_STYLE=
 '<style type="text/css">'+
@@ -787,7 +787,7 @@ PhotoGroupMarker.prototype.onclick=function(){
 	marker.onphotoclick.apply(marker.currphoto.img);
 };
 PhotoGroupMarker.prototype.showpanelstr = 
-	'<div style="width:505px;height:270px;">'+
+	'<div style="border: 1px solid gray; width:505px;height:270px;">'+
 		'<div style="position:absolute;left:  5px;top:  5px;"><a class="maxbtn" style="float:left;" target="_blank"></a><a class="title" target="_blank"></a></div>'+
 		'<div style="position:absolute;left:  5px;top: 25px;width:240px;height:180px; overflow:hidden;"></div>'+
 		'<div style="position:absolute;left:  5px;top:215px;width:240px;">'+
