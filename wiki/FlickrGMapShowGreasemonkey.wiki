@@ -1,3 +1,0 @@
-#labels Featured
-= Flickr GMap Show, Greasemonkey =
-[http://userscripts.org/scripts/show/9450 Project on userscripts.org]
