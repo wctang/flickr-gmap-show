@@ -1,13 +1,14 @@
 // Flickr Gmap Show
-// v3.1
+// v3.2
 // Copyright (c) 2008, Tang Wei-Ching.
 // Released under the GPL license
 // http://www.gnu.org/copyleft/gpl.html
 //
 // Change Log:
+// v3.2  08/03/11 Remove BrowseControl and PhotoSetControl.
 // v3.1  08/02/29 Support firefox 3. Add location history.
 // v3.0  07/11/09 Implement Orgnaize Map. Localize interface.
-// v2.9  07/10/11 Improve operation speed. Use CSS Sprites. Delay check new version. Fix minor bug. 
+// v2.9  07/10/11 Improve operation speed. Use CSS Sprites. Delay check new version. Fix minor bug.
 // v2.8  07/10/07 Change browse map behavior. Fix max window style.
 // v2.7  07/10/01 Refine photoset map. Change browse map behavior. Fix bugs.
 // v2.6  07/08/22 Add Embedded Link.
@@ -39,13 +40,12 @@ var SCRIPT = {
 	description: 'Show Flickr geotagged photos with Google Map.',
 	source: 'http://userscripts.org/scripts/show/9450',
 	identifier: 'http://userscripts.org/scripts/source/9450.user.js',
-	version: '3.1',
-	date: (new Date(2008, 2, 29)).valueOf() // update date
+	version: '3.2',
+	date: (new Date(2008, 3, 11)).valueOf() // update date
 };
 
 var unsafewin = (typeof unsafeWindow != 'undefined') ? unsafeWindow : window;
 var unsafedoc=unsafewin.document;
-var mapapi;
 
 var js_jquery = 'http://jqueryjs.googlecode.com/files/jquery-1.2.3.min.js';
 var $;
@@ -53,10 +53,11 @@ var map_key = {
 	'www.flickr.com':'ABQIAAAA5iyLqLpUbk1qBe2volmsqxSJH83gQrDVSdV8r9NArjCP9aOWERRU1og-N0K74gHhNgzjBwOD_qJqMA',
 	'flickr.com'    :'ABQIAAAA5iyLqLpUbk1qBe2volmsqxSGM0_bDfGWz8SC2GLcx2eGJvE10BTGjbXI0oN8Qn9JZDhW_LeBOkw_sA'
 };
-var js_gmap = 'http://maps.google.com/maps?file=api&v=2.x&key='; // www.flickr.com
+var js_gmap = 'http://www.google.com/jsapi?key=';
+var google=null;
 var js_analytics = 'http://www.google-analytics.com/ga.js';
 
-var EMBEDDED_URL = 'http://flickr-gmap-show.googlecode.com/svn/trunk/';
+// var EMBEDDED_URL = 'http://flickr-gmap-show.googlecode.com/svn/trunk/';
 
 var small_loading = 'data:image/gif;base64,R0lGODlhCgAKAJEDAMzMzP9mZv8AAP%2F%2F%2FyH%2FC05FVFNDQVBFMi4wAwEAAAAh%2BQQFAAADACwAAAAACgAKAAACF5wncgaAGgJzJ647cWua4sOBFEd62VEAACH5BAUAAAMALAEAAAAIAAMAAAIKnBM2IoMDAFMQFAAh%2BQQFAAADACwAAAAABgAGAAACDJwHMBGofKIRItJYAAAh%2BQQFAAADACwAAAEAAwAIAAACChxgOBPBvpYQYxYAIfkEBQAAAwAsAAAEAAYABgAAAgoEhmPJHOGgEGwWACH5BAUAAAMALAEABwAIAAMAAAIKBIYjYhOhRHqpAAAh%2BQQFAAADACwEAAQABgAGAAACDJwncqi7EQYAA0p6CgAh%2BQQJAAADACwHAAEAAwAIAAACCpRmoxoxvQAYchQAOw%3D%3D';
 var imgdir = 'http://flickr-gmap-show.googlecode.com/svn/trunk/pics/';
@@ -69,12 +70,12 @@ var pics = {
 	loading         : imgdir+'loading.gif',
 	icon1           : imgdir+'icon1.png',
 	icon2           : imgdir+'icon2.png',
-	icon3           : imgdir+'icon3.png'
+	icon3           : imgdir+'icon3.png',
+	infobg_flickr   : imgdir+'infobg_flickr.jpg',
+	bar_loading     : imgdir+'bar_loading.gif'
 };
 
-function prepare_pics() {
-	$.each(pics, function() { $("<img>").attr("src", this); });
-}
+function prepare_pics() { $.each(pics, function() { $("<img>").attr("src", this); }); }
 
 var PER_PAGE = 200;
 var DEF_LAT = '0';
@@ -100,28 +101,28 @@ switch(unsafewin.global_intl_lang) {
 		'pageprev': '&#x524d;&#x4e00;&#x9801;',
 		'pagenext': '&#x4e0b;&#x4e00;&#x9801;',
 		'loading': '&#x8f09;&#x5165;&#x4e2d;',
-		'opt-all': '&#x4f60;&#x6240;&#x6709;&#x7684;&#x76f8;&#x7247;',
-		'opt-not_tagged': '&#x4f60;&#x7684;&#x672a;&#x6a19;&#x8b58;&#x76f8;&#x7247;',
-		'opt-not_in_set': '&#x4f60;&#x4e0d;&#x5728;&#x76f8;&#x7247;&#x96c6;&#x4e2d;&#x7684;&#x76f8;&#x7247;',
-		'opt-located': '&#x4f60;&#x7684;&#x5df2;&#x6a19;&#x793a;&#x5730;&#x7406;&#x4f4d;&#x7f6e;&#x7684;&#x76f8;&#x7247;',
-		'opt-not_located': '&#x4f60;&#x7684;&#x672a;&#x6a19;&#x793a;&#x5730;&#x7406;&#x4f4d;&#x7f6e;&#x7684;&#x76f8;&#x7247;',
-		'opt-set': '&#x4f60;&#x7684;&#x76f8;&#x7247;&#x96c6;',
-		'opt-group': '&#x4f60;&#x7684;&#x7fa4;&#x7d44;',
-		'date-date': '&#x65e5;&#x671f;',
-		'date-lastmonth': '&#x4e0a;&#x500b;&#x6708;',
-		'date-lastweek': '&#x4e0a;&#x500b;&#x661f;&#x671f;',
-		'date-yesterday': '&#x6628;&#x5929;',
-		'date-all': '&#x5168;&#x90e8;',
-		'month-all': '&#x6240;&#x6709;&#x6708;&#x5206;',
-		'day-all': '&#x5168;&#x90e8;',
-		'sort-sort': '&#x6392;&#x5e8f;',
-		'sort-interestingness-desc': '&#x6709;&#x8da3;&#x5ea6;&#xff0c;&#x5927;&#x5230;&#x5c0f;',
-		'sort-interestingness-asc': '&#x6709;&#x8da3;&#x5ea6;&#xff0c;&#x5c0f;&#x5230;&#x5927;',
-		'sort-date-taken-desc': '&#x62cd;&#x651d;&#x65e5;&#x671f;&#xff0c;&#x8fd1;&#x81f3;&#x9060;',
-		'sort-date-taken-asc': '&#x62cd;&#x651d;&#x65e5;&#x671f;&#xff0c;&#x9060;&#x81f3;&#x8fd1;',
-		'sort-date-posted-desc': '&#x4e0a;&#x50b3;&#x65e5;&#x671f;&#xff0c;&#x8fd1;&#x81f3;&#x9060;',
-		'sort-date-posted-asc': '&#x4e0a;&#x50b3;&#x65e5;&#x671f;&#xff0c;&#x9060;&#x81f3;&#x8fd1;',
-		'sort-relevance': '&#x4f4d;&#x7f6e;&#x76f8;&#x95dc;&#x6027;',
+		'opt_all': '&#x4f60;&#x6240;&#x6709;&#x7684;&#x76f8;&#x7247;',
+		'opt_not_tagged': '&#x4f60;&#x7684;&#x672a;&#x6a19;&#x8b58;&#x76f8;&#x7247;',
+		'opt_not_in_set': '&#x4f60;&#x4e0d;&#x5728;&#x76f8;&#x7247;&#x96c6;&#x4e2d;&#x7684;&#x76f8;&#x7247;',
+		'opt_located': '&#x4f60;&#x7684;&#x5df2;&#x6a19;&#x793a;&#x5730;&#x7406;&#x4f4d;&#x7f6e;&#x7684;&#x76f8;&#x7247;',
+		'opt_not_located': '&#x4f60;&#x7684;&#x672a;&#x6a19;&#x793a;&#x5730;&#x7406;&#x4f4d;&#x7f6e;&#x7684;&#x76f8;&#x7247;',
+		'opt_set': '&#x4f60;&#x7684;&#x76f8;&#x7247;&#x96c6;',
+		'opt_group': '&#x4f60;&#x7684;&#x7fa4;&#x7d44;',
+		'date_date': '&#x65e5;&#x671f;',
+		'date_lastmonth': '&#x4e0a;&#x500b;&#x6708;',
+		'date_lastweek': '&#x4e0a;&#x500b;&#x661f;&#x671f;',
+		'date_yesterday': '&#x6628;&#x5929;',
+		'date_all': '&#x5168;&#x90e8;',
+		'month_all': '&#x6240;&#x6709;&#x6708;&#x5206;',
+		'day_all': '&#x5168;&#x90e8;',
+		'sort_sort': '&#x6392;&#x5e8f;',
+		'sort_interestingness_desc': '&#x6709;&#x8da3;&#x5ea6;',
+		'sort_interestingness_asc': '&#x6709;&#x8da3;&#x5ea6;&#xff0c;&#x5c0f;&#x5230;&#x5927;',
+		'sort_date_taken_desc': '&#x62cd;&#x651d;&#x65e5;&#x671f;',
+		'sort_date_taken_asc': '&#x62cd;&#x651d;&#x65e5;&#x671f;&#xff0c;&#x9060;&#x81f3;&#x8fd1;',
+		'sort_date_posted_desc': '&#x4e0a;&#x50b3;&#x65e5;&#x671f;',
+		'sort_date_posted_asc': '&#x4e0a;&#x50b3;&#x65e5;&#x671f;&#xff0c;&#x9060;&#x81f3;&#x8fd1;',
+		'sort_relevance': '&#x4f4d;&#x7f6e;&#x76f8;&#x95dc;&#x6027;',
 		'search': '&#x641c;&#x5c0b;',
 		'clearsel': '&#x6e05;&#x9664;&#x9078;&#x64c7;',
 		'photos': '&#x5f35;&#x76f8;&#x7247;',
@@ -150,28 +151,28 @@ switch(unsafewin.global_intl_lang) {
 		'pageprev': 'Previous Page',
 		'pagenext': 'Next Page',
 		'loading': 'Loading',
-		'opt-all': 'All your photos',
-		'opt-not_tagged': 'Your non-tagged photos',
-		'opt-not_in_set': 'Your photos not in a set',
-		'opt-located': 'Your geotagged photos',
-		'opt-not_located': 'Your non-geotagged photos',
-		'opt-set': 'Your sets',
-		'opt-group': 'Your groups',
-		'date-date': 'Date',
-		'date-lastmonth': 'Last Month',
-		'date-lastweek': 'Last Week',
-		'date-yesterday': 'Yesterday',
-		'date-all': 'All Time',
-		'month-all': 'All',
-		'day-all': 'All',
-		'sort-sort': 'Sort',
-		'sort-interestingness-desc': 'Interestingness, desc',
-		'sort-interestingness-asc': 'Interestingness, asc',
-		'sort-date-taken-desc': 'Date taken, desc',
-		'sort-date-taken-asc': 'Date taken, asc',
-		'sort-date-posted-desc': 'Date posted, desc',
-		'sort-date-posted-asc': 'Date posted, asc',
-		'sort-relevance': 'Relevance',
+		'opt_all': 'All your photos',
+		'opt_not_tagged': 'Your non-tagged photos',
+		'opt_not_in_set': 'Your photos not in a set',
+		'opt_located': 'Your geotagged photos',
+		'opt_not_located': 'Your non-geotagged photos',
+		'opt_set': 'Your sets',
+		'opt_group': 'Your groups',
+		'date_date': 'Date',
+		'date_lastmonth': 'Last Month',
+		'date_lastweek': 'Last Week',
+		'date_yesterday': 'Yesterday',
+		'date_all': 'All Time',
+		'month_all': 'All',
+		'day_all': 'All',
+		'sort_sort': 'Sort',
+		'sort_interestingness_desc': 'Interestingness',
+		'sort_interestingness_asc': 'Interestingness, less-first',
+		'sort_date_taken_desc': 'Date taken',
+		'sort_date_taken_asc': 'Date taken, older-first',
+		'sort_date_posted_desc': 'Date posted',
+		'sort_date_posted_asc': 'Date posted, older-first',
+		'sort_relevance': 'Relevance',
 		'search': 'Search',
 		'clearsel': 'Clear selection',
 		'photos': 'photos',
@@ -183,15 +184,15 @@ switch(unsafewin.global_intl_lang) {
 
 
 function loadscript(jspath,loaded) {
-	var s = document.createElement('script');
+	var s=document.createElement('script');
 	s.setAttribute('type','text/javascript');
 	s.setAttribute('src',jspath);
 	if(loaded) {
-		s.addEventListener('readystatechange', function(){this.readyState=='complete' && loaded();}, false);
+		s.addEventListener('readystatechange', function(){if(this.readyState==='complete') { loaded(); }}, false);
 		s.addEventListener('load', loaded, false);
 	}
 	document.getElementsByTagName('head')[0].appendChild(s);
-};
+}
 var document_write_old = unsafedoc.write;
 unsafedoc.write = function(str) {
 	if(str.indexOf('<script ')>=0){
@@ -201,11 +202,11 @@ unsafedoc.write = function(str) {
 	} else if(str.indexOf('<style ')>=0) {
 		var sty = document.createElement('style');
 		sty.setAttribute('type', 'text/css');
-		var f = str.indexOf('media="');
-		(f>0) && (sty.setAttribute('media', str.substring(f+7,str.indexOf('"',f+7))));
+		var s = str.indexOf('media="');
+		if(s>0) { sty.setAttribute('media', str.substring(s+7,str.indexOf('"',s+7))); }
 		str=str.replace(/<style.*">/,'').replace(/<\/style>/,'');
-		sty.styleSheet ? sty.styleSheet.cssText = str // ie
-			: sty.appendChild(document.createTextNode(str));
+		if(sty.styleSheet) { sty.styleSheet.cssText = str;  // ie
+		} else { sty.appendChild(document.createTextNode(str)); }
 		document.getElementsByTagName('head')[0].appendChild(sty);
 	} else {
 		document_write_old(str);
@@ -229,8 +230,8 @@ var FGS_STYLE=
 '.flickrgmapshow span.address {background-color:white;} '+
 '.flickrgmapshow span.address a {text-decoration:none;} '+
 '.flickrgmapshow span.latlng {font:italic 11px arial; cursor:pointer;} '+
-'.flickrgmapshow a.closebtn,a.maxbtn,a.searchbtn,a.actionbtn,a.embedbtn,a.aboutbtn,a.updnbtn,a.prevbtn,a.nextbtn,a.trkbtn {display:block;width:15px;height:15px; text-indent:-999em; cursor:pointer;} '+
 '.flickrgmapshow a.btn {display:block; cursor:pointer;} '+
+'.flickrgmapshow a.closebtn,a.maxbtn,a.searchbtn,a.actionbtn,a.embedbtn,a.aboutbtn,a.updnbtn,a.prevbtn,a.nextbtn,a.trkbtn {display:block;width:15px;height:15px; text-indent:-999em; cursor:pointer;} '+
 '.flickrgmapshow a.p_btn,a.r_btn   {display:block;height:48px;width:25px; text-indent:-999em; cursor:pointer;} '+
 '.flickrgmapshow a.pp_btn,a.rr_btn {display:block;height:32px;width:25px; text-indent:-999em; cursor:pointer;} '+
 '.flickrgmapshow a.closebtn  {'+btnbackgnd+' 0px    0px;} .flickrgmapshow a.closebtn:hover  {'+btnbackgnd+' -15px    0px;} '+
@@ -248,13 +249,14 @@ var FGS_STYLE=
 '.flickrgmapshow a.r_btn     {'+btnbackgnd+' 0px -230px;} .flickrgmapshow a.r_btn:hover     {'+btnbackgnd+' -25px -230px;} '+
 '.flickrgmapshow a.rr_btn    {'+btnbackgnd+' 0px -278px;} .flickrgmapshow a.rr_btn:hover    {'+btnbackgnd+' -25px -278px;} '+
 '.flickrgmapshow div.option {padding:5px; border:solid 1px black; background-color:white; border-radius:9px;-moz-border-radius:9px;-webkit-border-radius:9px;} '+
-'.flickrgmapshow div.markerlabel {position:absolute; text-align:center; vertical-align:middle; font-size:small; cursor:pointer;}'+
+'.flickrgmapshow div.markerlabel {text-align:center; vertical-align:middle; font-size:small; cursor:pointer;} '+
+'.flickrgmapshow div.markerlabel:hover {color:white; font-weight:bold;} '+
+'.flickrgmapshow div.flickr {background:transparent url('+pics.infobg_flickr+') no-repeat scroll bottom right;} '+
 '.flickrgmapshow div.markerinfowin a {text-decoration:none;} '+
 '.flickrgmapshow div.photopanel div.background {background-color:white; opacity:.75;-moz-opacity:.75;filter:alpha(opacity=75);} '+
-'.flickrgmapshow div.photopanel div.progress {background-color:#DDDDDD;} '+
-'.flickrgmapshow div.photopanel div.progressbar {background-color:#8888FF;} '+
-'.flickrgmapshow div.photopanel div.content img {top:6px; cursor:pointer; border:1px solid gray;} '+
+'.flickrgmapshow div.photopanel div.content img {top:6px; cursor:pointer; border:1px solid gray; background:transparent url('+pics.loading+') no-repeat scroll right bottom; } '+
 '.flickrgmapshow div.photopanel div.content img.selected {top:1px; border-bottom:3px solid #FF8888;} '+
+'.flickrgmapshow div.photopanel div.barloading {background:transparent url('+pics.bar_loading+') repeat-x scroll left top;} '+
 '.flickrgmapshow div.contextmenu {background-color:white; padding:3px; border:1px solid black; } '+
 '.flickrgmapshow div.contextmenu a {cursor:pointer;} '+
 '.flickrgmapshow .changed {color:red;} '+
@@ -264,6 +266,19 @@ var FGS_STYLE=
 
 var flickr={
 	name:'flickr',
+	parse: function(photos,rsp,ismustgeo,owner,ownername,buddy_url) {
+		var phs=rsp.photos||rsp.photoset;
+		for (var i=0,len=phs.photo.length; i<len; i++) {
+			var p=phs.photo[i];
+			var lat=parseFloat(p.latitude);
+			var lng=parseFloat(p.longitude);
+			if(ismustgeo && !lat && !lng) { continue; }
+
+			var latlng= ( (lat || lng) ? new google.maps.LatLng(lat, lng) : null);
+
+			photos.push({id:p.id, secret:p.secret, title:p.title, pos:latlng, accuracy:parseInt(p.accuracy,10), api:flickr, dateupload:parseInt(p.dateupload,10), datetaken:p.datetaken, owner:p.owner?p.owner:owner, ownername:p.ownername?p.ownername:ownername, farm:p.farm, server:p.server, iconfarm:p.iconfarm, iconserver:p.iconserver, buddy_url:buddy_url, license:parseInt(p.license,10)});
+		}
+	},
 	gettitle: function(photo) {return photo.title;},
 	iconurl: function(photo) {return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_s.jpg';},
 	thumburl: function(photo) {return 'http://farm'+photo.farm+'.static.flickr.com/'+photo.server+'/'+photo.id+'_'+photo.secret+'_t.jpg';},
@@ -276,16 +291,16 @@ var flickr={
 	ownerurl: function(photo) {return 'http://www.flickr.com/photos/'+photo.owner+'/';},
 	datetaken: function(photo) { return photo.datetaken.substr(0,10); },
 	datetakenurl: function(photo) { return 'http://www.flickr.com/photos/'+photo.owner+'/archives/date-taken/'+(flickr.datetaken(photo).replace(/\-/g,'/'))+'/'; },
-	dateupload: function(photo) { 
+	dateupload: function(photo) {
 		var t=new Date(photo.dateupload*1000), y=t.getFullYear(), m=t.getMonth()+1, d=t.getDate();
 		return ''+y+'-'+(m>9?'':'0')+m+'-'+(d>9?'':'0')+d;
 	},
 	dateuploadurl: function(photo) { return 'http://www.flickr.com/photos/'+photo.owner+'/archives/date-posted/'+(flickr.dateupload(photo).replace(/\-/g,'/'))+'/'; },
 	hasbuddy: true,
 	buddyurl: function(photo) {
-		if(photo.buddy_url) return photo.buddy_url;
-		if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
-		else return 'http://www.flickr.com/images/buddyicon.jpg';
+		if(photo.buddy_url) { return photo.buddy_url; }
+		if(photo.iconserver&parseInt(photo.iconserver,10)>0) { return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg'; }
+		else { return 'http://www.flickr.com/images/buddyicon.jpg'; }
 	},
 	licensestr: function(photo) {
 		switch(photo.license) {
@@ -324,8 +339,8 @@ function load_history() {
 	var searchhistory=[];
 	for(var i=0; i<10; ++i) {
 		var h=GM_getValue('history_'+i, null);
-		if(h==null) continue;
-		if(!/^\((\-?\d+\.\d+)\,(\-?\d+\.\d+)\,(\d+)\)(.*)?$/.exec(h)) continue;
+		if(!h) { continue; }
+		if(!/^\((\-?\d+\.\d+)\,(\-?\d+\.\d+)\,(\d+)\)(.*)?$/.exec(h)) { continue; }
 		var lat=RegExp.$1,lng=RegExp.$2,zoom=RegExp.$3,n=RegExp.$4;
 		searchhistory[i]={lat:lat,lng:lng,zoom:zoom,text:n};
 	}
@@ -333,82 +348,80 @@ function load_history() {
 }
 function create_mapwindow(opt) {
 	opt = opt || {};
-	var $win=$(
-		'<div class="flickrgmapshow" style="position:absolute;z-index:99999; display:none;">'+
-			'<table class="shadow"><tr><td class="top" colspan="2"></td></tr><tr><td class="bl"></td><td class="br"></td></tr></table>'+  // shadow
-			'<div class="main" style="position:absolute;left:0px;">'+ // main
-				'<span class="title"     style="position:absolute;left:10px;right:70px;top:5px;line-height:20px;"></span>'+ // title
-				'<div  class="map"       style="position:absolute;left:4px;right:4px;top:26px;bottom:29px; border:1px solid lightgray; overflow:hidden;"></div>'+ // map
-				'<div  class="mask"      style="position:absolute;left:5px;right:5px;top:27px;bottom:30px; overflow:hidden; z-index:999999; display:none;"><div><img src="'+pics['loading']+'"></img></div></div>'+ // mask
-				'<a    class="closebtn mainclose" style="position:absolute;right:12px;top:6px;" title="'+msg['close']+'"></a>'+ // close btn
-				'<a    class="maxbtn"    style="position:absolute;right:32px;top:6px; display:none;" title="'+msg['maxrestore']+'"></a>'+ // max btn
-				'<a    class="searchbtn" style="position:absolute;right:52px;top:6px;" title="'+msg['searchlocation']+'"></a>'+ // search btn
-				'<div  class="search"    style="position:absolute;left:15px;top:37px;right:15px;bottom:37px; display:none;">'+
-					'<div class="searchinsert" style="position:absolute;left:10px;right:10px; top:10px;">'
-						+msg['searchlocation']+': '+
-					'</div>'+
-					'<div class="searchresult" style="position:absolute;left:10px;right:10px; top:35px; height:75px; overflow:auto; border-bottom:2px solid gray;"></div>'+
-					'<div class="searchhistory" style="position:absolute;left:10px;right:10px; top:120px; bottom:10px; overflow:auto;"></div>'+
-					'<a class="closebtn searchclose" style="position:absolute;right:12px;top:6px;"></a>'+
-				'</div>'+ //search
-				'<span class="address"   style="position:absolute;left:10px;right:140px;bottom:5px;line-height:20px;"></span>'+ // address
-				'<span class="latlng"    style="position:absolute;right:25px;bottom:5px;line-height:20px;"></span>'+ // latlng
-				'<a    class="aboutbtn"  style="position:absolute;right:5px;bottom:6px;" title="'+msg['about']+'"></a>'+ // about btn
-				'<div  class="about"     style="position:absolute;right:5px;bottom:30px;width:200px;height:150px; display:none;"><div style="text-align:center; padding:3px;"><p><b>Flickr GMap Show</b></p><p><a href="http://userscripts.org/scripts/show/9450">Project Page</a></p><p>Author: <a href="mailto:wctang@gmail.com">wctang</a></p><p><a target="_blank" href="https://www.paypal.com/xclick/business=wctang%40gmail%2ecom&item_name=fgs_donation&no_note=1&currency_code=USD"><img src="http://www.pspad.com/img/paypal_en.gif"></img></a></p></div></div>'+ //about
+	var winstr=
+'<div class="flickrgmapshow" style="position:absolute;z-index:99999; display:none;">'+
+	'<table class="shadow"><tr><td class="top" colspan="2"></td></tr><tr><td class="bl"></td><td class="br"></td></tr></table>'+  // shadow
+	'<div class="main" style="position:absolute;left:0px;">'+ // main
+		'<span class="title"     style="position:absolute;left:10px;right:70px;top:5px;line-height:20px;"></span>'+ // title
+		'<div  class="map"       style="position:absolute;left:4px;right:4px;top:26px;bottom:29px; border:1px solid lightgray; overflow:hidden;"></div>'+ // map
+		'<div  class="mask"      style="position:absolute;left:5px;right:5px;top:27px;bottom:30px; overflow:hidden; z-index:999999; display:none;"><div><img src="'+pics.loading+'"></img></div></div>'+ // mask
+		'<a    class="closebtn mainclose" style="position:absolute;right:12px;top:6px;" title="'+msg.close+'"></a>'+ // close btn
+		'<a    class="maxbtn"    style="position:absolute;right:32px;top:6px; display:none;" title="'+msg.maxrestore+'"></a>'+ // max btn
+		'<a    class="searchbtn" style="position:absolute;right:52px;top:6px;" title="'+msg.searchlocation+'"></a>'+ // search btn
+		'<div  class="search"    style="position:absolute;left:15px;top:37px;right:15px;bottom:37px; display:none;">'+
+			'<div class="searchinsert" style="position:absolute;left:10px;right:10px; top:10px;">'+msg.searchlocation+': '+
+				'<form class="searchform" style="display:inline;"><input class="searchinput" style="width:250px;"></input><input type="submit"></input></form>'+
 			'</div>'+
-		'</div>');
+			'<div class="searchresult" style="position:absolute;left:10px;right:10px; top:35px; height:75px; overflow:auto; border-bottom:2px solid gray;"></div>'+
+			'<div class="searchhistory" style="position:absolute;left:10px;right:10px; top:120px; bottom:10px; overflow:auto;"></div>'+
+			'<a class="closebtn searchclose" style="position:absolute;right:12px;top:6px;"></a>'+
+		'</div>'+ //search
+		'<span class="address"   style="position:absolute;left:10px;right:140px;bottom:5px;line-height:20px;"></span>'+ // address
+		'<span class="latlng"    style="position:absolute;right:25px;bottom:5px;line-height:20px;"></span>'+ // latlng
+		'<a    class="aboutbtn"  style="position:absolute;right:5px;bottom:6px;" title="'+msg.about+'"></a>'+ // about btn
+		'<div  class="about"     style="position:absolute;right:5px;bottom:30px;width:200px;height:150px; display:none;"><div style="text-align:center; padding:3px;"><p><b>Flickr GMap Show</b></p><p><a href="http://userscripts.org/scripts/show/9450">Project Page</a></p><p>Author: <a href="mailto:wctang@gmail.com">wctang</a></p><p><a target="_blank" href="https://www.paypal.com/xclick/business=wctang%40gmail%2ecom&item_name=fgs_donation&no_note=1&currency_code=USD"><img src="http://www.pspad.com/img/paypal_en.gif"></img></a></p></div></div>'+ //about
+	'</div>'+
+'</div>';
+	var $win=$(winstr);
 	var win=$win.get(0);
-	for(var f in create_mapwindow)
-		(typeof create_mapwindow[f] == 'function') && (win[f] = create_mapwindow[f]);
+	for(var f in create_mapwindow) {
+		if(typeof create_mapwindow[f] == 'function') { win[f] = create_mapwindow[f]; }
+	}
 
-	var dosearchinput = document.createElement('input');
-	dosearchinput.setAttribute('name','s_str');
-	dosearchinput.style.width='250px';
-	var dosearchsubmit = document.createElement('input');
-	dosearchsubmit.setAttribute('type','submit');
-	dosearchsubmit.addEventListener('click',function(){
-		try{
-			$win.find('div.searchresult').empty().text('waiting...');
-			geocode.search(win,win.submitSearch_callback, dosearchinput.value );
-		} finally {
-			return false;
-		}
-	}, false);
+	$win.find('form.searchform').submit(function(){ try {
+		$win.find('div.searchresult').empty().html('<span><img src="'+pics.loading+'"></img> waiting...</span>');
+		var inp = $win.find('input.searchinput').val();
+		setTimeout(function() {
+			geocode.search(win,win.submitSearch_callback, inp );
+		}, 0);
+	} finally {
+		return false;
+	}});;
 
 	win.mapdiv=$win.find('div.map').get(0);
-	$win.find('a.mainclose').click(function(){ $win.fadeToggle('fast'); }).end()
-		.find('a.searchbtn,a.searchclose').click(function(){ 
-			var $search=$win.find('div.search');
-			if($search.css('display') == 'none') { // to show
-				$search.children('div.searchhistory').empty();
-				setTimeout(function() {
-					var a =$('<a class="btn searchhistory">'+msg['loadlastlocation']+'</a>').get(0);
-					a.lat=parseFloat(GM_getValue('last_lat', DEF_LAT));
-					a.lng=parseFloat(GM_getValue('last_lng', DEF_LNG));
-					a.zoom=parseInt(GM_getValue('last_zoom', DEF_ZOOM));
-					a.win=win;
-					a.notsavehistory=true;
-					$search.children('div.searchhistory').append(a);
-					var searchhistory=load_history();
-					for(var i=0; i<10; ++i) {
-						var item=searchhistory[i];
-						if(!item) continue;
-						var a =$('<a class="btn searchhistory">'+item.text+'</a>').get(0);
-						a.lat=parseFloat(item.lat);
-						a.lng=parseFloat(item.lng);
-						a.zoom=parseInt(item.zoom);
-						a.win=win;
-						$search.children('div.searchhistory').append(a);
-					}
-					$search.children('div.searchhistory').children('a').click(win.searchresult_click);
-				}, 0);
-			}
-			$win.find('div.search').fadeToggle('fast');
-		}).end()
-		.find('div.searchinsert').append(dosearchinput).append(dosearchsubmit).end()
-		.find('span.latlng').click(function(){ if(win.gmap && win.gmap.onLatLngClick) win.gmap.onLatLngClick(); }).end()
-		.find('a.aboutbtn').click(function(){ $win.find('div.about').slideToggle('fast'); }).end()
-		;
+	$win.find('a.mainclose').click(function(){ $win.fadeToggle('fast'); });
+	$win.find('a.searchbtn,a.searchclose').click(function(){
+		var $search=$win.find('div.search');
+		if($search.css('display') == 'none') { // to show
+			$search.find('div.searchhistory').empty();
+			setTimeout(function() {
+				var a =$('<a class="btn searchhistory">'+msg.loadlastlocation+'</a>').get(0);
+				a.lat=parseFloat(GM_getValue('last_lat', DEF_LAT));
+				a.lng=parseFloat(GM_getValue('last_lng', DEF_LNG));
+				a.zoom=parseInt(GM_getValue('last_zoom', DEF_ZOOM),10);
+				a.win=win;
+				a.notsavehistory=true;
+				$search.find('div.searchhistory').append(a);
+				var searchhistory=load_history();
+				for(var i=0; i<10; ++i) {
+					var item=searchhistory[i];
+					if(!item) { continue; }
+					var sitem =$('<a class="btn searchhistory">'+item.text+'</a>').get(0);
+					sitem.lat=parseFloat(item.lat);
+					sitem.lng=parseFloat(item.lng);
+					sitem.zoom=parseInt(item.zoom,10);
+					sitem.win=win;
+					$search.find('div.searchhistory').append(sitem);
+				}
+				$search.find('div.searchhistory').children('a').click(win.searchresult_click);
+				$search.find('input.searchinput').focus();
+			}, 0);
+		}
+		$win.find('div.search').fadeToggle('fast');
+	});
+	$win.find('span.latlng').click(function(){ if(win.gmap && win.gmap.onLatLngClick) { win.gmap.onLatLngClick(); } });
+	$win.find('a.aboutbtn').click(function(){ $win.find('div.about').slideToggle('fast'); });
+
 	win.link=opt.link;
 	if(opt.fixmax) {
 		win.m_max=true;
@@ -423,13 +436,13 @@ function create_mapwindow(opt) {
 		var ofst = $(win.link).offset();
 		var top=ofst.top-opt.height-10;
 		var left=ofst.left-(opt.width*.85);
-		if(left < 10) left = 10;
+		if(left < 10) { left = 10; }
 		win.m_pos = {top:top,left:left,width:opt.width,height:opt.height};
 	}
 	return win;
-};
+}
 create_mapwindow.open=function(dom){
-	if(dom) $(dom).prepend(this);
+	if(dom) { $(dom).prepend(this); }
 	$(this).fadeIn('fast');
 	this.refreshSize();
 };
@@ -438,15 +451,15 @@ create_mapwindow.close=function(){
 	$(win).fadeOut('fast');
 };
 create_mapwindow.onWindowResize=function(){
-	if(this.style.display == 'none' || !this.m_max) return;
+	if(this.style.display == 'none' || !this.m_max) { return; }
 	this.refreshSize();
 };
 create_mapwindow.refreshSize=function(animate) {
 	var pos;
 	if(this.m_max) {
 		pos={top:unsafewin.pageYOffset+10, left:unsafewin.pageXOffset+10, width:document.body.clientWidth-30, height:document.body.clientHeight-30};
-		if(pos.width < 150) pos.width = 150;
-		if(pos.height < 200) pos.height = 200;
+		if(pos.width < 150) { pos.width = 150; }
+		if(pos.height < 200) { pos.height = 200; }
 	} else {
 		pos = this.m_pos;
 	}
@@ -457,10 +470,10 @@ create_mapwindow.refreshSize=function(animate) {
 	function end_resize() {
 		if(isvisible && gmap) {
 			gmap.checkResize();
-			if(gmap.onresized) gmap.onresized();
+			if(gmap.onresized) { gmap.onresized(); }
 		}
-	};
-	if(gmap && gmap.onresize) gmap.onresize();
+	}
+	if(gmap && gmap.onresize) { gmap.onresize(); }
 	if(isvisible && animate) {
 		$this.animate(pos,'fast').find('div.main').animate({width:pos.width-4,height:pos.height-4},'fast','',end_resize);
 	} else {
@@ -475,8 +488,7 @@ create_mapwindow.submitSearch_callback=function(result){
 	}
 
 	var gres = eval('('+result.responseText+')');
-	if(!gres.Status || !gres.Status.code)
-		return;
+	if(!gres.Status || !gres.Status.code) { return; }
 
 	var $this = $(this);
 	$this.find('div.searchresult').empty();
@@ -507,19 +519,19 @@ create_mapwindow.submitSearch_callback=function(result){
 			if(!addrdtl) {
 				break;
 			} else if(addrdtl.Country) {
-				if(addrdtl.Country.CountryNameCode) addr.push(addrdtl.Country.CountryNameCode);
+				if(addrdtl.Country.CountryNameCode) { addr.push(addrdtl.Country.CountryNameCode); }
 				addrdtl=addrdtl.Country;
 			} else if(addrdtl.AdministrativeArea) {
-				if(addrdtl.AdministrativeArea.AdministrativeAreaName) addr.push(addrdtl.AdministrativeArea.AdministrativeAreaName);
+				if(addrdtl.AdministrativeArea.AdministrativeAreaName) { addr.push(addrdtl.AdministrativeArea.AdministrativeAreaName); }
 				addrdtl=addrdtl.AdministrativeArea;
 			} else if(addrdtl.SubAdministrativeArea) {
-				if(addrdtl.SubAdministrativeArea.SubAdministrativeAreaName) addr.push(addrdtl.SubAdministrativeArea.SubAdministrativeAreaName);
+				if(addrdtl.SubAdministrativeArea.SubAdministrativeAreaName) { addr.push(addrdtl.SubAdministrativeArea.SubAdministrativeAreaName); }
 				addrdtl=addrdtl.SubAdministrativeArea;
 			} else if(addrdtl.Locality) {
-				if(addrdtl.Locality.LocalityName) addr.push(addrdtl.Locality.LocalityName);
+				if(addrdtl.Locality.LocalityName) { addr.push(addrdtl.Locality.LocalityName); }
 				addrdtl=addrdtl.Locality;
 			} else if(addrdtl.Thoroughfare) {
-				if(addrdtl.Thoroughfare.ThoroughfareName) addr.push(addrdtl.Thoroughfare.ThoroughfareName);
+				if(addrdtl.Thoroughfare.ThoroughfareName) { addr.push(addrdtl.Thoroughfare.ThoroughfareName); }
 				addrdtl=addrdtl.Thoroughfare;
 			} else {
 				break;
@@ -530,8 +542,9 @@ create_mapwindow.submitSearch_callback=function(result){
 		var address = '';
 		if(point.address) {
 			var j = 0;
-			for(; j< addr.length; ++j)
-				if( point.address.indexOf(addr[j]) < 0) break;
+			for(; j< addr.length; ++j) {
+				if( point.address.indexOf(addr[j]) < 0) { break; }
+			}
 			addr.splice(0,j);
 			address = point.address + ' (' + addr.join(', ') + ')';
 		} else {
@@ -539,7 +552,7 @@ create_mapwindow.submitSearch_callback=function(result){
 		}
 
 		var a=$('<a class="btn searchresult">'+address+'</a>').click(this.searchresult_click).get(0);
-		a.zoom=geocode.accuracytozoom[parseInt(point.AddressDetails.Accuracy)];
+		a.zoom=geocode.accuracytozoom[parseInt(point.AddressDetails.Accuracy,10)];
 		var pos=point.Point.coordinates;
 		a.lat=parseFloat(pos[1]);
 		a.lng=parseFloat(pos[0]);
@@ -548,7 +561,8 @@ create_mapwindow.submitSearch_callback=function(result){
 	}
 };
 create_mapwindow.showmask=function(isshow){
-	isshow ? $(this).find('div.mask').show() : $(this).find('div.mask').hide();
+	if(isshow) { $(this).find('div.mask').show();
+	} else { $(this).find('div.mask').hide(); }
 };
 create_mapwindow.searchresult_click=function(){
 	$(this.win).find('div.search').fadeToggle('fast');
@@ -558,45 +572,42 @@ create_mapwindow.searchresult_click=function(){
 			var searchhistory=load_history();
 			var tmp=[];
 			tmp[0]=item_new;
-			for(var i=0; i<10; ++i) {
-				var item=searchhistory[i];
-				if(!item) continue;
-				if(item.lat==item_new.lat && item.lng==item_new.lng && item.zoom==item_new.zoom) continue;
+			var i=0, item;
+			for(i=0; i<10; ++i) {
+				item=searchhistory[i];
+				if(!item || (item.lat==item_new.lat && item.lng==item_new.lng && item.zoom==item_new.zoom)) { continue; }
 				tmp.push(item);
-				if(tmp.length >= 10) break;
+				if(tmp.length >= 10) { break; }
 			}
-			for(var i=0; i<10; ++i) {
-				var item=tmp[i];
+			for(i=0; i<10; ++i) {
+				item=tmp[i];
 				var h = null;
-				if(item) h='('+item.lat+','+item.lng+','+item.zoom+')'+item.text;
-	
+				if(item) { h='('+item.lat+','+item.lng+','+item.zoom+')'+item.text; }
 				GM_setValue('history_'+i, h);
 			}
 		}, 0);
 	}
-	var pos=new mapapi.GLatLng(this.lat,this.lng);
-	this.win.gmap && this.win.gmap.onSearchResultClicked && this.win.gmap.onSearchResultClicked(pos, this.zoom);
+	var pos=new google.maps.LatLng(this.lat,this.lng);
+	if(this.win.gmap && this.win.gmap.onSearchResultClicked) { this.win.gmap.onSearchResultClicked(pos, this.zoom); }
 };
 create_mapwindow.setLocationInfo=function(latlng, zoom, locate, ischanged){
 	var $this=$(this);
 	if(latlng) {
 		var $latlng = $this.find('span.latlng');
-	
+
 		$latlng.text(latlng.toUrlValue());
-		if(ischanged) 
-			$latlng.addClass('changed');
-		else
-			$latlng.removeClass('changed');
+		if(ischanged)  { $latlng.addClass('changed');
+		} else { $latlng.removeClass('changed'); }
 	}
 
-	if(locate == null) {
+	if(!locate) {
 		flickr.callapi('flickr.places.findByLatLon', {lat:latlng.lat(), lon:latlng.lng(), accuracy:zoom}, function(success, responseXML, responseText, params){
 			var rsp = eval('('+responseText+')');
-			if(rsp.stat != 'ok') return;
+			if(rsp.stat != 'ok') { return; }
 			if(rsp.places.total==1) {
 				flickr.callapi('flickr.places.resolvePlaceId', {place_id:rsp.places.place[0].place_id}, function(success, responseXML, responseText, params){
 					var rsp = eval('('+responseText+')');
-					if(rsp.stat != 'ok') return;
+					if(rsp.stat != 'ok') { return; }
 					$this.get(0).setLocationInfo(null, null, rsp.location, null);
 				});
 			} else {
@@ -614,39 +625,37 @@ create_mapwindow.setLocationInfo=function(latlng, zoom, locate, ischanged){
 		if(loc && loc._content!=last) { last=loc._content; locname.push('<a href="'+flickr.placeurl(loc.place_id)+'" target="_blank">'+last+'</a>'); }
 		loc = locate.country;
 		if(loc && loc._content!=last) { last=loc._content; locname.push('<a href="'+flickr.placeurl(loc.place_id)+'" target="_blank">'+last+'</a>'); }
-		if(locname.length)
-			$this.find('span.address').html(locname.join());
+		if(locname.length) { $this.find('span.address').html(locname.join()); }
 	}
 };
 
 var fgs = {
-extend : function(subc,basec) {
-	var inh=function(){}; inh.prototype=basec.prototype; subc.prototype=new inh();
-	subc.prototype.constructor=subc; subc.prototype.superconstructor=basec; subc.prototype.superprototype=basec.prototype;
-},
-
 init_afterloaded : function() {
-	if(arguments.callee.inited) return;
+	if(arguments.callee.inited) { return; }
 
+var extend=function(Constructor,Parent) {
+	var Inh=function(){}; Inh.prototype=Parent.prototype; Constructor.prototype=new Inh();
+	Constructor.prototype.constructor=Constructor; Constructor.superconstructor=Parent;
+};
 
-
-var ContextMenuControl=fgs.ContextMenuControl=function(onOpenHandler){
-	var $menu=this.$menu=$('<div class="contextmenu" style="display:none;"></div>');
+var ContextMenuControl=function(onOpenHandler){
+	this.$menu=$('<div class="contextmenu" style="display:none;"></div>');
 	this.onOpen=onOpenHandler;
 };
-ContextMenuControl.prototype=new mapapi.GControl();
-ContextMenuControl.prototype.getDefaultPosition=function(){ return new mapapi.GControlPosition(mapapi.G_ANCHOR_TOP_LEFT, new mapapi.GSize(0, 0)); };
+ContextMenuControl.prototype=new google.maps.Control();
+ContextMenuControl.prototype.getDefaultPosition=function(){ return new google.maps.ControlPosition(google.maps.ANCHOR_TOP_LEFT, new google.maps.Size(0, 0)); };
 ContextMenuControl.prototype.initialize=function(map){
 	this.$menu.appendTo(map.getContainer());
 
 	var ctrl=this;
-	mapapi.GEvent.addListener(map, 'click', function() {
+	google.maps.Event.addListener(map, 'click', function() {
 		ctrl.$menu.hide();
 	});
 
-	mapapi.GEvent.addListener(map, 'singlerightclick', function(point, src, overlay) {
-		if(ctrl.onOpen)
-			if(!ctrl.onOpen(point, src, overlay)) return;
+	google.maps.Event.addListener(map, 'singlerightclick', function(point, src, overlay) {
+		if(ctrl.onOpen) {
+			if(!ctrl.onOpen(point, src, overlay)) { return; }
+		}
 
 		ctrl.$menu.show();
 		var menuw=ctrl.$menu.width();
@@ -656,10 +665,10 @@ ContextMenuControl.prototype.initialize=function(map){
 		var size=this.getSize();
 		if (x > size.width-menuw-3) { x = size.width-menuw-3; }
 		if (y > size.height-menuh-3) { y = size.height-menuh-3; }
-		
+
 		ctrl.$menu.tgt={pos:point, target:src, overlay:overlay};
 
-		new mapapi.GControlPosition(mapapi.G_ANCHOR_TOP_LEFT, new mapapi.GSize(x,y)).apply(ctrl.$menu.get(0));
+		new google.maps.ControlPosition(google.maps.ANCHOR_TOP_LEFT, new google.maps.Size(x,y)).apply(ctrl.$menu.get(0));
 	});
 
 	return this.$menu.get(0);
@@ -673,21 +682,21 @@ ContextMenuControl.prototype.addItem=function(str,fn){
 
 
 
-var PhotoMap=fgs.PhotoMap=function(container, opts){
-	this.superconstructor.apply(this,arguments);
+var PhotoMap=function(container, opts){
+	arguments.callee.superconstructor.apply(this, arguments);
 	opts = opts || {};
 	this.win=opts.win;
 	this.win.gmap=this;
 	this.photo_id=opts.photo_id;
 
-	this.addMapType(mapapi.G_PHYSICAL_MAP); 
-	this.addControl(new mapapi.GHierarchicalMapTypeControl());
-	this.ctrl_small=new mapapi.GSmallMapControl();
+	this.addMapType(google.maps.PHYSICAL_MAP);
+	this.addControl(new google.maps.HierarchicalMapTypeControl());
+	this.ctrl_small=new google.maps.SmallMapControl();
 	this.addControl(this.ctrl_small);
 
 	this.loadLocation();
 };
-fgs.extend(PhotoMap, mapapi.GMap2);
+extend(PhotoMap, google.maps.Map2);
 PhotoMap.prototype.flickr_photos_getInfo_onLoad=function(success, responseXML, responseText, params){
 try {
 	var rsp = eval('(' + responseText + ')');
@@ -699,13 +708,13 @@ try {
 	$win.find('span.title').text(photo.title._content);
 
 	var zoom = 12;
-	
+
 	if(!photo.location) {
 		photo.location={latitude:0,longitude:0};
 		zoom=2;
 		$win.find('a.searchbtn').trigger('click');
 	} else {
-		if(photo.location.accuracy) zoom=parseInt(photo.location.accuracy);
+		if(photo.location.accuracy) zoom=parseInt(photo.location.accuracy,10);
 	}
 
 	var isdraggable = true;
@@ -715,33 +724,33 @@ try {
 	}
 
 	this.clearOverlays();
-	
+
 	// create marker
 	if(!arguments.callee.markericon) {
-		var deficon = new mapapi.GIcon();
-		deficon.image = pics['marker_img'];
-		deficon.shadow = pics['marker_shw'];
-		deficon.iconSize = new mapapi.GSize(79, 89);
-		deficon.shadowSize = new mapapi.GSize(109, 89);
-		deficon.iconAnchor = new mapapi.GPoint(40, 89);
-		deficon.infoWindowAnchor = new mapapi.GPoint(79, 50);
+		var deficon = new google.maps.Icon();
+		deficon.image = pics.marker_img;
+		deficon.shadow = pics.marker_shw;
+		deficon.iconSize = new google.maps.Size(79, 89);
+		deficon.shadowSize = new google.maps.Size(109, 89);
+		deficon.iconAnchor = new google.maps.Point(40, 89);
+		deficon.infoWindowAnchor = new google.maps.Point(79, 50);
 		deficon.imageMap=[0,0,78,0,78,78,49,78,39,88,39,78,0,78];
-		deficon.transparent=pics['marker_trans'];
+		deficon.transparent=pics.marker_trans;
 		arguments.callee.markericon=deficon;
 	}
-	var icon= new mapapi.GIcon(arguments.callee.markericon);
-	icon.label = {url:flickr.iconurl(photo), anchor:new mapapi.GLatLng(2,2), size:new mapapi.GSize(75,75)};
+	var icon= new google.maps.Icon(arguments.callee.markericon);
+	icon.label = {url:flickr.iconurl(photo), anchor:new google.maps.LatLng(2,2), size:new google.maps.Size(75,75)};
 
-	var center = new mapapi.GLatLng(photo.location.latitude,photo.location.longitude);
-	var marker=this.marker=new mapapi.GMarker(center, {icon:icon, draggable:isdraggable});
+	var center = new google.maps.LatLng(photo.location.latitude,photo.location.longitude);
+	var marker=this.marker=new google.maps.Marker(center, {icon:icon, draggable:isdraggable});
 	marker.origpos=center;
 	var map = this;
 	if(isdraggable) { // have permission to relocation.
-		mapapi.GEvent.addListener(marker, 'dragend', function(){ map.onMarkerChanged(); });
-		mapapi.GEvent.addListener(marker, 'click', function(){ if(marker.infowinPanel) map.showInfoWindow(); });
+		google.maps.Event.addListener(marker, 'dragend', function(){ map.onMarkerChanged(); });
+		google.maps.Event.addListener(marker, 'click', function(){ if(marker.infowinPanel) map.showInfoWindow(); });
 
 		if(!this.contextMenu) {
-			this.contextMenu=new fgs.ContextMenuControl();
+			this.contextMenu=new ContextMenuControl();
 			this.contextMenu.addItem('Move to Here', function(point, src, overlay) {
 				var latlng = map.fromContainerPixelToLatLng(point);
 				marker.setLatLng(latlng);
@@ -768,8 +777,8 @@ PhotoMap.prototype.onresized = function() {
 
 	if(this.win.ismax) {
 		if(!this.ctrl_large) {
-			this.ctrl_large=new mapapi.GLargeMapControl();
-			this.ctrl_overview=new mapapi.GOverviewMapControl();
+			this.ctrl_large=new google.maps.LargeMapControl();
+			this.ctrl_overview=new google.maps.OverviewMapControl();
 		}
 		this.removeControl(this.ctrl_small);
 		this.addControl(this.ctrl_large);
@@ -793,18 +802,18 @@ PhotoMap.prototype.onMarkerChanged=function() {
 	if(!this.marker) return;
 
 	this.win.setLocationInfo(this.marker.getLatLng(), this.getZoom(), null, true);
-	this.marker.setImage(pics['marker_mov']);
+	this.marker.setImage(pics.marker_mov);
 
 	this.showInfoWindow();
 };
 PhotoMap.prototype.showInfoWindow=function() {
 	if(!this.marker) return;
 	if(!this.marker.infowinPanel) {
-		var $panel = $('<div><a class="save">'+msg['savelocation']+'?</a><br><a class="remove">'+msg['removelocation']+'?</a><br><a class="cancel">Cancel move?</a></div>');
+		var $panel = $('<div><a class="save">'+msg.savelocation+'?</a><br><a class="remove">'+msg.removelocation+'?</a><br><a class="cancel">Cancel move?</a></div>');
 		var map=this;
-		$panel.children('a.save').click(  function(){ if(confirm('Save Location?')){ map.marker.closeInfoWindow(); map.saveLocation(); }});
-		$panel.children('a.remove').click(function(){ if(confirm('Remove Location?')) { map.marker.closeInfoWindow(); map.removeLocation(); }});
-		$panel.children('a.cancel').click(function(){ map.marker.closeInfoWindow(); map.loadLocation(); });
+		$panel.find('a.save').click(  function(){ if(confirm('Save Location?')){ map.marker.closeInfoWindow(); map.saveLocation(); }});
+		$panel.find('a.remove').click(function(){ if(confirm('Remove Location?')) { map.marker.closeInfoWindow(); map.removeLocation(); }});
+		$panel.find('a.cancel').click(function(){ map.marker.closeInfoWindow(); map.loadLocation(); });
 		this.marker.infowinPanel=$panel.get(0);
 	}
 	this.marker.openInfoWindow(this.marker.infowinPanel, {noCloseOnClick:false,suppressMapPan:false});
@@ -859,30 +868,30 @@ PhotoMap.prototype.flickr_photos_geo_removeLocation_onLoad=function(success, res
 
 
 // PhotoGroupMarker
-var PhotoGroupMarker=fgs.PhotoGroupMarker=function(latlng,opts){ // called when created
-	this.superconstructor.apply(this, arguments);
+var PhotoGroupMarker=function(latlng,opts){ // called when created
+	arguments.callee.superconstructor.apply(this, arguments);
 	this.photos=this.showpanel=null;
 	this.iconsize = this.getIcon().iconSize;
 
-	mapapi.GEvent.addListener(this, 'click', this.onClick);
-	this.$div=$('<div class="markerlabel"></div>').width(this.iconsize.width-2).height(this.iconsize.height-2).click(this.onClick);
+	google.maps.Event.addListener(this, 'click', this.onClick);
+	this.$div=$('<div class="markerlabel" style="position:absolute;"></div>').width(this.iconsize.width-2).height(this.iconsize.height-2).click(this.onClick);
 	this.$div.get(0).marker=this;
 };
-fgs.extend(PhotoGroupMarker, mapapi.GMarker);
+extend(PhotoGroupMarker, google.maps.Marker);
 PhotoGroupMarker.generateIcon=function(n) {
 	if(!arguments.callee.init) {
 		function ic(img,w1,h1,w2,h2,w3,h3) {
-			var icon=new mapapi.GIcon();
+			var icon=new google.maps.Icon();
 			icon.image=img;
-			icon.iconSize=new mapapi.GSize(w1,h1);
-			icon.iconAnchor=new mapapi.GPoint(w2,h2);
-			icon.infoWindowAnchor=new mapapi.GPoint(w3,w3);
+			icon.iconSize=new google.maps.Size(w1,h1);
+			icon.iconAnchor=new google.maps.Point(w2,h2);
+			icon.infoWindowAnchor=new google.maps.Point(w3,w3);
 			return icon;
 		};
 		arguments.callee.init=true;
-		arguments.callee.i1=ic(pics['icon1'], 18, 19, 9, 9, 9, 9);
-		arguments.callee.i2=ic(pics['icon2'], 20, 21,10,10,10,10);
-		arguments.callee.i3=ic(pics['icon3'], 26, 27,13,13,13,13);
+		arguments.callee.i1=ic(pics.icon1, 18, 19, 9, 9, 9, 9);
+		arguments.callee.i2=ic(pics.icon2, 20, 21,10,10,10,10);
+		arguments.callee.i3=ic(pics.icon3, 26, 27,13,13,13,13);
 	}
 	if(n < 10) return arguments.callee.i1;
 	else if(n < 100) return arguments.callee.i2;
@@ -894,8 +903,8 @@ PhotoGroupMarker.getInstance=function(photogroup) {
 	var idx = (n < 10) ? 0 : ((n < 100) ? 1 : 2);
 
 	var marker;
-	if(PhotoGroupMarker.instances[idx].length == 0) {
-		marker = new PhotoGroupMarker(new mapapi.GLatLng(0,0), {icon:PhotoGroupMarker.generateIcon(n)});
+	if(PhotoGroupMarker.instances[idx].length === 0) {
+		marker = new PhotoGroupMarker(new google.maps.LatLng(0,0), {icon:PhotoGroupMarker.generateIcon(n)});
 		marker.num = n;
 	} else {
 		marker = PhotoGroupMarker.instances[idx].pop();
@@ -907,15 +916,15 @@ PhotoGroupMarker.getInstance=function(photogroup) {
 	return marker;
 };
 PhotoGroupMarker.prototype.initialize=function(map){ // called when add to map
-	this.superprototype.initialize.apply(this,arguments);
-	this.$div.appendTo(map.getPane(mapapi.G_MAP_MARKER_PANE));
+	google.maps.Marker.prototype.initialize.apply(this,arguments);
+	this.$div.appendTo(map.getPane(google.maps.MAP_MARKER_PANE));
 	var posi = this.getLatLng();
 	this.pos = map.fromLatLngToDivPixel(posi);
-	this.zidx = mapapi.GOverlay.getZIndex(posi.lat());
+	this.zidx = google.maps.Overlay.getZIndex(posi.lat());
 	this.gmap=map; // may be change to other map
 };
 PhotoGroupMarker.prototype.remove=function(){
-	this.superprototype.remove.apply(this,arguments);
+	google.maps.Marker.prototype.remove.apply(this,arguments);
 	this.photos=null;
 	var cf = this.$div.get(0);
 	cf.parentNode.removeChild(cf);
@@ -925,16 +934,15 @@ PhotoGroupMarker.prototype.remove=function(){
 	PhotoGroupMarker.instances[idx].push(this);
 };
 PhotoGroupMarker.prototype.redraw=function(force){
-	this.superprototype.redraw.apply(this, arguments);
-	if (!force || !this.pos) return;
+	google.maps.Marker.prototype.redraw.apply(this, arguments);
+	if (!force || !this.pos) { return; }
 	this.$div.css({left:(this.pos.x-this.iconsize.width/2), top:((this.pos.y-this.iconsize.height/2)+(this.iconsize.height-18)/2),zIndex:this.zidx+1});
 };
 PhotoGroupMarker.prototype.onClick=function(){
 	var marker=this.marker||this;
-	if(marker.gmap)
-		marker.gmap.onMarkerClick(marker,marker.photos);
+	if(marker.gmap && marker.gmap.onMarkerClick) { marker.gmap.onMarkerClick(marker,marker.photos); }
 };
-PhotoGroupMarker.prototype.showpanelstr = 
+PhotoGroupMarker.prototype.showpanelstr =
 '<div class="markerinfowin" style="width:505px;height:290px;">'+
 	'<a class="title" style="position:absolute;left:0px;top:0px; font-size:large;" target="_blank"></a>'+
 	'<div class="map" style="position:absolute;left:5px;top:30px; width:240px;height:180px; border:solid 1px gray; overflow:hidden;"></div>'+
@@ -948,25 +956,26 @@ PhotoGroupMarker.prototype.showpanelstr =
 	'<span class="license" style="position:absolute;left:5px;top:270px; line-height:15px; font-size:small;"></span>'+
 
 	'<div style="position:absolute;left:260px;top:30px; width:240px;height:240px; text-align:center;">'+
-		'<a class="photoimg" target="_blank">'+
+		'<a class="photoimg" target="_blank"></a>'+
 	'</div>'+
 '</div>';
 PhotoGroupMarker.prototype.showInfoWindow=function(idx){
 	var photo = this.photos[idx];
-	if(!this.showpanel){
-		var showpanel= $(this.showpanelstr).get(0);
+	var showpanel=this.showpanel;
+	if(!showpanel){
+		showpanel=$(this.showpanelstr).get(0);
 		this.showpanel=showpanel;
 	}
-	var showpanel=this.showpanel;
+	var $showpanel=$(showpanel);
 	if(this.gmap.getInfoWindow().isHidden()) {
 		this.openInfoWindow(showpanel, {suppressMapPan:false});
-		var mapdiv = $(showpanel).find('div.map').get(0);
-		var map = new mapapi.GMap2(mapdiv);
-		map.addMapType(mapapi.G_PHYSICAL_MAP); 
-		map.addControl(new mapapi.GHierarchicalMapTypeControl());
-		map.addControl(new mapapi.GSmallZoomControl());
+		var mapdiv = $showpanel.find('div.map').get(0);
+		var map = new google.maps.Map2(mapdiv);
+		map.addMapType(google.maps.PHYSICAL_MAP);
+		map.addControl(new google.maps.HierarchicalMapTypeControl());
+		map.addControl(new google.maps.SmallZoomControl());
 		map.setCenter(photo.pos, photo.accuracy);
-		map.marker=new mapapi.GMarker(photo.pos);
+		map.marker=new google.maps.Marker(photo.pos);
 		map.addOverlay(map.marker);
 		showpanel.map = map;
 	} else {
@@ -975,23 +984,24 @@ PhotoGroupMarker.prototype.showInfoWindow=function(idx){
 	}
 
 	var href=photo.api.pageurl(photo);
-	$(showpanel)
-		.find('a.title').attr('href',href).text(photo.api.gettitle(photo)).end()
-		.find('a.authicn').attr('href',photo.api.ownerurl(photo)).end()
-		.find('img.authimg').attr('src',photo.api.buddyurl(photo)).end()
-		.find('a.authlnk').attr('href',photo.api.ownerurl(photo)).text(photo.api.owner(photo)).end()
-		.find('a.takendatelnk').text(photo.api.datetaken(photo)).attr('href',photo.api.datetakenurl(photo)).end()
-//		.find('a.uploaddatelnk').text(photo.api.dateupload(photo)).attr('href',photo.api.dateuploadurl(photo)).end()
-		.find('span.license').html(photo.api.licensestr(photo)).end()
-		.find('a.photoimg').attr('href',href).empty().append('<img src="'+photo.api.smallurl(photo)+'"></img>').end();
+	$showpanel.addClass(photo.api.name);
+	$showpanel.find('a.title').attr('href',href).text(photo.api.gettitle(photo));
+	$showpanel.find('a.authicn').attr('href',photo.api.ownerurl(photo));
+	$showpanel.find('img.authimg').attr('src',photo.api.buddyurl(photo));
+	$showpanel.find('a.authlnk').attr('href',photo.api.ownerurl(photo)).text(photo.api.owner(photo));
+	$showpanel.find('a.takendatelnk').text(photo.api.datetaken(photo)).attr('href',photo.api.datetakenurl(photo));
+//	$showpanel.find('a.uploaddatelnk').text(photo.api.dateupload(photo)).attr('href',photo.api.dateuploadurl(photo));
+	$showpanel.find('span.license').html(photo.api.licensestr(photo));
+	$showpanel.find('a.photoimg').attr('href',href).empty().append('<img src="'+photo.api.smallurl(photo)+'"></img>');
 };
 PhotoGroupMarker.prototype.deleteAllGeoInfo=function(){
 	if (confirm('Delete all photo\'s location information here?\n')) {
 		var marker=this;
 		var photos = marker.photos;
 		var delids = [];
-		for(var i = 0, len = photos.length; i < len; ++i)
+		for(var i = 0, len = photos.length; i < len; ++i) {
 			delids.push(photos[i].id);
+		}
 
 		flickr.callapi('flickr.photos.geo.removeLocation', {photo_ids:delids}, function(success, responseXML, responseText, params){
 			if(marker.gmap.refreshView) marker.gmap.refreshView(true);
@@ -1002,82 +1012,239 @@ PhotoGroupMarker.prototype.deleteAllGeoInfo=function(){
 
 
 // PanelControl
-var PanelControl=fgs.PanelControl=function(isOrganizePanel){
+var PanelControl=function(controltype, year, month, sort){
+	this.default_year=year||'lastweek';
+	this.default_month=month||'all';
+	this.default_sort=sort||'interestingness-desc';
+
+	this.pageCurr=1;
+	this.pageTotal=1;
+
 	this.imgs=[];
 	this.photos=null;
-	this.isOrganizePanel=isOrganizePanel;
 
-	var hightdif=(this.isOrganizePanel?140:95);
-	var $panel=this.$panel=$(
-		'<div class="photopanel" style="right:10px; display:none;">'+
-			'<div class="background" style="height:'+hightdif+'px;left:0px;right:0px;"></div>'+
-			(!this.isOrganizePanel?'':
-			'<form style="position:absolute;left:5px;top:5px;">'+
+	if(controltype === 1) {        // browse control
+	} else if(controltype === 2) { // photo set control
+		this.isPhotosetPanel=true;
+	} else if(controltype === 3) { // orgnize control
+		this.isOrganizePanel=true;
+	}
+
+	var nowy = new Date().getFullYear();
+	var panelstr=
+'<div class="photopanel" style="right:130px;height:150px;">'+
+	'<div class="background" style="position:absolute;top:0px;right:0px;bottom:0px;left:0px;"></div>'+
+	'<div class="toppanel">'+
+		(this.isPhotosetPanel?
+		'<a class="trkbtn" style="position:absolute;top:5px;left:5px;"></a>'
+		:
+		'<div class="searchoption" style="position:absolute; top:-90px; height:90px; left:0px; width:400px; background-color:white; display:none;">'+
+			'<div style="margin:5px;">'+msg.date_date+': '+
+				'<select class="year_select">'+
+					'<option value="lastweek">'+msg.date_lastweek+'</option>'+
+					'<option value="yesterday">'+msg.date_yesterday+'</option>'+
+					'<option value="lastmonth">'+msg.date_lastmonth+'</option>'+
+					'<option value="all">'+msg.date_all+'</option>'+
+					'<option value="'+(nowy-0)+'">'+(nowy-0)+'</option><option value="'+(nowy-1)+'">'+(nowy-1)+'</option>'+
+					'<option value="'+(nowy-2)+'">'+(nowy-2)+'</option><option value="'+(nowy-3)+'">'+(nowy-3)+'</option>'+
+					'<option value="'+(nowy-4)+'">'+(nowy-4)+'</option><option value="'+(nowy-5)+'">'+(nowy-5)+'</option>'+
+					'<option value="'+(nowy-6)+'">'+(nowy-6)+'</option><option value="'+(nowy-7)+'">'+(nowy-7)+'</option>'+
+					'<option value="'+(nowy-8)+'">'+(nowy-8)+'</option><option value="'+(nowy-9)+'">'+(nowy-9)+'</option>'+
+				'</select>'+
+				'<span class="date_month_option" style="display:none;"> / '+
+					'<select class="month_select">'+
+						'<option value="all">'+msg.month_all+'</option>'+
+						'<option value="01">01</option><option value="02">02</option>'+
+						'<option value="03">03</option><option value="04">04</option>'+
+						'<option value="05">05</option><option value="06">06</option>'+
+						'<option value="07">07</option><option value="08">08</option>'+
+						'<option value="09">09</option><option value="10">10</option>'+
+						'<option value="11">11</option><option value="12">12</option>'+
+					'</select>'+
+					'<span class="date_day_option" style="display:none;"> / '+
+						'<select class="day_select">'+
+							'<option value="all">'+msg.day_all+'</option>'+
+							'<option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option>'+
+							'<option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option>'+
+							'<option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>'+
+							'<option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option>'+
+							'<option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>'+
+							'<option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option>'+
+							'<option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option>'+
+							'<option value="29">29</option><option value="30">30</option><option value="31">31</option>'+
+						'</select>'+
+					'</span>'+
+				'</span>'+
+			'</div>'+
+			'<div style="margin:5px;">'+msg.sort_sort+': '+
+				'<select class="sort_select">'+
+					'<option value="interestingness-desc">'+msg.sort_interestingness_desc+'</option>'+
+					'<option value="date-taken-desc">'+msg.sort_date_taken_desc+'</option>'+
+					'<option value="date-posted-desc">'+msg.sort_date_posted_desc+'</option>'+
+					'<option value="relevance">'+msg.sort_relevance+'</option>'+
+					'<option value="interestingness-asc">'+msg.sort_interestingness_asc+'</option>'+
+					'<option value="date-taken-asc">'+msg.sort_date_taken_asc+'</option>'+
+					'<option value="date-posted-asc">'+msg.sort_date_posted_asc+'</option>'+
+				'</select>'+
+			'</div>'+
+			'<div style="margin:5px;"> '+msg.search+': '+
+				'<form class="search_form" style="display:inline;">'+
+					'<input class="search_text" type="text">'+
+					'<input type="submit">'+
+				'</form>'+
+			'</div>'+
+		'</div>'+
+		'<a class="updnbtn" title="Search Option..." style="position:absolute;top:5px;left:5px;"></a>'
+		)+
+		'<div class="pagebarctnr" style="position:absolute;top:5px;left:25px;right:5px; height:15px; overflow:hidden;">'+
+			'<div class="pagebartotal" style="position:absolute; left:0px;right:0px; top:2px; bottom:2px; background-color:#DDDDDD; cursor:pointer;"></div>'+
+			'<div class="pagebar" style="position:relative; height:15px; width:120px; text-align:center; background-color:#8888FF;"><span class="info">Loading...</span></div>'+
+		'</div>'+
+	'</div>'+
+	'<div class="subpanel">'+
+		(!this.isOrganizePanel?'':
+		'<div style="position:absolute;top:30px;left:25px; right:5px; height:20px;">'+
+			'<form style="display:inline;">'+
 				'<select class="collectselect">'+
 					'<option value="none"></option>'+
-					'<option value="all" selected="true">'+msg['opt-all']+'</option>'+
-					'<option value="not_tagged">'+msg['opt-not_tagged']+'</option>'+
-					'<option value="not_in_set">'+msg['opt-not_in_set']+'</option>'+
-					'<option value="located">'+msg['opt-located']+'</option>'+
-					'<option value="not_located">'+msg['opt-not_located']+'</option>'+
-					'<optgroup class="set" label="'+msg['opt-set']+'"></optgroup>'+
-					'<optgroup class="group" label="'+msg['opt-group']+'"></optgroup>'+
+					'<option value="all" selected="true">'+msg.opt_all+'</option>'+
+					'<option value="not_tagged">'+msg.opt_not_tagged+'</option>'+
+					'<option value="not_in_set">'+msg.opt_not_in_set+'</option>'+
+					'<option value="located">'+msg.opt_located+'</option>'+
+					'<option value="not_located">'+msg.opt_not_located+'</option>'+
+					'<optgroup class="set" label="'+msg.opt_set+'"></optgroup>'+
+					'<optgroup class="group" label="'+msg.opt_group+'"></optgroup>'+
 				'</select>'+
 			'</form>'+
-			'<div class="info" style="position: absolute;left:10px;top:28px; font-size:12px; color:black;">'+
-				'<span class="total" style="font-weight:bold;"></span> '+msg['photos']+' :: <span class="selected" style="font-weight:bold;"></span> '+msg['selected']+' <span class="clearspan" style="display:none;">| <a class="clearsel" href="javascript:void(0);">'+msg['clearsel']+'</a> </span>'+
-			'</div>'
-			)+
-			'<div class="progress" style="position:absolute;left:26px;right:26px; bottom:85px;height:5px; overflow:hidden;">'+
-				'<div class="progressbar" style="position:relative; height:5px;"></div>'+
+			'<span class="total" style="margin-left:10px; font-size:12px; font-weight:bold;"></span> '+msg.photos+' :: <span class="selected" style="font-weight:bold;"></span> '+msg.selected+' <span class="clearspan" style="display:none;">| <a class="clearsel" href="javascript:void(0);">'+msg.clearsel+'</a> </span>'+
+		'</div>'
+		)+
+		'<div style="position:absolute;left:26px;right:26px; bottom:85px;height:10px; overflow:hidden; display:none;">'+
+			'<div class="progresstotal" style="position:absolute; left:0px;right:0px; top:2px; bottom:2px; background-color:#DDDDDD; cursor:pointer;"></div>'+
+			'<div class="progressbar" style="position:relative; height:10px; background-color:#8888FF;"></div>'+
+		'</div>'+
+		'<div class="contentwrap" style="position:absolute;left:26px;right:26px; bottom:0px;height:85px; overflow:hidden;">'+
+			'<div class="content" style="position:absolute;top:0px; height:85px; overflow:hidden;"></div>'+
+		'</div>'+
+		(!this.isOrganizePanel?'':
+		'<div class="dragagent" style="position:absolute;left:0px;top:0px;height:77px;width:77px; cursor:pointer;">'+
+			'<div class="marker" style="display:none; width:79px; height:89px; background:transparent url('+pics.marker_img+') no-repeat scroll left top;">'+
+				'<img style="position:absolute; left:2px; top:2px;"></img>'+
+				'<span class="info" style="position:absolute; left:5px; top:5px; border:solid 1px gray; background-color:white;"></span>'+
 			'</div>'+
-			'<div class="contentwrap" style="position:absolute;left:26px;right:26px; bottom:0px;height:85px; overflow:hidden;">'+
-				'<div class="content" style="position:absolute;top:0px; height:85px; overflow:hidden;"></div>'+
-			'</div>'+
-			(!this.isOrganizePanel?'':
-			'<div class="dragable" style="position:absolute;left:0px;top:0px;height:77px;width:77px;">'+
-				'<div class="marker" style="display:none; width:79px; height:89px; background: transparent url('+pics['marker_img']+') no-repeat scroll left top;">'+
-					'<img style="position:absolute; left:2px; top:2px;"></img>'+
-					'<span class="info" style="position:absolute; left:5px; top:5px; border:solid 1px gray; background-color:white;"></span>'+
-				'</div>'+
-			'</div>'
-			)+
-			'<a class="pp_btn" style="position:absolute;left:0px;bottom:0px;" title="'+msg['pagefrst']+'"></a>'+
-			'<a class="p_btn" style="position:absolute;left:0px;bottom:32px;" title="'+msg['pageprev']+'"></a>'+
-			'<a class="r_btn" style="position:absolute;right:0px;bottom:32px;" title="'+msg['pagenext']+'"></a>'+
-			'<a class="rr_btn" style="position:absolute;right:0px;bottom:0px;" title="'+msg['pagelast']+'"></a>'+
-		'</div>');
+		'</div>'
+		)+
+		'<a class="pp_btn" style="position:absolute;left:0px;bottom:0px;" title="'+msg.pagefrst+'"></a>'+
+		'<a class="p_btn" style="position:absolute;left:0px;bottom:32px;" title="'+msg.pageprev+'"></a>'+
+		'<a class="r_btn" style="position:absolute;right:0px;bottom:32px;" title="'+msg.pagenext+'"></a>'+
+		'<a class="rr_btn" style="position:absolute;right:0px;bottom:0px;" title="'+msg.pagelast+'"></a>'+
+	'</div>'+
+'</div>';
+	var $panel=$(panelstr);
+	this.$panel=$panel;
+
 	var ctrl=this;
-	$panel.children('a.pp_btn').click(function(){ ctrl.slide(-Infinity); }).end()
-	      .children('a.p_btn' ).click(function(){ ctrl.slide(-1); }).end()
-	      .children('a.r_btn') .click(function(){ ctrl.slide(1); }).end()
-	      .children('a.rr_btn').click(function(){ ctrl.slide(Infinity); });
+
+	if(!this.isOrganizePanel) { this.show(false); }
+
+	var $pagebar=$panel.find('div.pagebar');
+	if(this.isPhotosetPanel) {
+		$pagebar.width(300);
+		$panel.find('a.trkbtn').click(function(){ if(ctrl.gmap) { ctrl.gmap.tracking_toggle(); } });
+	} else {
+		var pagebar=$pagebar.get(0);
+		$.setDragable(pagebar,{direction:'horizontal',bounded:'parent'},null,function(){
+			var bw=$pagebar.width();
+			var cw=$pagebar.parent().width();
+			var lef=parseInt($pagebar.css('left'),10);
+			var n = Math.round(lef*(ctrl.pageTotal-1)/(cw-bw));
+			ctrl.setInfo((n+1)+' / '+ctrl.pageTotal);
+		},function() {
+			if(ctrl.pageTotal==1) { return; }
+			var bw=$pagebar.width();
+			var cw=$pagebar.parent().width();
+			var lef=parseInt($pagebar.css('left'),10);
+			var pagepos=null;
+			if(lef === 0) {
+				pagepos=1;
+			} else if(lef+bw === cw) {
+				pagepos=ctrl.pageTotal;
+			} else {
+				var n = Math.round(lef*(ctrl.pageTotal-1)/(cw-bw));
+				pagepos=n+1;
+			}
+
+			if(ctrl.pageCurr===pagepos) { ctrl.setPage(pagepos,null); return; }
+			ctrl.setPage(pagepos,null);
+			ctrl.gmap.refreshView(true);
+		});
+		$panel.find('div.pagebartotal').click(function(e) {
+			if(pagebar.disableDrag) { return; }
+			var bw=$pagebar.width();
+			var cw=$pagebar.parent().width();
+			var ofst=$pagebar.offset();
+			var page=ctrl.pageCurr;
+			if(e.clientX < ofst.left) {
+				if( page <= 1) { return; }
+				page--;
+			} else if(e.clientX > ofst.left+$pagebar.width()) {
+				if( page >= ctrl.pageTotal) { return; }
+				page++;
+			}
+			ctrl.setPage(page,null);
+			ctrl.gmap.refreshView(true);
+		});
+
+		$panel.find('select.year_select').val(this.default_year);
+		$panel.find('select.month_select').val(this.default_month);
+		$panel.find('select.sort_select').val(this.default_sort);
+
+		$panel.find('div.searchoption').find('select').change(function() { try {
+			if(parseInt($panel.find('select.year_select').val(),10)) {
+				$panel.find('span.date_month_option').show();
+				if(parseInt($panel.find('select.month_select').val(),10)) {
+					$panel.find('span.date_day_option').show();
+				} else {
+					$panel.find('span.date_day_option').hide();
+					$panel.find('select.day_select').val('all');
+				}
+			} else {
+				$panel.find('span.date_month_option').hide();
+				$panel.find('select.month_select').val('all');
+				$panel.find('select.day_select').val('all');
+			}
+		} finally { return false; }});
+		$panel.find('div.searchoption').find('form').submit(function() { try {
+			$panel.find('div.searchoption').fadeToggle();
+			ctrl.gmap.changeOption();
+		} finally { return false; }});
+		$panel.find('a.updnbtn').click(function(){ $panel.find('div.searchoption').fadeToggle(); });
+	}
+
+	$panel.find('a.pp_btn').click(function(){ ctrl.slide(-Infinity); });
+	$panel.find('a.p_btn' ).click(function(){ ctrl.slide(-1); });
+	$panel.find('a.r_btn') .click(function(){ ctrl.slide(1); });
+	$panel.find('a.rr_btn').click(function(){ ctrl.slide(Infinity); });
 
 	var $progressbar=$panel.find('div.progressbar');
-	var progressbarobj=this.progressbarobj=new mapapi.GDraggableObject($progressbar.get(0));
-	mapapi.GEvent.addListener(progressbarobj, 'mousedown', function(){
+	var progressbar=$progressbar.get(0);
+	$.setDragable(progressbar,{direction:'horizontal',bounded:'parent'},null,null,function(e) {
+		var bw=$progressbar.width();
+		var cw=$progressbar.parent().width();
+		var lef=parseInt($progressbar.css('left'),10);
+		if(lef === 0 && lef+bw === cw) { return;
+		} else if(lef === 0) { ctrl.slide(-Infinity);
+		} else if(lef+bw === cw) { ctrl.slide(Infinity);
+		} else { ctrl.slide(0, lef, bw, cw); }
+	});
+	$panel.find('div.progresstotal').click(function(e) {
 		var ofst=$progressbar.offset();
-		var pofst=$progressbar.parent().offset();
-		var lef=ofst.left-pofst.left;
-		progressbarobj.moveTo(new mapapi.GPoint(lef, 0));
+		if(e.clientX < ofst.left) {
+			ctrl.slide(-1);
+		} else if(e.clientX > ofst.left+$progressbar.width()) {
+			ctrl.slide(1);
+		}
 	});
-	mapapi.GEvent.addListener(progressbarobj, 'drag', function(){
-		var ofst=$progressbar.offset();
-		var pofst=$progressbar.parent().offset();
-		var lef=ofst.left-pofst.left;
-		var pw=$progressbar.width();
-		var ppw=$progressbar.parent().width();
-		if(lef<0) lef=0;
-		else if(lef+pw > ppw) lef=ppw-pw;
-		progressbarobj.moveTo(new mapapi.GPoint(lef, 0));
-	});
-	mapapi.GEvent.addListener(progressbarobj, 'dragend', function(){
-		var lef=parseInt($progressbar.css('left'));
-		var ppw=$progressbar.parent().width();
-
-		ctrl.slide(0, Math.floor(lef*ctrl.total/ppw));
-	});
-	
 
 	if(this.isOrganizePanel) {
 		this.flickr_photos_search_onLoad=this.onDataLoaded;
@@ -1125,35 +1292,55 @@ var PanelControl=fgs.PanelControl=function(isOrganizePanel){
 
 		$panel.find('a.clearsel').click(function(){
 			$panel.find('img.selected').removeClass('selected');
-			$panel.find('span.selected').text(0).end().find('span.clearspan').hide();
+			$panel.find('span.selected').text(0);
+			$panel.find('span.clearspan').hide();
 		});
 
-		var $dragable = $panel.find('div.dragable');
-		var dragableobj = new mapapi.GDraggableObject($dragable.get(0), {draggingCursor:'pointer', draggableCursor: 'pointer'});
-		dragableobj.moveTo(new mapapi.GPoint(-10000, -10000));
+
+		var $dragagent=$panel.find('div.dragagent');
+		var dragagent=$dragagent.get(0);
+		$dragagent.css({'top':-10000,'left':-10000});
 
 		var currimg=null;
 		var selected_ids=[];
-		$panel.children('div.contentwrap').mousemove(function(e){
+		$panel.find('div.contentwrap').mousemove(function(e){
 			if(e.target.tagName != 'IMG') return;
 			e.stopPropagation();
 
 			currimg=e.target;
-			$dragable.attr('title',$(currimg).attr('title'));
+			$dragagent.attr('title',$(currimg).attr('title'));
 			var divofst=$(e.target).offset();
-			var dragofst=$dragable.offset();
-			dragableobj.moveTo(new mapapi.GPoint(parseInt($dragable.css('left'))+divofst.left-dragofst.left, parseInt($dragable.css('top'))+divofst.top-dragofst.top));
+			var dragofst=$dragagent.offset();
+			$dragagent.css({'top':parseInt($dragagent.css('top'),10)+divofst.top-dragofst.top,'left':parseInt($dragagent.css('left'),10)+divofst.left-dragofst.left});
 		});
-		mapapi.GEvent.addListener(dragableobj, 'mousedown', function(){
+
+		$dragagent.click(function(e){
+			if(!currimg) { return; }
+
+			currimg.drag_state=0;
+			$dragagent.css('cursor','pointer');
+			if(e.ctrlKey) {
+				$(currimg).toggleClass('selected');
+			} else {
+				var sels=$panel.find('img.selected');
+				sels.removeClass('selected');
+				if(!(sels.size()==1 && sels.get(0)==currimg)) {
+					$(currimg).addClass('selected');
+				}
+			}
+
+			ctrl.updateSelectionInfo();
+		});
+		$.setDragable(dragagent,{},function(){
 			if(!currimg) return;
 			currimg.drag_state=1;
 			setTimeout(function(){
 				if(currimg.drag_state!=1) return;
 				currimg.drag_state=2;
-				
-				dragableobj.setDraggingCursor('move');
-				$dragable.find('img').attr('src',currimg.src);
-				
+
+				$dragagent.css('cursor','move');
+				$dragagent.find('img').attr('src',currimg.src);
+
 				selected_ids=[];
 				if(!$(currimg).hasClass('selected')) {
 					selected_ids.push(currimg.photo.id);
@@ -1162,144 +1349,127 @@ var PanelControl=fgs.PanelControl=function(isOrganizePanel){
 				}
 
 				if(selected_ids.length > 1) {
-					$dragable.find('span.info').text(selected_ids.length + ' photos');
+					$dragagent.find('span.info').text(selected_ids.length + ' photos');
 				} else {
-					$dragable.find('span.info').text('');
+					$dragagent.find('span.info').text('');
 				}
-
-				$dragable.children('div.marker').show();
+				$dragagent.find('div.marker').show();
 			}, 500);
-		});
-		mapapi.GEvent.addListener(dragableobj, 'click', function(e){
-			if(!currimg) return;
-
-			currimg.drag_state=0;
-			this.setDraggingCursor('pointer');
-			if(e.ctrlKey) {
-				$(currimg).toggleClass('selected');
-			} else {
-				var sels=$panel.find('img.selected');
-				sels.removeClass('selected');
-				if(!(sels.size()==1 && sels.get(0)==currimg))
-					$(currimg).addClass('selected');
-			}
-			
-			var sel_num=$panel.find('img.selected').size();
-			$panel.find('span.selected').text(sel_num);
-			if(sel_num) $panel.find('span.clearspan').show();
-			else        $panel.find('span.clearspan').hide();
-		});
-		mapapi.GEvent.addListener(dragableobj, 'dragend', function(){
+		},null,function(){
 			if(!currimg) return;
 			var drag_state=currimg.drag_state;
 			currimg.drag_state=0;
 			if(drag_state!=2) return;
 
-			this.setDraggingCursor('pointer');
-			var dragofst=$dragable.offset();
+			$dragagent.find('div.marker').hide();
+
+			var dragofst=$dragagent.offset();
 			var ins={x:dragofst.left+40, y:dragofst.top+89};
-			
+
 			var $gmapdom=$(ctrl.gmap.getContainer());
 			var gmapofst=$gmapdom.offset();
 			var maprect={top:gmapofst.top, left:gmapofst.left, bottom:gmapofst.top+$gmapdom.height(), right:gmapofst.left+$gmapdom.width()};
-			
+
 			var panelofst=$panel.offset();
 			var panelrect={top:panelofst.top, left:panelofst.left, bottom:panelofst.top+$panel.height(), right:panelofst.left+$panel.width()};
 
 			if( ins.x>maprect.left && ins.x<maprect.right && ins.y>maprect.top && ins.y<panelrect.top) {
-				var latlng = ctrl.gmap.fromContainerPixelToLatLng(new mapapi.GPoint(ins.x-maprect.left, ins.y-maprect.top));
+				var latlng = ctrl.gmap.fromContainerPixelToLatLng(new google.maps.Point(ins.x-maprect.left, ins.y-maprect.top));
 				var zoom = ctrl.gmap.getZoom();
 				flickr.callapi('flickr.photos.geo.setLocation', {photo_ids:selected_ids, lat:latlng.lat(),lon:latlng.lng(),accuracy:zoom}, function(success, responseXML, responseText, params){
 					var rsp=eval('(' + responseText + ')');
-					if(!rsp||rsp.stat != 'ok') return;
+					if(!rsp||rsp.stat != 'ok') { return; }
 
-					if(ctrl.gmap.refreshView) ctrl.gmap.refreshView(true);
+					if(ctrl.gmap.refreshView) { ctrl.gmap.refreshView(true); }
 
 					var sel=$panel.find('select.collectselect').val();
-					if(sel == 'located' || sel == 'not_located')
-						changeOption();
+					if(sel == 'located' || sel == 'not_located') { changeOption(); }
 				});
 			}
 
-			$dragable.children('div.marker').hide();
 			var divofst=$(currimg).offset();
-			this.moveTo(new mapapi.GPoint(parseInt($dragable.css('left'))+divofst.left-dragofst.left, parseInt($dragable.css('top'))+divofst.top-dragofst.top));
+			$dragagent.css({'left':parseInt($dragagent.css('left'),10)+divofst.left-dragofst.left, 'top':parseInt($dragagent.css('top'),10)+divofst.top-dragofst.top});
 		});
-	
-		flickr.callapi('flickr.photosets.getList', {user_id:unsafewin.global_nsid}, this);
-		flickr.callapi('flickr.people.getPublicGroups', {user_id:unsafewin.global_nsid}, this);
+
+
+		flickr.callapi('flickr.photosets.getList', {user_id:unsafewin.global_nsid}, function(success, responseXML, responseText, params){
+			var rsp=eval('(' + responseText + ')');
+			if(!rsp||rsp.stat != 'ok') return;
+			for (var i=0,photosets=rsp.photosets.photoset,len=photosets.length,$c=$panel.find('optgroup.set'); i<len; i++) {
+				var photoset=photosets[i];
+				$c.append('<option value="option_photoset'+photoset.id+'">'+photoset.title._content+' ('+photoset.photos+')</option>');
+			}
+		});
+		flickr.callapi('flickr.people.getPublicGroups', {user_id:unsafewin.global_nsid}, function(success, responseXML, responseText, params){
+			var rsp=eval('(' + responseText + ')');
+			if(!rsp||rsp.stat != 'ok') return;
+			for (var i=0,groups=rsp.groups.group,len=groups.length,$c=$panel.find('optgroup.group'); i<len; i++) {
+				var group=groups[i];
+				$c.append('<option value="group'+group.nsid+'">'+group.name+'</option>');
+			}
+		});
 		changeOption();
 	}
 };
-PanelControl.prototype=new mapapi.GControl();
-PanelControl.prototype.getDefaultPosition=function(){ return new mapapi.GControlPosition(mapapi.G_ANCHOR_BOTTOM_LEFT, new mapapi.GSize(10, 35)); };
+PanelControl.prototype=new google.maps.Control();
+PanelControl.prototype.getDefaultPosition=function(){ return new google.maps.ControlPosition(google.maps.ANCHOR_BOTTOM_LEFT, new google.maps.Size(10, 15)); };
 PanelControl.prototype.initialize=function(map){
 	this.gmap=map;
 	map.getContainer().appendChild(this.$panel.get(0));
 	return this.$panel.get(0);
 };
-PanelControl.prototype.hide=function(){
-	if(!this.isOrganizePanel) {
-		this.$panel.fadeOut('fast');
-	}
-};
-PanelControl.prototype.onImageLoaded=function(){ $(this).fadeIn('fast'); };
-PanelControl.prototype.flickr_photosets_getList_onLoad=function(success, responseXML, responseText, params){
-	var rsp=eval('(' + responseText + ')');
-	if(!rsp||rsp.stat != 'ok') return;
-	for (var i=0,photosets=rsp.photosets.photoset,len=photosets.length,$c=this.$panel.find('optgroup.set'); i<len; i++) {
-		var photoset=photosets[i];
-		$c.append('<option value="option_photoset'+photoset.id+'">'+photoset.title._content+' ('+photoset.photos+')</option>');
-	}
-};
-PanelControl.prototype.flickr_people_getPublicGroups_onLoad=function(success, responseXML, responseText, params){
-	var rsp=eval('(' + responseText + ')');
-	if(!rsp||rsp.stat != 'ok') return;
-	for (var i=0,groups=rsp.groups.group,len=groups.length,$c=this.$panel.find('optgroup.group'); i<len; i++) {
-		var group=groups[i];
-		$c.append('<option value="group'+group.nsid+'">'+group.name+'</option>');
+PanelControl.prototype.show=function(isshow){
+	if(this.isOrganizePanel) { return; }
+	if(isshow) {
+		this.$panel.find('div.toppanel').hide();
+		this.$panel.find('div.subpanel').show();
+		this.$panel.animate({'height':100});
+	} else {
+		this.$panel.find('div.toppanel').show();
+		this.$panel.find('div.subpanel').hide();
+		this.$panel.animate({'height':30});
 	}
 };
 PanelControl.prototype.loadData=function(page){
 	if(!this.pagestoload) return;
 	if(!this.pagestoload[page-1]) {
 		this.option.page=page;
+		this.showPhotoLoading(true);
 		flickr.callapi(this.method, this.option, this);
 		this.pagestoload[page-1] = true;
 	}
 };
-PanelControl.prototype.onDataLoaded=function(success, responseXML, responseText, params){
+PanelControl.prototype.updateSelectionInfo=function(){
+	this.$panel.find('span.total').text(this.total);
+	var sel_num=this.$panel.find('img.selected').size();
+	this.$panel.find('span.selected').text(sel_num);
+	if(sel_num) { this.$panel.find('span.clearspan').show();
+	} else { this.$panel.find('span.clearspan').hide(); }
+}
+PanelControl.prototype.onDataLoaded=function(success, responseXML, responseText, params){ try {
 	var rsp=eval('(' + responseText + ')');
 	if(!rsp||rsp.stat != 'ok') return;
 
 	var phs=rsp.photos||rsp.photoset;
 
-	var currPage=parseInt(phs.page)-1;
-	this.perpage=parseInt(phs.perpage||phs.per_page);
-	this.total=parseInt(phs.total)||0;
+	var currPage=parseInt(phs.page,10)-1;
+	this.perpage=parseInt(phs.perpage||phs.per_page,10);
+	this.total=parseInt(phs.total,10)||0;
 
-	this.$panel.find('span.total').text(this.total).end().find('span.selected').text(0).end().find('span.clearspan').hide();
+	this.updateSelectionInfo();
+
 	this.$panel.find('div.content').width(this.total*79);
 
 	var owner=unsafewin.global_nsid;
 	var ownername=unsafewin.global_name;
 	var buddy_url=unsafewin.global_icon_url;
-	
 	var tmp_photos=[];
-	for(var i=0,len=phs.photo.length; i<len; ++i) {
-		var photo=phs.photo[i];
-
-		var lat=parseFloat(photo.latitude);
-		var lng=parseFloat(photo.longitude);
-		var latlng=null;
-		if(lat || lng) latlng = new mapapi.GLatLng(lat, lng);
-		
-		tmp_photos[i]={id:photo.id, secret:photo.secret, title:photo.title, pos:latlng, accuracy:parseInt(photo.accuracy), api:flickr, datetaken:photo.datetaken, owner:owner, ownername:ownername, farm:photo.farm, server:photo.server, buddy_url:buddy_url};
-	}
+	flickr.parse(tmp_photos, rsp, false, owner, ownername, buddy_url);
 
 	this.prepareImage(currPage*this.perpage, tmp_photos);
 
 	this.slide(0);
+} finally { this.showPhotoLoading(false); }
 };
 PanelControl.prototype.setPhotos=function(photos){
 	if(this.isOrganizePanel) {
@@ -1308,8 +1478,8 @@ PanelControl.prototype.setPhotos=function(photos){
 		this.gmap.onPanelPhotoClick(0);
 		return;
 	}
-	
-	this.$panel.fadeIn('fast');
+
+	this.show(true);
 
 	this.pagestoload=null; // disable more loading
 	this.photos=photos;
@@ -1318,13 +1488,15 @@ PanelControl.prototype.setPhotos=function(photos){
 
 	this.total=photos.length;
 
-	this.$panel.find('span.total').text(this.total).end().find('span.selected').text(0);
+	this.$panel.find('span.total').text(this.total);
+	this.$panel.find('span.selected').text(0);
 	this.$panel.find('div.content').width(this.total*79);
 
 	this.prepareImage(0, photos);
 
-	if(!this.isOrganizePanel)
+    if(!this.isOrganizePanel) {
 		this.onPhotoClick.call(this.imgs[photos.sel_idx]);
+	}
 
 	this.slide(0);
 };
@@ -1335,36 +1507,36 @@ PanelControl.prototype.prepareImage=function(startidx,photos){
 		var photo=photos[i];
 		var img=this.imgs[idx];
 		if(!img) {
-			img=this.imgs[idx]=$('<img style="position:absolute;width:75px;height:75px;"></img>').css('left',idx*79+1).appendTo(content).load(this.onImageLoaded).click(this.onPhotoClick).get(0);
+			img=this.imgs[idx]=$('<img style="position:absolute;width:75px;height:75px;"></img>').css('left',idx*79+1).appendTo(content).click(this.onPhotoClick).get(0);
 			img.idx=idx;
 			img.ctrl=this;
 		}
 		img.photo=photo;
 		photo.img=null;
 		this.photos[idx]=photo;
-		$(img).hide();
+		$(img).attr({title:'Loading...',src:pics.marker_trans});
 	}
 };
-PanelControl.prototype.slide=function(dif,pos){
-	var width_wrap = this.$panel.children('div.contentwrap').width();
-	var show_count = parseInt((width_wrap+78)/79);
-	var rel_count = parseInt(width_wrap/79);
-	var roll_len = rel_count-1;
+PanelControl.prototype.slide=function(dif,left,barwid,bartotal){
+	var width_wrap = this.$panel.find('div.contentwrap').width();
+	var show_count = parseInt((width_wrap+78)/79,10);
+	var rel_count = parseInt(width_wrap/79,10);
 
 	var total_idx = this.total-1;
 	var begin_idx = this.photos.show_idx;
 	var end_idx=begin_idx;
-	
+
 	switch(dif) {
 	case 0:
-		if(pos!=null) begin_idx=pos;
-	
+		if(left!==undefined && barwid!==undefined && bartotal!==undefined) {
+			begin_idx = Math.floor(left*(this.total-rel_count)/(bartotal-barwid));
+		}
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
-	
+
 	case 1:
-		if(total_idx-begin_idx+1 <= rel_count) return;
+		if(total_idx-begin_idx+1 <= rel_count) { return; }
 
 		begin_idx+=rel_count;
 		if(total_idx-begin_idx+1 <= rel_count) {
@@ -1376,28 +1548,28 @@ PanelControl.prototype.slide=function(dif,pos){
 		break;
 
 	case -1:
-		if(begin_idx == 0) return;
-		
+		if(begin_idx === 0) { return; }
+
 		begin_idx-=rel_count;
-		if(begin_idx <= 0) begin_idx = 0;
+		if(begin_idx <= 0) { begin_idx = 0; }
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
 
 	case Infinity:
-		if(total_idx-begin_idx+1 <= rel_count) return;
+		if(total_idx-begin_idx+1 <= rel_count) { return; }
 
 		end_idx=total_idx;
 		begin_idx=end_idx-(rel_count-1);
-		if(begin_idx<0) begin_idx=0;
+		if(begin_idx<0) { begin_idx=0; }
 		break;
 
 	case -Infinity:
-		if(begin_idx == 0) return;
+		if(begin_idx === 0) { return; }
 
 		begin_idx=0;
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
 	}
 	this.photos.show_idx=begin_idx;
@@ -1405,258 +1577,153 @@ PanelControl.prototype.slide=function(dif,pos){
 	for(var i=begin_idx; i<=end_idx; ++i) {
 		var photo = this.photos[i];
 		if(!photo) {
-			this.loadData(parseInt(i/this.perpage)+1);
+			this.loadData(parseInt(i/this.perpage)+1,10);
 		} else if(!photo.img) {
 			photo.img=this.imgs[i];
 			$(photo.img).attr({title:photo.api.gettitle(photo),src:photo.api.iconurl(photo)});
 		}
 	}
 
-	var rang_count = (end_idx-begin_idx+1);
-	if(rang_count > rel_count) rang_count = rel_count;
 
-	this.$panel.find('div.progressbar').animate({width:rang_count*100/(total_idx+1)+'%', left:begin_idx*100/(total_idx+1)+'%'}, 'fast');
+	var $progressbarctnr=this.$panel.find('div.progressbar').parent();
+
+	if(this.total <= rel_count) {
+		$progressbarctnr.hide();
+	} else {
+		var bartotalwid=$progressbarctnr.show().width();
+		var barwid=rel_count/this.total*bartotalwid;
+
+		if(barwid < 50 && bartotalwid > 100) {
+			var mov={width:'50px', left:Math.floor(begin_idx/(this.total-rel_count)*(bartotalwid-50))};
+		} else {
+			var mov={width:Math.floor(rel_count/this.total*bartotalwid), left:Math.floor(begin_idx/this.total*bartotalwid)};
+		}
+		this.$panel.find('div.progressbar').animate(mov, 'fast');
+	}
+
 	this.$panel.find('div.content').animate({left:begin_idx*(-79)},'fast');
 };
 PanelControl.prototype.onPhotoClick=function(){
-	if(this.ctrl.isOrganizePanel) {
-		
+	if(this.ctrl.isOrganizePanel) { return; }
+
+	this.ctrl.photos.sel_idx=this.idx;
+	this.ctrl.$panel.find('img.selected').removeClass('selected');
+	$(this).addClass('selected');
+
+	if(this.ctrl.gmap && this.ctrl.gmap.onPanelPhotoClick) { this.ctrl.gmap.onPanelPhotoClick(this.idx); }
+};
+PanelControl.prototype.setInfo=function(txt){
+	this.$panel.find('span.info').text(txt);
+};
+PanelControl.prototype.setPage=function(curr,total){
+	if(total!==null) { this.pageTotal=total; }
+	if(curr !==null) { this.pageCurr=curr; }
+
+	var $pagebar=this.$panel.find('div.pagebar');
+	if(this.pageTotal === -1) {
+		$pagebar.css('left',0);
+		this.$panel.find('span.info').text('Loading...');
+		$pagebar.get(0).disableDrag=true;
+		return;
+	}
+	if(this.pageTotal === 0) {
+		$pagebar.css('left',0);
+		this.$panel.find('span.info').text('No photos.');
+		$pagebar.get(0).disableDrag=true;
+		return;
+	}
+	if(this.pageTotal === 1) {
+		$pagebar.css('left',0);
+		this.$panel.find('span.info').text(this.pageCurr+' / '+this.pageTotal);
+		$pagebar.get(0).disableDrag=true;
+		return;
+	}
+
+	$pagebar.get(0).disableDrag=false;
+	var bw=$pagebar.width();
+	var cw=$pagebar.parent().width();
+	$pagebar.css('left',Math.floor((this.pageCurr-1)*(cw-bw)/(this.pageTotal-1)));
+	this.$panel.find('span.info').text(this.pageCurr+' / '+this.pageTotal);
+};
+PanelControl.prototype.getPageCurr=function(){ return this.pageCurr; };
+PanelControl.prototype.showPageLoading=function(show){
+	if(show) {
+		this.$panel.find('div.pagebar').get(0).disableDrag=true;
+		this.$panel.find('div.pagebartotal').addClass('barloading');
 	} else {
-		this.ctrl.photos.sel_idx=this.idx;
-		this.ctrl.$panel.find('img.selected').removeClass('selected');
-		$(this).addClass('selected');
-	
-		if(this.ctrl.gmap) this.ctrl.gmap.onPanelPhotoClick(this.idx);
+		this.$panel.find('div.pagebartotal').removeClass('barloading');
 	}
 };
-
-
-// PhotoSetControl
-var PhotoSetControl=fgs.PhotoSetControl=function(photoset_id) {
-	flickr.callapi('flickr.photosets.getInfo', {photoset_id:photoset_id}, this);
-};
-PhotoSetControl.prototype=new mapapi.GControl();
-PhotoSetControl.prototype.initialize=function(map) {
-	this.gmap=map;
-	var $options=this.$options=$(
-		'<div class="option">'+
-			'<a    class="updnbtn" style="position:absolute;left:5px;"></a>'+
-			'<a    class="trkbtn"  style="position:absolute;left:20px;"></a>'+
-			'<span class="title"   style="margin-left:35px;">&nbsp;</span>'+
-			'<p    class="desc"    style="margin:5px; display:none;"></p>'+
-			'<div  class="loading" style="padding-top:5px;"><img src="'+pics['flickr_loading']+'"></img> <span class="loadingmsg">'+msg['loading']+'...</span></div>'+
-		'</div>');
-
-	$options.children('a.updnbtn').click(function(){ $options.children('p.desc').toggle(); });
-	var ctrl=this;
-	$options.children('a.trkbtn').click(function(){ if(ctrl.gmap) ctrl.gmap.tracking_toggle(); });
-
-	map.getContainer().appendChild($options.get(0));
-	return $options.get(0);
-};
-PhotoSetControl.prototype.getDefaultPosition=function(){ return new mapapi.GControlPosition(mapapi.G_ANCHOR_TOP_LEFT, new mapapi.GSize(80, 6)); };
-PhotoSetControl.prototype.flickr_photosets_getInfo_onLoad=function(success, responseXML, responseText, params){
-	var rsp=eval('(' + responseText + ')');
-	if(!rsp||rsp.stat != 'ok') return;
-
-	var photoset=rsp.photoset;
-	this.$options.children('span.title').text(photoset.title._content).end()
-	             .children('p.desc').html(photoset.description._content.replace(/\n/g,'<br>'));
-};
-PhotoSetControl.prototype.showLoading=function(show, msg){
-	var $loading = this.$options.children('div.loading');
-	(show) ? $loading.show() : $loading.hide();
-	if(msg) $loading.children('span.loadingmsg').html('Loading... ' + msg);
+PanelControl.prototype.showPhotoLoading=function(show){
+	if(show) { this.$panel.find('div.progresstotal').addClass('barloading');
+	} else {   this.$panel.find('div.progresstotal').removeClass('barloading'); }
 };
 
+PanelControl.prototype.getTime=function(){
+	var year=this.$panel.find('select.year_select').val();
 
-
-// BrowseOptionControl
-var BrowseOptionControl=fgs.BrowseOptionControl=function(year,month,sort){
-	this.default_year=year||'lastweek';
-	this.default_month=month||'all';
-	this.default_sort=sort||'interestingness-desc';
-
-	var nowy = new Date().getFullYear();
-	var $options=this.$options=$(
-		'<div class="option">'+
-			'<div style="height:15px;">'+
-				'<a class="updnbtn" style="position:absolute;left:5px;" title="'+msg['showhide']+'"></a>'+
-				'<a class="prevbtn" style="position:absolute;left:20px;" title="'+msg['pageprev']+'"></a>'+
-				'<a class="nextbtn" style="position:absolute;left:35px;" title="'+msg['pagenext']+'"></a>'+
-				'<span class="info" style="padding-left:55px; line-hight:15px;"></span>'+
-			'</div>'+
-			'<div class="panel" style="padding-top:5px;">'+
-				'<div>'+msg['date-date']+': '+
-					'<select class="year_select">'+
-						'<option value="lastweek">'+msg['date-lastweek']+'</option>'+
-						'<option value="yesterday">'+msg['date-yesterday']+'</option>'+
-						'<option value="lastmonth">'+msg['date-lastmonth']+'</option>'+
-						'<option value="all">'+msg['date-all']+'</option>'+
-						'<option value="'+(nowy-0)+'">'+(nowy-0)+'</option><option value="'+(nowy-1)+'">'+(nowy-1)+'</option>'+
-						'<option value="'+(nowy-2)+'">'+(nowy-2)+'</option><option value="'+(nowy-3)+'">'+(nowy-3)+'</option>'+
-						'<option value="'+(nowy-4)+'">'+(nowy-4)+'</option><option value="'+(nowy-5)+'">'+(nowy-5)+'</option>'+
-						'<option value="'+(nowy-6)+'">'+(nowy-6)+'</option><option value="'+(nowy-7)+'">'+(nowy-7)+'</option>'+
-						'<option value="'+(nowy-8)+'">'+(nowy-8)+'</option><option value="'+(nowy-9)+'">'+(nowy-9)+'</option>'+
-					'</select>'+
-					'<span class="date_month_option" style="display:none;"> / '+
-						'<select class="month_select">'+
-							'<option value="all">'+msg['month-all']+'</option>'+
-							'<option value="01">01</option><option value="02">02</option>'+
-							'<option value="03">03</option><option value="04">04</option>'+
-							'<option value="05">05</option><option value="06">06</option>'+
-							'<option value="07">07</option><option value="08">08</option>'+
-							'<option value="09">09</option><option value="10">10</option>'+
-							'<option value="11">11</option><option value="12">12</option>'+
-						'</select>'+
-						'<span class="date_day_option" style="display:none;"> / '+
-							'<select class="day_select">'+
-								'<option value="all">'+msg['day-all']+'</option>'+
-								'<option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option>'+
-								'<option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option>'+
-								'<option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>'+
-								'<option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option>'+
-								'<option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option>'+
-								'<option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option>'+
-								'<option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option>'+
-								'<option value="29">29</option><option value="30">30</option><option value="31">31</option>'+
-							'</select>'+
-						'</span>'+
-					'</span>'+
-				'</div>'+
-				'<div>'+msg['sort-sort']+': '+
-					'<select class="sort_select">'+
-						'<option value="interestingness-desc">'+msg['sort-interestingness-desc']+'</option>'+
-						'<option value="interestingness-asc">'+msg['sort-interestingness-asc']+'</option>'+
-						'<option value="date-taken-desc">'+msg['sort-date-taken-desc']+'</option>'+
-						'<option value="date-taken-asc">'+msg['sort-date-taken-asc']+'</option>'+
-						'<option value="date-posted-desc">'+msg['sort-date-posted-desc']+'</option>'+
-						'<option value="date-posted-asc">'+msg['sort-date-posted-asc']+'</option>'+
-						'<option value="relevance">'+msg['sort-relevance']+'</option>'+
-					'</select>'+
-				'</div>'+
-				'<div> '+msg['search']+': '+
-					'<form class="search_form">'+
-						'<input class="search_text" type="text">'+
-						'<input type="submit">'+
-					'</form>'+
-				'</div>'+
-			'</div>'+
-			'<div class="loading" style="padding-top:5px;"><img src="'+pics['flickr_loading']+'"></img> <span class="loadingmsg">'+msg['loading']+'...</span></div>'+
-		'</div>');
-
-	$options.find('select.year_select').val(this.default_year).end()
-	        .find('select.month_select').val(this.default_month).end()
-	        .find('select.sort_select').val(this.default_sort);
-
-	var ctrl=this;
-	function changeoption(){ try{
-		if(parseInt($options.find('select.year_select').val())) {
-			$options.find('span.date_month_option').show();
-			if(parseInt($options.find('select.month_select').val())) {
-				$options.find('span.date_day_option').show();
-			}
-		} else {
-			$options.find('span.date_month_option').hide().end().find('select.month_select').val('all').end().find('select.day_select').val('all');
-		}
-		ctrl.gmap.changeOption();
-	} finally {
-		return false;
-	}};
-	$options.find('select').change(changeoption);
-	$options.find('form').submit(changeoption);
-
-	$options.find('a.updnbtn').click(function(){ $options.children('div.panel').toggle(); }).end()
-	        .find('a.prevbtn').click(function(){ ctrl.gmap.prevPage(); }).end()
-	        .find('a.nextbtn').click(function(){ ctrl.gmap.nextPage(); });
-};
-BrowseOptionControl.prototype=new mapapi.GControl();
-BrowseOptionControl.prototype.initialize=function(map) {
-	this.gmap=map;
-	map.getContainer().appendChild(this.$options.get(0));
-	return this.$options.get(0);
-};
-BrowseOptionControl.prototype.getDefaultPosition=function(){ return new mapapi.GControlPosition(mapapi.G_ANCHOR_TOP_LEFT, new mapapi.GSize(90, 8)); };
-BrowseOptionControl.prototype.showLoading=function(show){
-	var $loading = this.$options.children('div.loading');
-	(show) ? $loading.show() : $loading.hide();
-};
-BrowseOptionControl.prototype.getTime=function(){ 
-	var year=this.$options.find('select.year_select').val();
-
-	if(year == 'all') {
-		return {begin:'1970-01-01 00:00:00'};
+	if(year === 'all') {
+		var ddmax=new Date();
+		var yy=ddmax.getFullYear();
+		var mm=ddmax.getMonth()+1;
+		var dd=ddmax.getDate();
+		return {begin:'1800-01-01 00:00:00', end:yy+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd+' 23:59:59'};
 	}
-	
-	var datemin = null;
-	if(year == 'lastmonth') {
+
+	var datemin=null;
+	if(year === 'lastmonth') {
 		datemin=new Date();
 		datemin.setMonth(datemin.getMonth()-1);
-	} else if(year == 'lastweek') {
+	} else if(year === 'lastweek') {
 		datemin=new Date();
 		datemin.setDate(datemin.getDate()-7);
-	} else if(year == 'yesterday') {
+	} else if(year === 'yesterday') {
 		datemin=new Date();
 		datemin.setDate(datemin.getDate()-1);
 	}
 	if(datemin) {
-		var y = datemin.getFullYear();
-		var m = datemin.getMonth()+1;
-		var d = datemin.getDate();
-		return {begin:y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d+' 00:00:00'};
+		var y=datemin.getFullYear();
+		var m=datemin.getMonth()+1;
+		var d=datemin.getDate();
+		var dmin=y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d+' 00:00:00';
+		var dmax=new Date();
+		y=dmax.getFullYear();
+		m=dmax.getMonth()+1;
+		d=dmax.getDate();
+		dmax=y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d+' 23:59:59';
+		return {begin:dmin, end:dmax};
 	}
-	
+
 	// year is number
-	var month=this.$options.find('select.month_select').val();
-	if(month == 'all') {
+	var month=this.$panel.find('select.month_select').val();
+	if(month === 'all') {
 		return {begin:year+'-01-01', end:year+'-12-31 23:59:59'};
 	} else {
-		var day=this.$options.find('select.day_select').val();
-		if(day == 'all') {
-			return {begin:year+'-'+month+'-01', end:year+'-'+month+'-31 23:59:59'};
-		} else {
-			return {begin:year+'-'+month+'-'+day, end:year+'-'+month+'-'+day+' 23:59:59'};
-		}
+		var day=this.$panel.find('select.day_select').val();
+		if(day === 'all') { return {begin:year+'-'+month+'-01', end:year+'-'+month+'-31 23:59:59'}; }
+		else {             return {begin:year+'-'+month+'-'+day, end:year+'-'+month+'-'+day+' 23:59:59'}; }
 	}
 };
-BrowseOptionControl.prototype.getSort=function(){ return this.$options.find('select.sort_select').val(); };
-BrowseOptionControl.prototype.getSearchText=function(){ return $.trim(this.$options.find('input.search_text').val()); };
-BrowseOptionControl.prototype.setInfo=function(str){ this.$options.find('span.info').text(str); };
+PanelControl.prototype.getSort=function(){ return this.$panel.find('select.sort_select').val(); };
+PanelControl.prototype.getSearchText=function(){ return $.trim(this.$panel.find('input.search_text').val()); };
+PanelControl.prototype.isTimeTracking=function(){ return this.timetracking; };
 
 
 
 
 // PhotosMap, for base class
-PhotosMap=fgs.PhotosMap=function(container, opts){
-	mapapi.GMap2.apply(this,arguments);
-	this.photos=null;
+var PhotosMap=function(container, opts){
+	arguments.callee.superconstructor.apply(this, arguments);
+	this.photos=[];
 
-	if(opts.panelctrl) {
-		this.panelctrl=opts.panelctrl;
-		this.addControl(this.panelctrl);
-	}
-
-	mapapi.GEvent.addListener(this, 'infowindowopen', this.onInfoWindowOpen);
-	mapapi.GEvent.addListener(this, 'infowindowclose', this.onInfoWindowClose);
+	google.maps.Event.addListener(this, 'infowindowopen', this.onInfoWindowOpen);
+	google.maps.Event.addListener(this, 'infowindowclose', this.onInfoWindowClose);
 
 	var mt=this.getMapTypes();
-	for(var i=0; i<mt.length; i++)
-		mt[i].getMinimumResolution=this.getMinimumResolution;
+	for(var i=0; i<mt.length; i++) { mt[i].getMinimumResolution=this.getMinimumResolution; }
 };
-fgs.extend(PhotosMap, mapapi.GMap2);
+extend(PhotosMap, google.maps.Map2);
 PhotosMap.prototype.getMinimumResolution=function() { return 3; };
-PhotosMap.prototype.parsePhotos=function(fromphotos,owner,ownername) {
-	this.photos = this.photos||[];
-	for (var i=0,len=fromphotos.photo.length; i<len; i++) {
-		var photo=fromphotos.photo[i];
-		var lat=parseFloat(photo.latitude);
-		var lon=parseFloat(photo.longitude);
-		if(!lat && !lon) continue;
-
-		var p = {id:photo.id, secret:photo.secret, title:photo.title, pos:new mapapi.GLatLng(lat, lon), accuracy:parseInt(photo.accuracy), api:flickr, dateupload:parseInt(photo.dateupload), datetaken:photo.datetaken, owner:photo.owner?photo.owner:owner, ownername:photo.ownername?photo.ownername:ownername, farm:photo.farm, server:photo.server, iconfarm:photo.iconfarm, iconserver:photo.iconserver, license:parseInt(photo.license)};
-		this.photos.push(p);
-	}
-};
 PhotosMap.prototype.deltas = [
 0,0,
 6.0471013966887784,
@@ -1677,6 +1744,8 @@ PhotosMap.prototype.deltas = [
 0.0001978462849822430,
 0.0000989186817588934,
 0.0000494593408794467];
+PhotosMap.prototype.setPanelControl=function(panelctrl) { this.panelctrl=panelctrl; };
+PhotosMap.prototype.getPanelControl=function() { return this.panelctrl; };
 PhotosMap.prototype.groupPhotos=function() {
 	var delta=this.deltas[this.getZoom()];
 
@@ -1691,16 +1760,15 @@ PhotosMap.prototype.groupPhotos=function() {
 			if( b.containsLatLng(pos)) {
 				isMerged=true;
 				b.photos.push(photo);
-				if(b.firstdate>photo.firstdate)
-					b.firstdate=photo.firstdate;
+				if(b.firstdate>photo.firstdate) { b.firstdate=photo.firstdate; }
 				break;
 			}
 		}
 		if(!isMerged) {
-			var b = new mapapi.GLatLngBounds(new mapapi.GLatLng(pos.lat()-delta, pos.lng()-delta), new mapapi.GLatLng(pos.lat()+delta, pos.lng()+delta));
-			b.photos=[photo];
-			b.firstdate=photo.datetaken;
-			temp_bounds.push(b);
+			var bb = new google.maps.LatLngBounds(new google.maps.LatLng(pos.lat()-delta, pos.lng()-delta), new google.maps.LatLng(pos.lat()+delta, pos.lng()+delta));
+			bb.photos=[photo];
+			bb.firstdate=photo.datetaken;
+			temp_bounds.push(bb);
 		}
 	}
 	return temp_bounds;
@@ -1708,22 +1776,20 @@ PhotosMap.prototype.groupPhotos=function() {
 PhotosMap.prototype.showPhotoGroups=function(pgroups) {
 	for (var i=0,len=pgroups.length; i<len ; ++i) {
 		var pgroup = pgroups[i];
-		if(pgroup.photos.length == 0) continue;
+		if(pgroup.photos.length === 0) { continue; }
 
-		if(pgroup.maker) this.removeOverlay(pgroup.maker);
-		pgroup.maker=fgs.PhotoGroupMarker.getInstance(pgroup);
+		if(pgroup.maker) { this.removeOverlay(pgroup.maker); }
+		pgroup.maker=PhotoGroupMarker.getInstance(pgroup);
 		pgroup.maker.setLatLng(pgroup.getCenter());
 		this.addOverlay(pgroup.maker);
 	}
 };
 PhotosMap.prototype.onMarkerClick=function(marker,photos){
 	this.currSelectMarker=marker;
-	if(this.panelctrl.setPhotos) this.panelctrl.setPhotos(photos);
+	if(this.panelctrl && this.panelctrl.setPhotos) { this.panelctrl.setPhotos(photos); }
 };
 PhotosMap.prototype.onPanelPhotoClick=function(idx){
-	if(this.currSelectMarker) {
-		this.currSelectMarker.showInfoWindow(idx);
-	}
+	if(this.currSelectMarker) { this.currSelectMarker.showInfoWindow(idx); }
 };
 PhotosMap.prototype.onInfoWindowOpen=function(){
 	this.suspenddragevent=true;
@@ -1732,39 +1798,52 @@ PhotosMap.prototype.onInfoWindowOpen=function(){
 PhotosMap.prototype.onInfoWindowClose=function(){
 	this.returnToSavedPosition();
 	this.suspenddragevent=false;
-	if(this.panelctrl.hide) this.panelctrl.hide();
+	if(this.panelctrl && this.panelctrl.show) { this.panelctrl.show(false); }
 };
 
 
 // PhotoSetMap : PhotosMap
-var PhotoSetMap=fgs.PhotoSetMap=function(container, opts){
-	opts=opts||{};
-	this.superconstructor.apply(this, arguments);
+var PhotoSetMap=function(container, opts){
+	PhotoSetMap.superconstructor.call(this, container, opts);
 	this.win=opts.win;
 	this.win.gmap=this;
 	this.photoset_id=opts.photoset_id;
 	this.datetracking=false;
 
 	this.isSetCenter=false;
-	this.setCenter(new mapapi.GLatLng(0,0), 0);
+	this.setCenter(new google.maps.LatLng(0,0), 0);
 
-	this.addMapType(mapapi.G_PHYSICAL_MAP); 
-	this.addControl(new mapapi.GHierarchicalMapTypeControl());
-	this.addControl(new mapapi.GLargeMapControl());
-	var ctrl = new mapapi.GOverviewMapControl();
+	this.addMapType(google.maps.PHYSICAL_MAP);
+	this.addControl(new google.maps.HierarchicalMapTypeControl());
+	this.addControl(new google.maps.LargeMapControl());
+	var ctrl = new google.maps.OverviewMapControl();
 	this.addControl(ctrl);
 	ctrl.hide();
-	this.photoSetCtrl = new fgs.PhotoSetControl(this.photoset_id);
-	this.addControl(this.photoSetCtrl);
 
-	mapapi.GEvent.addListener(this, 'zoomend', this.onzoomend);
+	//var photoSetCtrl = new PhotoSetControl(this.photoset_id);
+	//this.addControl(photoSetCtrl);
+
+	var panelctrl=new PanelControl(2);
+	this.setPanelControl(panelctrl);
+	this.addControl(panelctrl);
+
+	google.maps.Event.addListener(this, 'zoomend', this.onzoomend);
 
 	this.win.showmask(true);
 
+	var that=this;
+	flickr.callapi('flickr.photosets.getInfo', {photoset_id:this.photoset_id}, function(success, responseXML, responseText, params) {
+		var rsp=eval('(' + responseText + ')');
+		if(!rsp||rsp.stat != 'ok') return;
+
+		that.getPanelControl().setInfo(rsp.photoset.title._content);
+	});
+
 	var opts={photoset_id:this.photoset_id, extras:'geo,date_upload,date_taken,icon_server,license', per_page:PER_PAGE, page:1};
+	this.getPanelControl().showPageLoading(true);
 	flickr.callapi('flickr.photosets.getPhotos', opts, this);
 };
-fgs.extend(PhotoSetMap, fgs.PhotosMap);
+extend(PhotoSetMap, PhotosMap);
 PhotoSetMap.prototype.flickr_photosets_getPhotos_onLoad=function(success, responseXML, responseText, params){
 	var pageCurr = 0;
 	var pageTotal = 0;
@@ -1774,32 +1853,31 @@ try {
 
 	var photoset=rsp.photoset;
 
-	pageCurr=parseInt(photoset.page);
-	pageTotal=parseInt(photoset.pages);
+	pageCurr=parseInt(photoset.page,10);
+	pageTotal=parseInt(photoset.pages,10);
 
 	if(pageCurr < pageTotal) {
-		this.photoSetCtrl.showLoading( true, parseInt(pageCurr/pageTotal*100)+'%');
+		//this.getPanelControl().showPageLoading( true, parseInt(pageCurr/pageTotal*100,10)+'%');
 		var opts={photoset_id:this.photoset_id, extras:'geo,date_upload,date_taken,icon_server,license', per_page:PER_PAGE, page:pageCurr+1};
 		flickr.callapi('flickr.photosets.getPhotos', opts, this);
 	}
 
 	var owner=photoset.owner;
 	var ownername=photoset.ownername;
-	this.parsePhotos(photoset,owner,ownername);
+	flickr.parse(this.photos, rsp, true, owner, ownername);
 
 	this.regroupphotos();
 } finally {
-	if(pageCurr >= pageTotal) this.photoSetCtrl.showLoading(false);
+	if(pageCurr >= pageTotal) this.getPanelControl().showPageLoading(false);
 	this.win.showmask(false);
 }};
 PhotoSetMap.prototype.regroupphotos=function(){
-	if(!this.photos) return;
-
 	if(!this.isSetCenter) {
 		this.isSetCenter=true;
-		var totalbound = new mapapi.GLatLngBounds();
+		var totalbound = new google.maps.LatLngBounds();
 		for (var i=0,len=this.photos.length; i<len; i++) {
 			var photo=this.photos[i];
+			if(!photo.pos) continue;
 			totalbound.extend(photo.pos);
 		}
 		var zoom = this.getBoundsZoomLevel(totalbound);
@@ -1807,16 +1885,17 @@ PhotoSetMap.prototype.regroupphotos=function(){
 		return;
 	}
 
-	var pgroups=this.groupPhotos();
-
 	this.clearOverlays();
+
+	var pgroups=this.groupPhotos();
 
 	if(this.datetracking) {
 		pgroups.sort( function(a,b){ if(a.firstdate>b.firstdate) return -1; else return 1;} );
 		var trackpoints = [];
-		for (var i=0,len=pgroups.length; i<len; i++)
+		for (var i=0,len=pgroups.length; i<len; i++) {
 			trackpoints.push(pgroups[i].getCenter());
-		this.addOverlay(new mapapi.GPolyline(trackpoints)); // TODO disappear if large track points .....
+		}
+		this.addOverlay(new google.maps.Polyline(trackpoints)); // TODO disappear if large track points .....
 	}
 
 	this.showPhotoGroups(pgroups);
@@ -1835,9 +1914,11 @@ PhotoSetMap.prototype.onSearchResultClicked=function(pos, zoom){
 
 
 // BrowseMap : PhotosMap
-var BrowseMap=fgs.BrowseMap=function(container, opts){
-	opts=opts||{};
-	this.superconstructor.apply(this,arguments);
+var BrowseMap=function(container, opts){
+	if(opts && opts.organize_user_id) {
+		opts.user_id=opts.organize_user_id;
+	}
+	BrowseMap.superconstructor.call(this, container, opts);
 	this.win=opts.win;
 	this.win.gmap=this;
 	this.user_id=opts.user_id;
@@ -1845,29 +1926,39 @@ var BrowseMap=fgs.BrowseMap=function(container, opts){
 	this.fullrange=opts.fullrange;
 	this.disable_refresh=false;
 	this.lastcenter=null;
-	this.pageCurr=1;
-	this.pageTotal=1;
 	this.suspenddragevent=false;
 	this.delay_loading=2000;
 	this.currSelectMarker=null;
 
-	if(this.user_id) {
-		this.browseoption = new fgs.BrowseOptionControl('all',null,'relevance');
-	} else {
-		this.browseoption = new fgs.BrowseOptionControl();
-	}
-	this.addControl(this.browseoption);
-	this.browseoption.setInfo('Loading...');
-	
-	this.addMapType(mapapi.G_PHYSICAL_MAP); 
-	this.addControl(new mapapi.GHierarchicalMapTypeControl());
-	this.addControl(new mapapi.GLargeMapControl());
-	var ctrl = new mapapi.GOverviewMapControl();
+	//if(this.user_id) {
+	//	this.browseoption = new BrowseOptionControl('all',null,'relevance');
+	//} else {
+	//	this.browseoption = new BrowseOptionControl();
+	//}
+	//this.addControl(this.browseoption);
+
+	this.addMapType(google.maps.PHYSICAL_MAP);
+	this.addControl(new google.maps.HierarchicalMapTypeControl());
+	this.addControl(new google.maps.LargeMapControl());
+	var ctrl = new google.maps.OverviewMapControl();
 	this.addControl(ctrl);
 	ctrl.hide();
 
+	var panelctrl=null;
 	if(opts.organize_user_id) {
-		this.contextMenu = new fgs.ContextMenuControl(function(point, src, overlay){
+		panelctrl=new PanelControl(3,'all',null,'relevance');
+	} else if(this.user_id) {
+		panelctrl=new PanelControl(1,'all',null,'relevance');
+	} else {
+		panelctrl=new PanelControl(1);
+	}
+	this.setPanelControl(panelctrl);
+	this.addControl(panelctrl);
+
+	panelctrl.setPage(1, -1); // loading...
+
+	if(opts.organize_user_id) {
+		this.contextMenu = new ContextMenuControl(function(point, src, overlay){
 			if(!src || !src.tagName) return false;
 			if((src.tagName == 'DIV' && src.className && src.className == 'markerlabel') || (src.tagName == 'IMG' && overlay && overlay.photos)) {
 			   	return true;
@@ -1875,33 +1966,28 @@ var BrowseMap=fgs.BrowseMap=function(container, opts){
 			return false;
 		});
 		this.contextMenu.addItem('delete', function(point, src, overlay){
-			var marker;
-			if(overlay.photos) {
-				marker=overlay;
-			} else {
-				marker=src.marker;
-			}
+			var marker = (overlay.photos ? overlay : src.marker);
 			marker.deleteAllGeoInfo();
 		});
 		this.addControl(this.contextMenu);
 	}
 
-	mapapi.GEvent.addListener(this, 'zoomend', this.onzoomend);
-	mapapi.GEvent.addListener(this, 'dragend', this.ondragend);
+	google.maps.Event.addListener(this, 'zoomend', this.onzoomend);
+	google.maps.Event.addListener(this, 'dragend', this.ondragend);
 
 	var lat = parseFloat(GM_getValue('last_browse_lat', DEF_LAT));
 	var lng = parseFloat(GM_getValue('last_browse_lng', DEF_LNG));
-	var zoom = parseInt(GM_getValue('last_browse_zoom', DEF_ZOOM));
-	this.setCenter(new mapapi.GLatLng(lat,lng), zoom);
+	var zoom = parseInt(GM_getValue('last_browse_zoom', DEF_ZOOM),10);
+	this.setCenter(new google.maps.LatLng(lat,lng), zoom);
 };
-fgs.extend(BrowseMap, fgs.PhotosMap);
+extend(BrowseMap, PhotosMap);
 BrowseMap.prototype.onzoomend=function(){
-	this.pageCurr=this.pageTotal=1;
 	this.clearOverlays();
+	this.getPanelControl().setPage(1,-1); //loading
 	this.refreshView();
 };
 BrowseMap.prototype.ondragend=function(){
-	if(this.suspenddragevent) return;
+	if(this.suspenddragevent) { return; }
 	var lastcenter=this.lastcenter;
 	var bound=this.getBounds();
 	var center=bound.getCenter();
@@ -1911,23 +1997,26 @@ BrowseMap.prototype.ondragend=function(){
 		var dy  = Math.abs(center.lat() - lastcenter.lat());
 		var bx = span.lng();
 		var by = span.lat();
-		if ((dx < 0.15*bx) && (dy < 0.15*by)) return;
+		if ((dx < 0.15*bx) && (dy < 0.15*by)) { return; }
 	}
-	this.pageCurr=this.pageTotal=1;
+	this.getPanelControl().setPage(1,-1); // loading
 	this.refreshView();
 };
 BrowseMap.prototype.refreshView=function(nodelay, timestamp){
-	if(this.disable_refresh) return;
-	if(!timestamp) timestamp = this.search_timestamp = new Date().getTime();
-	if(this.search_timestamp != timestamp) return;
-	
+	if(this.disable_refresh) { return; }
+	if(!timestamp) {
+		this.search_timestamp = new Date().getTime();
+		timestamp = this.search_timestamp;
+	}
+	if(this.search_timestamp !== timestamp) { return; }
+
 	var gmap = this;
 	if(!nodelay) {
 		setTimeout( function() { gmap.refreshView(true, timestamp); }, this.delay_loading);
 		return;
 	}
 
-	this.browseoption.showLoading(true);
+	this.getPanelControl().showPageLoading(true);
 
 	this.lastcenter = this.getCenter();
 	window.setTimeout(function() {
@@ -1935,7 +2024,7 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 		GM_setValue('last_browse_lat', gmap.lastcenter.lat()+'');
 		GM_setValue('last_browse_lng', gmap.lastcenter.lng()+'');
 	}, 0);
-	
+
 	var bound = this.getBounds();
 	var sw = bound.getSouthWest();
 	var ne = bound.getNorthEast();
@@ -1951,28 +2040,30 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 		e-=wid/5;
 		n-=hig/5;
 		s+=hig/5;
-		if(w > 180) w-=360;
-		if(e <= -180) e+=360;
-		if(e < w)
-			((180+e) > (180-w)) ? w=-180 : e=180;
+		if(w > 180) { w-=360; }
+		if(e <= -180) { e+=360; }
+		if(e < w) {
+			if((180+e) > (180-w)) { w=-180;
+			} else { e=180; }
+		}
 	}
 
-	var searchOption={extras:'geo,date_upload,date_taken,owner_name,icon_server,license', per_page:PER_PAGE, page:this.pageCurr, accuracy:1};
+	var pageCurr=this.getPanelControl().getPageCurr();
+	var searchOption={extras:'geo,date_upload,date_taken,owner_name,icon_server,license', per_page:PER_PAGE, page:pageCurr, accuracy:1};
 	searchOption.search_timestamp=this.search_timestamp;
 	searchOption.bbox=w+','+s+','+e+','+n;
 
 	if(this.user_id) searchOption.user_id=this.user_id;
 	if(this.group_id) searchOption.group_id=this.group_id;
 
-	searchOption.sort=this.browseoption.getSort();
-	
-	var t = this.browseoption.getTime();
+	searchOption.sort=this.getPanelControl().getSort();
+
+	var t = this.getPanelControl().getTime();
 	if(t.begin) searchOption.min_taken_date=t.begin;
 	if(t.end)   searchOption.max_taken_date=t.end;
 
-	var searchtxt = this.browseoption.getSearchText();
-	if(searchtxt!='')
-		searchOption.text=searchtxt;
+	var searchtxt = this.getPanelControl().getSearchText();
+	if(searchtxt!='') { searchOption.text=searchtxt; }
 
 	//var points = [new gobj.GLatLng(n,e),new gobj.GLatLng(n,w),new gobj.GLatLng(s,w),new gobj.GLatLng(s,e),new gobj.GLatLng(n,e)];
 	//this.addOverlay(new gobj.GPolyline(points, '#0000FF', 1, .3));
@@ -1982,49 +2073,34 @@ BrowseMap.prototype.flickr_photos_search_onLoad=function(success, responseXML, r
 	if(this.search_timestamp != params.search_timestamp) return;
 try {
 	var rsp=eval('(' + responseText + ')');
-	if(!rsp||rsp.stat != 'ok') return;
+	if(!rsp||rsp.stat != 'ok') { return; }
 
-	this.pageCurr=parseInt(rsp.photos.page);
-	this.pageTotal=parseInt(rsp.photos.pages);
-	if(this.pageTotal == 0) {
-		this.browseoption.setInfo('No photos.');
-	} else {
-		this.browseoption.setInfo(this.pageCurr+' / '+this.pageTotal);
-	}
+	var pageCurr=parseInt(rsp.photos.page,10);
+	var pageTotal=parseInt(rsp.photos.pages,10);
 
-	this.photos=null; // clear previous photo data
+	this.getPanelControl().setPage(pageCurr, pageTotal);
 
-	this.parsePhotos(rsp.photos);
+	this.photos=[]; // clear previous photo data
+
+	flickr.parse(this.photos, rsp);
 
 	this.regroupphotos();
 } finally {
-	this.browseoption.showLoading(false);
+	this.getPanelControl().showPageLoading(false);
 }};
 BrowseMap.prototype.regroupphotos=function(){
-	if(!this.photos) return;
-
-	var pgroups=this.groupPhotos();
+	if(!this.photos) { return; }
 
 	this.clearOverlays();
-	
+
+	var pgroups=this.groupPhotos();
 	this.showPhotoGroups(pgroups);
-};
-BrowseMap.prototype.prevPage=function(){
-	if( this.pageCurr <= 1) return;
-	this.pageCurr--;
-	this.refreshView(true);
-};
-BrowseMap.prototype.nextPage=function(){
-	if( this.pageCurr >= this.pageTotal) return;
-	this.pageCurr++;
-	this.refreshView(true);
 };
 BrowseMap.prototype.changeOption=function(){
 try{
-	this.pageCurr=this.pageTotal=1;
+	this.getPanelControl().setPage(1,-1); // loading
 	this.refreshView(true);
-} finally {
-	return false;
+} finally { return false;
 }};
 BrowseMap.prototype.onSearchResultClicked=function(pos, zoom){
 	this.disable_refresh=true;
@@ -2033,9 +2109,10 @@ BrowseMap.prototype.onSearchResultClicked=function(pos, zoom){
 	this.onzoomend();
 };
 
-
-
-	arguments.callee.inited=true;	
+	this.PhotoMap=PhotoMap;
+	this.PhotoSetMap=PhotoSetMap;
+	this.BrowseMap=BrowseMap;
+	arguments.callee.inited=true;
 },
 
 
@@ -2046,7 +2123,7 @@ try {
 	var isSomeoneChecking = GM_getValue('CHECKING', null);
 	var now = new Date().getTime();
 	GM_setValue('CHECKING', now.toString());
-	if (isSomeoneChecking && (now - parseInt(isSomeoneChecking)) < DOS_PREVENTION_TIME) return;
+	if (isSomeoneChecking && (now - parseInt(isSomeoneChecking,10)) < DOS_PREVENTION_TIME) return;
 
 	// check daily
 	var ONE_DAY = 24*60*60*1000;
@@ -2071,40 +2148,76 @@ try {
 
 
 prepare: function() {
-	if(arguments.callee.init_ok) return true;
-	
-	if(!js_jquery && !js_gmap && $ && mapapi && mapapi.GMap2 && mapapi.GUnload ) {
+	if(arguments.callee.init_ok) { return true; }
+
+	if($ && google && google.maps && google.maps.Map2 && google.maps.Unload ) {
 		arguments.callee.init_ok=true;
-		unsafewin.grab_win = null;
+		unsafewin.grab_win=undefined;
 		return true;
 	}
 	if(!arguments.callee.prepare) {
 		arguments.callee.prepare = true;
 		GM_addStyle(FGS_STYLE);
-		
+
 		loadscript(js_jquery,function(){
 			$=unsafewin.jQuery;
-			$.fn.fadeToggle = function(speed, easing, callback) { return this.animate({opacity: 'toggle'}, speed, easing, callback); };
-			js_jquery=null;
+			$.fn.fadeToggle=function(speed, easing, callback) { return this.animate({opacity: 'toggle'}, speed, easing, callback); };
+			$.setDragable=function(obj,opt, cbmousedown, cbdraging, cbdragend) {
+				opt=opt||{};
+				var $obj=$(obj);
+				$obj.css('cursor','pointer');
+				$obj.mousedown(function(e){
+					if(obj.disableDrag) { return; }
+					obj.dragbegin=true;
+					obj.dragposx=e.clientX;
+					obj.dragposy=e.clientY;
+					if(cbmousedown) { cbmousedown(e); }
+				});
+				$().mousemove(function(e){
+					if(!obj.dragbegin || obj.disableDrag) { return; }
+					$obj.css('cursor','move');
+					var posy=e.clientY-obj.dragposy+parseInt($obj.css('top'),10);
+					var posx=e.clientX-obj.dragposx+parseInt($obj.css('left'),10);
+
+					if(opt.direction==='horizontal') { posy=0;
+					} else if(opt.direction==='vertical') { posx=0; }
+
+					if(opt.bounded==='parent') {
+						var bw=$obj.width();
+						var cw=$obj.parent().width();
+						if(posx < 0) { posx=0;
+						} else if(posx+bw>cw) { posx=cw-bw; }
+					}
+					$obj.css({'top':posy,'left':posx});
+					obj.dragposx=e.clientX;
+					obj.dragposy=e.clientY;
+					if(cbdraging) { cbdraging(e,obj); }
+				}).mouseup(function(e){
+					if(!obj.dragbegin || obj.disableDrag) { return; }
+					$obj.css('cursor','pointer');
+					obj.dragbegin=false;
+					if(cbdragend) { cbdragend(e,obj); }
+				});
+			};
 		});
-		unsafewin.grab_win = (function(w) { mapapi=w; });
-		location.href = "javascript:void(window.grab_win(window));";
 		var k = map_key[location.hostname];
-		if(k == null) {
+		if(!k) {
 			alert('Not support This host, please contact: '+SCRIPT.author);
 			return;
 		}
-		loadscript(js_gmap+k,function(){js_gmap=null;});
-		loadscript(js_analytics,function(){ 
-			location.href="javascript:(" + function() { var pageTracker = _gat._getTracker("UA-359113-6"); pageTracker._initData(); pageTracker._trackPageview(); } + ")()";
+		loadscript(js_gmap+k,function(){
+			unsafewin.grab_win = (function(w) { google=w.google; });
+			location.href = 'javascript:void(window.grab_win(window));'; // call 
+			unsafewin.google.load('maps', '2.x');
+		});
+		loadscript(js_analytics,function(){
+			location.href='javascript:(' + function() { var pageTracker = _gat._getTracker('UA-359113-6'); pageTracker._initData(); pageTracker._trackPageview(); } + ')()';
 		});
 	}
 	return false;
 },
 
-onWindowResizeScroll: function() {
-	$('div.flickrgmapshow').each(function() { this.onWindowResize(); });
-},
+onWindowResizeScroll: function() { $('div.flickrgmapshow').each(function() { this.onWindowResize(); }); },
 
 launch: function(){
 try {
@@ -2125,7 +2238,7 @@ try {
 			if(fgs.prepare()) {
 				prepare_pics();
 				fgs.init_afterloaded();
-				$(window).unload(mapapi.GUnload).resize(fgs.onWindowResizeScroll).scroll(fgs.onWindowResizeScroll);
+				$(window).unload(google.maps.Unload).resize(fgs.onWindowResizeScroll).scroll(fgs.onWindowResizeScroll);
 				callfun.call(lnk, null);
 				loading.parentNode.removeChild(loading);
 			} else {
@@ -2151,29 +2264,21 @@ try {
 
 	var opt = {photo_id:this.getAttribute('photo_id'), user_id:this.getAttribute('user_id'), group_id:this.getAttribute('group_id'), photoset_id:this.getAttribute('photoset_id')};
 	if(opt.photo_id) {
-		var win=create_mapwindow({link:this,fixmax:false,width:516,height:313,embedlink:true,loadlast:true});
-		opt.win=this.win=win;
-		win.open(document.body);
-		new fgs.PhotoMap(win.mapdiv, opt);
+		this.win=create_mapwindow({link:this,fixmax:false,width:516,height:313,embedlink:true,loadlast:true});
+		opt.win=this.win;
+		this.win.open(document.body);
+		new fgs.PhotoMap(this.win.mapdiv, opt);
 	} else if(opt.photoset_id) {
-		var win=create_mapwindow({link:this,fixmax:true,readonly:true,embedlink:true});
-		opt.win=this.win=win;
-		opt.panelctrl=new fgs.PanelControl(false);
-		win.open(document.body);
-		new fgs.PhotoSetMap(win.mapdiv, opt);
+		this.win=create_mapwindow({link:this,fixmax:true,readonly:true,embedlink:true});
+		opt.win=this.win;
+		this.win.open(document.body);
+		new fgs.PhotoSetMap(this.win.mapdiv, opt);
 	} else { // world map, user map, organize map
-		var win=create_mapwindow({link:this,fixmax:true,readonly:true,loadlast:true});
-		opt.win=this.win=win;
-		opt.organize_user_id = this.getAttribute('organize_user_id');
-		if(opt.organize_user_id) {
-			opt.user_id=opt.organize_user_id;
-			//opt.fullrange=true;
-			opt.panelctrl=new fgs.PanelControl(true);
-		} else {
-			opt.panelctrl=new fgs.PanelControl(false);
-		}
-		win.open(document.body);
-		new fgs.BrowseMap(win.mapdiv, opt);
+		this.win=create_mapwindow({link:this,fixmax:true,readonly:true,loadlast:true});
+		opt.win=this.win;
+		opt.organize_user_id=this.getAttribute('organize_user_id');
+		this.win.open(document.body);
+		new fgs.BrowseMap(this.win.mapdiv, opt);
 	}
 } finally {
 	return false;
@@ -2188,7 +2293,7 @@ onload: function() {
 	var re_world_map_link =    /^http:\/\/(?:www.*\.)?flickr\.com\/map(?:\/.*)?$/;
 
 	function parseLink(p, exp) {
-		if(!p) return;
+		if(!p) { return; }
 		var lnks = p.getElementsByTagName('a');
 		for(var ln in lnks) {
 			var maplnk = lnks[ln];
@@ -2201,26 +2306,26 @@ onload: function() {
 	};
 	function parsePhotoMap(p) {
 		var maplnk = parseLink(p, re_photo_map_link);
-		if(maplnk) maplnk.setAttribute('photo_id',RegExp.$2);
+		if(maplnk) { maplnk.setAttribute('photo_id',RegExp.$2); }
 	};
 	function parseUserMap(p,user_id) {
 		var maplnk = parseLink(p, re_user_map_link);
-		if(maplnk) maplnk.setAttribute('user_id',user_id);
+		if(maplnk) { maplnk.setAttribute('user_id',user_id); }
 	};
 	function parseWorldMap(p) {
 		parseLink(p, re_world_map_link);
 	};
 	function parseGroupMap(p) {
 		var maplnk = parseLink(p, re_group_map_link);
-		if(maplnk) maplnk.setAttribute('group_id',unsafewin.f.w.value);
+		if(maplnk) { maplnk.setAttribute('group_id',unsafewin.f.w.value); }
 	};
 	function parsePhotosetMap(p) {
 		var maplnk = parseLink(p, re_set_map_link);
-		if(maplnk) maplnk.setAttribute('photoset_id',RegExp.$2);
+		if(maplnk) { maplnk.setAttribute('photoset_id',RegExp.$2); }
 	};
 	function parseOrganizeMap(p) {
 		var maplnk = parseLink(p, re_organize_map_link);
-		if(maplnk) maplnk.setAttribute('organize_user_id',unsafewin.global_nsid);
+		if(maplnk) { maplnk.setAttribute('organize_user_id',unsafewin.global_nsid); }
 	};
 
 	if(       /^http:\/\/(?:www.*\.)?flickr\.com\/photos\/([a-zA-Z0-9\-\_@]+)\/(\d+)(?:\/.*)?$/.exec(location.href)) {
@@ -2252,8 +2357,9 @@ onload: function() {
 		parseWorldMap(document.getElementById('Main'));
 	} else if(/^http:\/\/(?:www.*\.)?flickr\.com\/groups\/([a-zA-Z0-9\-\_@]+)(?:\/.*)?$/.exec(location.href)) {
 		var paras = document.getElementsByTagName('p');
-		for(var p in paras)
+		for(var p in paras) {
 			paras[p].className == 'Links' && parseGroupMap(paras[p]);
+		}
 	}
 
 	parseUserMap(document.getElementById('candy_nav_menu_you'), unsafewin.global_nsid);
