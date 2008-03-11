@@ -4,9 +4,12 @@
 // http://www.gnu.org/copyleft/gpl.html
 
 
+(function() {
+
 var PER_PAGE = 100;
 var DELAY_TIME = 2000;
-
+var google=window.google;
+var $=window.$;
 
 var msg={
 		'close': 'Close',
@@ -24,25 +27,25 @@ var msg={
 		'pageprev': 'Previous Page',
 		'pagenext': 'Next Page',
 		'loading': 'Loading',
-		'opt-all': 'All your photos',
-		'opt-not_tagged': 'Your non-tagged photos',
-		'opt-not_in_set': 'Your photos not in a set',
-		'opt-located': 'Your geotagged photos',
-		'opt-not_located': 'Your non-geotagged photos',
-		'opt-set': 'Your sets',
-		'opt-group': 'Your groups',
-		'date-date': 'Date',
-		'date-lastmonth': 'Last Month',
-		'date-lastweek': 'Last Week',
-		'date-yesterday': 'Yesterday',
-		'date-all': 'All Time',
-		'month-all': 'All',
-		'day-all': 'All',
-		'sort-sort': 'Sort',
-		'sort-interestingness-desc': 'Interestingness',
-		'sort-date-taken-desc': 'Date taken',
-		'sort-date-posted-desc': 'Date posted',
-		'sort-relevance': 'Relevance',
+		'opt_all': 'All your photos',
+		'opt_not_tagged': 'Your non-tagged photos',
+		'opt_not_in_set': 'Your photos not in a set',
+		'opt_located': 'Your geotagged photos',
+		'opt_not_located': 'Your non-geotagged photos',
+		'opt_set': 'Your sets',
+		'opt_group': 'Your groups',
+		'date_date': 'Date',
+		'date_lastmonth': 'Last Month',
+		'date_lastweek': 'Last Week',
+		'date_yesterday': 'Yesterday',
+		'date_all': 'All Time',
+		'month_all': 'All',
+		'day_all': 'All',
+		'sort_sort': 'Sort',
+		'sort_interestingness_desc': 'Interestingness',
+		'sort_date_taken_desc': 'Date taken',
+		'sort_date_posted_desc': 'Date posted',
+		'sort_relevance': 'Relevance',
 		'search': 'Search',
 		'clearsel': 'Clear selection',
 		'photos': 'photos',
@@ -58,6 +61,7 @@ var pics = {
 	marker_trans    : imgdir+'marker_transparent.png',
 	marker_mov      : imgdir+'marker_image_moved.png',
 	loading         : imgdir+'loading.gif',
+	img_loading     : imgdir+'loading.gif',
 	icons           : imgdir+'icons.png?v=2.9',
 	icon1           : imgdir+'icon1.png',
 	icon2           : imgdir+'icon2.png',
@@ -68,8 +72,8 @@ var pics = {
 };
 $.each(pics, function() { $("<img>").attr("src", this); });
 
-var btnbackgnd = 'background:transparent url('+pics['icons']+') no-repeat scroll ';
-var STYLE=
+var btnbackgnd = 'background:transparent url('+pics.icons+') no-repeat scroll ';
+var CSS_STYLE=
 'a.btn {display:block; cursor:pointer;} '+
 'a.closebtn,a.maxbtn,a.searchbtn,a.actionbtn,a.embedbtn,a.aboutbtn,a.updnbtn,a.prevbtn,a.nextbtn,a.trkbtn {display:block;width:15px;height:15px; text-indent:-999em; cursor:pointer;} '+
 'a.p_btn,a.r_btn   {display:block;height:48px;width:25px; text-indent:-999em; cursor:pointer;} '+
@@ -88,11 +92,11 @@ var STYLE=
 'a.pp_btn    {'+btnbackgnd+' 0px -198px;} a.pp_btn:hover    {'+btnbackgnd+' -25px -198px;} '+
 'a.r_btn     {'+btnbackgnd+' 0px -230px;} a.r_btn:hover     {'+btnbackgnd+' -25px -230px;} '+
 'a.rr_btn    {'+btnbackgnd+' 0px -278px;} a.rr_btn:hover    {'+btnbackgnd+' -25px -278px;} '+
-'div.markerlabel {text-align:center; vertical-align:middle; font-size:small; cursor:pointer;}'+
-'div.markerlabel:hover {color:white; font-weight:bold;}'+
-'div.flickr    {background:transparent url('+pics['infobg_flickr']+') no-repeat scroll bottom right;} '+
-'div.picasa    {background:transparent url('+pics['infobg_picasa']+') no-repeat scroll bottom right;} '+
-'div.panoramio {background:transparent url('+pics['infobg_panoramio']+') no-repeat scroll bottom right;} '+
+'div.markerlabel {text-align:center; vertical-align:middle; font-size:small; cursor:pointer;} '+
+'div.markerlabel:hover {color:white; font-weight:bold;} '+
+'div.flickr    {background:transparent url('+pics.infobg_flickr+') no-repeat scroll bottom right;} '+
+'div.picasa    {background:transparent url('+pics.infobg_picasa+') no-repeat scroll bottom right;} '+
+'div.panoramio {background:transparent url('+pics.infobg_panoramio+') no-repeat scroll bottom right;} '+
 'div.markerinfowin a {text-decoration:none;} '+
 'div.markerinfowin a:hover {text-decoration:underline;} '+
 'div.markerinfowin img {border-width:0px;} '+
@@ -100,7 +104,7 @@ var STYLE=
 'div.longpanel {height:125px;right:10px;} '+
 'div.shortpanel {height:30px;width:150px;} '+
 'table.option td.loading {cursor:pointer; } '+
-'table.option td.loadingnow {cursor:pointer;  background:transparent url('+pics['flickr_loading']+') no-repeat scroll center center; } '+
+'table.option td.loadingnow {cursor:pointer;  background:transparent url('+pics.flickr_loading+') no-repeat scroll center center; } '+
 'div.photopanel div.progress {background-color:#DDDDDD;} '+
 'div.photopanel div.progressbar {background-color:#8888FF;} '+
 'div.photopanel div.content img {top:6px; cursor:pointer; border:1px solid gray;} '+
@@ -114,27 +118,27 @@ var STYLE=
 
 function loadscript(jspath, id) {
 	var s=document.createElement('script');
-	s.type='text/javascript'
+	s.type='text/javascript';
 	s.src =jspath;
-	if(id) s.id = id;
+	s.id = id;
 	document.getElementsByTagName('head')[0].appendChild(s);
-};
+}
 
 
 var flickr={
 	_api_key: 'ebed0eef1b25b738b1903ef93b8f25ee',
 	name:'flickr',
-	check: function(rsp) { return (rsp && rsp.stat == 'ok'); },
-	parseTotalPage: function(rsp) { return parseInt(rsp.photos.pages); },
+	check: function(rsp) { return (rsp && rsp.stat === 'ok'); },
+	parseTotalPage: function(rsp) { return parseInt(rsp.photos.pages,10); },
 	parse: function(photos,rsp,owner,ownername,buddy_url) {
 		for (var i=0,len=rsp.photos.photo.length; i<len; i++) {
 			var p=rsp.photos.photo[i];
 			var lat=parseFloat(p.latitude);
 			var lng=parseFloat(p.longitude);
 			var latlng=null;
-			if(lat || lng) latlng=new google.maps.LatLng(lat, lng);
+			if(lat || lng) { latlng=new google.maps.LatLng(lat, lng); }
 
-			photos.push({id:p.id, secret:p.secret, title:p.title, pos:latlng, accuracy:parseInt(p.accuracy), api:flickr, dateupload:parseInt(p.dateupload), datetaken:p.datetaken, owner:p.owner?p.owner:owner, ownername:p.ownername?p.ownername:ownername, farm:p.farm, server:p.server, iconfarm:p.iconfarm, iconserver:p.iconserver, buddy_url:buddy_url, license:parseInt(p.license)});
+			photos.push({id:p.id, secret:p.secret, title:p.title, pos:latlng, accuracy:parseInt(p.accuracy,10), api:flickr, dateupload:parseInt(p.dateupload,10), datetaken:p.datetaken, owner:p.owner?p.owner:owner, ownername:p.ownername?p.ownername:ownername, farm:p.farm, server:p.server, iconfarm:p.iconfarm, iconserver:p.iconserver, buddy_url:buddy_url, license:parseInt(p.license,10)});
 		}
 	},
 	gettitle: function(photo) {return photo.title;},
@@ -155,9 +159,12 @@ var flickr={
 	},
 	dateuploadurl: function(photo) { return 'http://www.flickr.com/photos/'+photo.owner+'/archives/date-posted/'+(flickr.dateupload(photo).replace(/\-/g,'/'))+'/'; },
 	buddyurl: function(photo) {
-		if(photo.buddy_url) return photo.buddy_url;
-		if(photo.iconserver&parseInt(photo.iconserver)>0) return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
-		else return 'http://www.flickr.com/images/buddyicon.jpg';
+		if(photo.buddy_url) { return photo.buddy_url; }
+		if(photo.iconserver&parseInt(photo.iconserver,10)>0) {
+			return 'http://farm'+photo.iconfarm+'.static.flickr.com/'+photo.iconserver+'/buddyicons/'+photo.owner+'.jpg';
+		} else {
+			return 'http://www.flickr.com/images/buddyicon.jpg';
+		}
 	},
 	licensestr: function(photo) {
 		switch(photo.license) {
@@ -171,9 +178,11 @@ var flickr={
 		}
 	},
 	_url: function(args, sign) {
-		var url = 'http://api.flickr.com/services/rest/?'
+		var url = 'http://api.flickr.com/services/rest/?';
 		var keys = [];
-		for (var k in args) { keys.push(k); }
+		for (var arg in args) { if(args.hasOwnProperty(arg)) {
+			keys.push(arg);
+		}}
 		keys.sort();
 
 	//	var signature = flickr._secret_key;
@@ -207,16 +216,16 @@ var mappeo={}; // http://mappeo.net/welcome/api
 var picasa={
 	name:'picasa',
 	check: function(rsp) { return true; },
-	parseTotalPage: function(rsp) { return parseInt(parseInt(rsp.feed.gphoto$crowded_length.$t)/PER_PAGE); },
+	parseTotalPage: function(rsp) { return parseInt(parseInt(rsp.feed.gphoto$crowded_length.$t,10)/PER_PAGE,10); },
 	parse: function(photos,rsp) {
-		if(!rsp.feed.entry) return;
+		if(!rsp.feed.entry) { return; }
 		for (var i=0,len=rsp.feed.entry.length; i<len; i++) {
 			var p=rsp.feed.entry[i];
 			var w=p.georss$where.gml$Point.gml$pos.$t.split(/\s+/);
 			w[0]=parseFloat(w[0]); w[1]=parseFloat(w[1]);
-			if(!w[0] && !w[1]) continue;
+			if(!w[0] && !w[1]) { continue; }
 
-			var pp={api:picasa, id:parseInt(p.gphoto$id), title:p.title.$t, pos:new google.maps.LatLng(w[0],w[1]), accuracy:12, linkurl:p.link[1].href, content:p.content.src, owner:p.author[0].name.$t, owner_url:p.author[0].uri.$t, buddyurl:p.author[0].gphoto$thumbnail.$t, date:p.published.$t};
+			var pp={api:picasa, id:parseInt(p.gphoto$id,10), title:p.title.$t, pos:new google.maps.LatLng(w[0],w[1]), accuracy:12, linkurl:p.link[1].href, content:p.content.src, owner:p.author[0].name.$t, owner_url:p.author[0].uri.$t, buddyurl:p.author[0].gphoto$thumbnail.$t, date:p.published.$t};
 			photos.push(pp);
 		}
 	},
@@ -237,9 +246,11 @@ var picasa={
 	buddyurl: function(photo) { return photo.buddyurl; },
 	licensestr: function(photo) { return ''; },
 	_url: function(args, sign) {
-		var url = 'http://picasaweb.google.com/data/feed/api/all?kind=photo&'
+		var url = 'http://picasaweb.google.com/data/feed/api/all?kind=photo&';
 		var keys = [];
-		for (var k in args) { keys.push(k); }
+		for (var arg in args) { if(args.hasOwnProperty(arg)) {
+			keys.push(arg);
+		}}
 		keys.sort();
 
 		for (var i=0; i<keys.length; i++) {
@@ -261,13 +272,13 @@ var picasa={
 var panoramio={
 	name:'panoramio',
 	check: function(rsp) { return true; },
-	parseTotalPage: function(rsp) { return parseInt(rsp.count/PER_PAGE); },
+	parseTotalPage: function(rsp) { return parseInt(rsp.count/PER_PAGE,10); },
 	parse: function(photos,rsp) {
 		for (var i=0,len=rsp.photos.length; i<len; i++) {
 			var photo=rsp.photos[i];
 			var lat=parseFloat(photo.latitude);
 			var lon=parseFloat(photo.longitude);
-			if(!lat && !lon) continue;
+			if(!lat && !lon) { continue; }
 	
 			photo.pos=new google.maps.LatLng(lat, lon);
 			photo.accuracy=12;
@@ -293,9 +304,11 @@ var panoramio={
 	buddyurl: function(photo) { return null; },
 	licensestr: function(photo) { return ''; },
 	_url: function(args, sign) {
-		var url = 'http://www.panoramio.com/map/get_panoramas.php?'
+		var url = 'http://www.panoramio.com/map/get_panoramas.php?';
 		var keys = [];
-		for (var k in args) { keys.push(k); }
+		for (var arg in args) { if(args.hasOwnProperty(arg)) {
+			keys.push(arg);
+		}}
 		keys.sort();
 		for (var i=0; i<keys.length; i++) {
 			var k = keys[i];
@@ -315,17 +328,17 @@ var panoramio={
 
 var gmps = {
 init:function(){
-	if(arguments.callee.inited) return;
+	if(arguments.callee.inited) { return; }
 
 var extend=function(subc,basec) {
-	var inh=function(){}; inh.prototype=basec.prototype; subc.prototype=new inh();
-	subc.prototype.constructor=subc; subc.superconstructor=basec; subc.prototype.superprototype=basec.prototype;
+	var Inh=function(){}; Inh.prototype=basec.prototype; subc.prototype=new Inh();
+	subc.prototype.constructor=subc; subc.superconstructor=basec;
 };
 
 
 // PhotoGroupMarker
 var PhotoGroupMarker=function(latlng,opts){ // called when created
-	PhotoGroupMarker.superconstructor.apply(this, arguments);
+	arguments.callee.superconstructor.apply(this, arguments);
 	this.photos=this.showpanel=null;
 	this.iconsize = this.getIcon().iconSize;
 
@@ -334,24 +347,24 @@ var PhotoGroupMarker=function(latlng,opts){ // called when created
 	this.$div.get(0).marker=this;
 };
 extend(PhotoGroupMarker, google.maps.Marker);
+PhotoGroupMarker.ic=function(img,w1,h1,w2,h2,w3,h3) {
+	var icon=new google.maps.Icon();
+	icon.image=img;
+	icon.iconSize=new google.maps.Size(w1,h1);
+	icon.iconAnchor=new google.maps.Point(w2,h2);
+	icon.infoWindowAnchor=new google.maps.Point(w3,w3);
+	return icon;
+};
 PhotoGroupMarker.generateIcon=function(n) {
 	if(!arguments.callee.init) {
-		function ic(img,w1,h1,w2,h2,w3,h3) {
-			var icon=new google.maps.Icon();
-			icon.image=img;
-			icon.iconSize=new google.maps.Size(w1,h1);
-			icon.iconAnchor=new google.maps.Point(w2,h2);
-			icon.infoWindowAnchor=new google.maps.Point(w3,w3);
-			return icon;
-		};
 		arguments.callee.init=true;
-		arguments.callee.i1=ic(pics['icon1'], 18, 19, 9, 9, 9, 9);
-		arguments.callee.i2=ic(pics['icon2'], 20, 21,10,10,10,10);
-		arguments.callee.i3=ic(pics['icon3'], 26, 27,13,13,13,13);
+		arguments.callee.i1=PhotoGroupMarker.ic(pics.icon1, 18, 19, 9, 9, 9, 9);
+		arguments.callee.i2=PhotoGroupMarker.ic(pics.icon2, 20, 21,10,10,10,10);
+		arguments.callee.i3=PhotoGroupMarker.ic(pics.icon3, 26, 27,13,13,13,13);
 	}
-	if(n < 10) return arguments.callee.i1;
-	else if(n < 100) return arguments.callee.i2;
-	else return arguments.callee.i3;
+	if(n < 10) { return arguments.callee.i1; }
+	else if(n < 100) { return arguments.callee.i2; }
+	else { return arguments.callee.i3; }
 };
 PhotoGroupMarker.instances=[[],[],[]];
 PhotoGroupMarker.getInstance=function(photogroup) {
@@ -359,7 +372,7 @@ PhotoGroupMarker.getInstance=function(photogroup) {
 	var idx = (n < 10) ? 0 : ((n < 100) ? 1 : 2);
 
 	var marker;
-	if(PhotoGroupMarker.instances[idx].length == 0) {
+	if(PhotoGroupMarker.instances[idx].length === 0) {
 		marker = new PhotoGroupMarker(new google.maps.LatLng(0,0), {icon:PhotoGroupMarker.generateIcon(n)});
 		marker.num = n;
 	} else {
@@ -372,7 +385,7 @@ PhotoGroupMarker.getInstance=function(photogroup) {
 	return marker;
 };
 PhotoGroupMarker.prototype.initialize=function(map){ // called when add to map
-	this.superprototype.initialize.apply(this,arguments);
+	google.maps.Marker.prototype.initialize.apply(this,arguments);
 	this.$div.appendTo(map.getPane(google.maps.MAP_MARKER_PANE));
 	var posi = this.getLatLng();
 	this.pos = map.fromLatLngToDivPixel(posi);
@@ -380,7 +393,7 @@ PhotoGroupMarker.prototype.initialize=function(map){ // called when add to map
 	this.gmap=map; // may be change to other map
 };
 PhotoGroupMarker.prototype.remove=function(){
-	this.superprototype.remove.apply(this,arguments);
+	google.maps.Marker.prototype.remove.apply(this,arguments);
 	this.photos=null;
 	var cf = this.$div.get(0);
 	cf.parentNode.removeChild(cf);
@@ -390,14 +403,13 @@ PhotoGroupMarker.prototype.remove=function(){
 	PhotoGroupMarker.instances[idx].push(this);
 };
 PhotoGroupMarker.prototype.redraw=function(force){
-	this.superprototype.redraw.apply(this, arguments);
-	if (!force || !this.pos) return;
+	google.maps.Marker.prototype.redraw.apply(this, arguments);
+	if (!force || !this.pos) { return; }
 	this.$div.css({left:(this.pos.x-this.iconsize.width/2), top:((this.pos.y-this.iconsize.height/2)+(this.iconsize.height-18)/2),zIndex:this.zidx+1});
 };
 PhotoGroupMarker.prototype.onClick=function(){
 	var marker=this.marker||this;
-	if(marker.gmap)
-		marker.gmap.onMarkerClick(marker,marker.photos);
+	if(marker.gmap && marker.gmap.onMarkerClick) { marker.gmap.onMarkerClick(marker,marker.photos); }
 };
 PhotoGroupMarker.prototype.showpanelstr = 
 '<div class="markerinfowin" style="width:505px;height:290px;">'+
@@ -418,14 +430,15 @@ PhotoGroupMarker.prototype.showpanelstr =
 '</div>';
 PhotoGroupMarker.prototype.showInfoWindow=function(idx){
 	var photo = this.photos[idx];
-	if(!this.showpanel){
-		var showpanel= $(this.showpanelstr).get(0);
+	var showpanel=this.showpanel;
+	if(!showpanel){
+		showpanel=$(this.showpanelstr).get(0);
 		this.showpanel=showpanel;
 	}
-	var showpanel=this.showpanel;
+	var $showpanel=$(showpanel);
 	if(this.gmap.getInfoWindow().isHidden()) {
 		this.openInfoWindow(showpanel, {suppressMapPan:false});
-		var mapdiv = $(showpanel).find('div.map').get(0);
+		var mapdiv = $showpanel.find('div.map').get(0);
 		var map = new google.maps.Map2(mapdiv);
 		map.addMapType(google.maps.PHYSICAL_MAP); 
 		map.addControl(new google.maps.HierarchicalMapTypeControl());
@@ -441,17 +454,18 @@ PhotoGroupMarker.prototype.showInfoWindow=function(idx){
 
 	showpanel.className='markerinfowin';
 	var href=photo.api.pageurl(photo);
-	$(showpanel).addClass(photo.api.name)
-		.find('a.title').attr('href',href).text(photo.api.gettitle(photo)).end()
-		.find('a.authicn').attr('href',photo.api.ownerurl(photo)).end()
-		.find('a.authlnk').attr('href',photo.api.ownerurl(photo)).text(photo.api.owner(photo)).end()
-		.find('a.takendatelnk').text(photo.api.datetaken(photo)).attr('href',photo.api.datetakenurl(photo)).end()
-		.find('a.uploaddatelnk').text(photo.api.dateupload(photo)).attr('href',photo.api.dateuploadurl(photo)).end()
-		.find('span.license').html(photo.api.licensestr(photo)).end()
-		.find('a.photoimg').attr('href',href).empty().append('<img src="'+photo.api.smallurl(photo)+'"></img>').end();
+	$showpanel.addClass(photo.api.name);
+	$showpanel.find('a.title').attr('href',href).text(photo.api.gettitle(photo));
+	$showpanel.find('a.authicn').attr('href',photo.api.ownerurl(photo));
+	$showpanel.find('a.authlnk').attr('href',photo.api.ownerurl(photo)).text(photo.api.owner(photo));
+	$showpanel.find('a.takendatelnk').text(photo.api.datetaken(photo)).attr('href',photo.api.datetakenurl(photo));
+	$showpanel.find('a.uploaddatelnk').text(photo.api.dateupload(photo)).attr('href',photo.api.dateuploadurl(photo));
+	$showpanel.find('span.license').html(photo.api.licensestr(photo));
+	$showpanel.find('a.photoimg').attr('href',href).empty().append('<img src="'+photo.api.smallurl(photo)+'"></img>');
 
 	var buddy=photo.api.buddyurl(photo);
-	(buddy) ? $(showpanel).find('img.authimg').show().attr('src',buddy) : $(showpanel).find('img.authimg').hide();
+	if(buddy) { $showpanel.find('img.authimg').show().attr('src',buddy); }
+	else { $showpanel.find('img.authimg').hide(); }
 };
 
 
@@ -466,16 +480,16 @@ var PanelControl=function(year,month,sort){
 	this.photos=null;
 
 	var nowy = new Date().getFullYear();
-	var $panel=this.$panel=$(
+	var panelstr=
 		'<div class="panelwrapper shortpanel">'+
 			'<div class="background" style="position:absolute;top:0px;right:0px;bottom:0px;left:0px;"></div>'+
 			'<div class="panel" style="position:absolute;padding:5px; width:180px; height:20px; top:-30px;  background-color:white; display:none;">'+
-				'<div style="display:none;">'+msg['date-date']+': '+
+				'<div style="display:none;">'+msg.date_date+': '+
 					'<select class="year_select">'+
-						'<option value="lastweek">'+msg['date-lastweek']+'</option>'+
-						'<option value="yesterday">'+msg['date-yesterday']+'</option>'+
-						'<option value="lastmonth">'+msg['date-lastmonth']+'</option>'+
-						'<option value="all">'+msg['date-all']+'</option>'+
+						'<option value="lastweek">'+msg.date_lastweek+'</option>'+
+						'<option value="yesterday">'+msg.date_yesterday+'</option>'+
+						'<option value="lastmonth">'+msg.date_lastmonth+'</option>'+
+						'<option value="all">'+msg.date_all+'</option>'+
 						'<option value="'+(nowy-0)+'">'+(nowy-0)+'</option><option value="'+(nowy-1)+'">'+(nowy-1)+'</option>'+
 						'<option value="'+(nowy-2)+'">'+(nowy-2)+'</option><option value="'+(nowy-3)+'">'+(nowy-3)+'</option>'+
 						'<option value="'+(nowy-4)+'">'+(nowy-4)+'</option><option value="'+(nowy-5)+'">'+(nowy-5)+'</option>'+
@@ -484,7 +498,7 @@ var PanelControl=function(year,month,sort){
 					'</select>'+
 					'<span class="date_month_option" style="display:none;"> / '+
 						'<select class="month_select">'+
-							'<option value="all">'+msg['month-all']+'</option>'+
+							'<option value="all">'+msg.month_all+'</option>'+
 							'<option value="01">01</option><option value="02">02</option>'+
 							'<option value="03">03</option><option value="04">04</option>'+
 							'<option value="05">05</option><option value="06">06</option>'+
@@ -494,7 +508,7 @@ var PanelControl=function(year,month,sort){
 						'</select>'+
 						'<span class="date_day_option" style="display:none;"> / '+
 							'<select class="day_select">'+
-								'<option value="all">'+msg['day-all']+'</option>'+
+								'<option value="all">'+msg.day_all+'</option>'+
 								'<option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option>'+
 								'<option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option>'+
 								'<option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>'+
@@ -507,18 +521,15 @@ var PanelControl=function(year,month,sort){
 						'</span>'+
 					'</span>'+
 				'</div>'+
-				'<div style="display:inline;">'+msg['sort-sort']+': '+
+				'<div style="display:inline;">'+msg.sort_sort+': '+
 					'<select class="sort_select">'+
-						'<option value="interestingness-desc">'+msg['sort-interestingness-desc']+'</option>'+
-						//'<option value="interestingness-asc">'+msg['sort-interestingness-asc']+'</option>'+
-						'<option value="date-taken-desc">'+msg['sort-date-taken-desc']+'</option>'+
-						//'<option value="date-taken-asc">'+msg['sort-date-taken-asc']+'</option>'+
-						'<option value="date-posted-desc">'+msg['sort-date-posted-desc']+'</option>'+
-						//'<option value="date-posted-asc">'+msg['sort-date-posted-asc']+'</option>'+
-						'<option value="relevance">'+msg['sort-relevance']+'</option>'+
+						'<option value="interestingness-desc">'+msg.sort_interestingness_desc+'</option>'+
+						'<option value="date-taken-desc">'+msg.sort_date_taken_desc+'</option>'+
+						'<option value="date-posted-desc">'+msg.sort_date_posted_desc+'</option>'+
+						'<option value="relevance">'+msg.sort_relevance+'</option>'+
 					'</select>'+
 				'</div>'+
-				'<div style="display:none;"> '+msg['search']+': '+
+				'<div style="display:none;"> '+msg.search+': '+
 					'<form class="search_form">'+
 						'<input class="search_text" type="text">'+
 						'<input type="submit">'+
@@ -527,9 +538,9 @@ var PanelControl=function(year,month,sort){
 			'</div>'+
 			'<table class="option" style="position:absolute;top:0px;width:150px;height:30px; background-color:white;">'+
 				'<tr>'+
-					'<td align="center" width="25px"><a class="prevbtn" title="'+msg['pageprev']+'"></a></td>'+
+					'<td align="center" width="25px"><a class="prevbtn" title="'+msg.pageprev+'"></a></td>'+
 					'<td align="center" class="loading"><span class="info"></span></td>'+
-					'<td align="center" width="25px"><a class="nextbtn" title="'+msg['pagenext']+'"></a></td>'+
+					'<td align="center" width="25px"><a class="nextbtn" title="'+msg.pagenext+'"></a></td>'+
 				'</tr>'+
 			'</table>'+
 			'<div class="photopanel" style="display:none;">'+
@@ -539,47 +550,51 @@ var PanelControl=function(year,month,sort){
 				'<div class="contentwrap" style="position:absolute;left:26px;right:26px; bottom:0px;height:85px; overflow:hidden;">'+
 					'<div class="content" style="position:absolute;top:0px; height:85px; overflow:hidden;"></div>'+
 				'</div>'+
-				'<a class="pp_btn" style="position:absolute;left:0px;bottom:0px;" title="'+msg['pagefrst']+'"></a>'+
-				'<a class="p_btn" style="position:absolute;left:0px;bottom:32px;" title="'+msg['pageprev']+'"></a>'+
-				'<a class="r_btn" style="position:absolute;right:0px;bottom:32px;" title="'+msg['pagenext']+'"></a>'+
-				'<a class="rr_btn" style="position:absolute;right:0px;bottom:0px;" title="'+msg['pagelast']+'"></a>'+
+				'<a class="pp_btn" style="position:absolute;left:0px;bottom:0px;" title="'+msg.pagefrst+'"></a>'+
+				'<a class="p_btn" style="position:absolute;left:0px;bottom:32px;" title="'+msg.pageprev+'"></a>'+
+				'<a class="r_btn" style="position:absolute;right:0px;bottom:32px;" title="'+msg.pagenext+'"></a>'+
+				'<a class="rr_btn" style="position:absolute;right:0px;bottom:0px;" title="'+msg.pagelast+'"></a>'+
 			'</div>'+
-		'</div>');
+		'</div>';
+	var $panel=$(panelstr);
+	this.$panel=$panel;
+
+	$panel.find('select.year_select').val(this.default_year);
+	$panel.find('select.month_select').val(this.default_month);
+	$panel.find('select.sort_select').val(this.default_sort);
 
 	var ctrl=this;
-
-	$panel.find('select.year_select').val(this.default_year).end()
-	      .find('select.month_select').val(this.default_month).end()
-	      .find('select.sort_select').val(this.default_sort);
-
 	function changeoption(){ try{
-		if(parseInt($panel.find('select.year_select').val())) {
+		if(parseInt($panel.find('select.year_select').val(),10)) {
 			$panel.find('span.date_month_option').show();
-			if(parseInt($panel.find('select.month_select').val())) {
+			if(parseInt($panel.find('select.month_select').val(),10)) {
 				$panel.find('span.date_day_option').show();
 			}
 		} else {
-			$panel.find('span.date_month_option').hide().end().find('select.month_select').val('all').end().find('select.day_select').val('all');
+			$panel.find('span.date_month_option').hide();
+			$panel.find('select.month_select').val('all');
+			$panel.find('select.day_select').val('all');
 		}
 		ctrl.gmap.changeOption();
 	} finally {
 		return false;
-	}};
+	}}
 	$panel.find('select').change(changeoption);
 	$panel.find('form').submit(changeoption);
 
-	$panel.find('a.prevbtn').click(function(){ ctrl.gmap.prevPage(); }).end()
-	      .find('a.nextbtn').click(function(){ ctrl.gmap.nextPage(); }).end()
-	      .find('td.loading').click(function(){ $panel.find('div.panel').slideToggle('fast'); });
+	$panel.find('a.prevbtn').click(function(){ ctrl.gmap.prevPage(); });
+	$panel.find('a.nextbtn').click(function(){ ctrl.gmap.nextPage(); });
+	$panel.find('td.loading').click(function(){ $panel.find('div.panel').slideToggle('fast'); });
 
-	$panel.find('a.pp_btn').click(function(){ ctrl.slide(-Infinity); }).end()
-	      .find('a.p_btn' ).click(function(){ ctrl.slide(-1); }).end()
-	      .find('a.r_btn') .click(function(){ ctrl.slide(1); }).end()
-	      .find('a.rr_btn').click(function(){ ctrl.slide(Infinity); });
+	$panel.find('a.pp_btn').click(function(){ ctrl.slide(-Infinity); });
+	$panel.find('a.p_btn' ).click(function(){ ctrl.slide(-1); });
+	$panel.find('a.r_btn') .click(function(){ ctrl.slide(1); });
+	$panel.find('a.rr_btn').click(function(){ ctrl.slide(Infinity); });
 
 
 	var $progressbar=$panel.find('div.progressbar');
-	var progressbarobj=this.progressbarobj=new google.maps.DraggableObject($progressbar.get(0));
+	this.progressbarobj=new google.maps.DraggableObject($progressbar.get(0));
+	var progressbarobj=this.progressbarobj;
 	google.maps.Event.addListener(progressbarobj, 'mousedown', function(){
 		var ofst=$progressbar.offset();
 		var pofst=$progressbar.parent().offset();
@@ -592,12 +607,12 @@ var PanelControl=function(year,month,sort){
 		var lef=ofst.left-pofst.left;
 		var pw=$progressbar.width();
 		var ppw=$progressbar.parent().width();
-		if(lef<0) lef=0;
-		else if(lef+pw > ppw) lef=ppw-pw;
+		if(lef<0) { lef=0; }
+		else if(lef+pw > ppw) { lef=ppw-pw; }
 		progressbarobj.moveTo(new google.maps.Point(lef, 0));
 	});
 	google.maps.Event.addListener(progressbarobj, 'dragend', function(){
-		var lef=parseInt($progressbar.css('left'));
+		var lef=parseInt($progressbar.css('left'),10);
 		var ppw=$progressbar.parent().width();
 
 		ctrl.slide(0, Math.floor(lef*ctrl.total/ppw));
@@ -612,21 +627,18 @@ PanelControl.prototype.initialize=function(map){
 };
 PanelControl.prototype.hide=function(isshow){
 	if(isshow) {
-		//this.$panel.children('div.optionpanel').fadeOut('fast');
 		this.$panel.children('div.photopanel').fadeIn('fast');
 		this.$panel.removeClass('shortpanel');
 		this.$panel.addClass('longpanel');
 	} else {
-		//this.$panel.children('div.optionpanel').fadeIn('fast');
 		this.$panel.children('div.photopanel').fadeOut('fast');
 		this.$panel.addClass('shortpanel');
 		this.$panel.removeClass('longpanel');
 	}
 };
-PanelControl.prototype.onImageLoaded=function(){ $(this).fadeIn('fast'); };
 PanelControl.prototype.setPhotos=function(photos){
-	if(photos.length==1) {
-		if(this.gmap) this.gmap.onPanelPhotoClick(0);
+	if(photos.length === 1) {
+		if(this.gmap) { this.gmap.onPanelPhotoClick(0); }
 		return;
 	}
 
@@ -639,7 +651,8 @@ PanelControl.prototype.setPhotos=function(photos){
 
 	this.total=photos.length;
 
-	this.$panel.find('span.total').text(this.total).end().find('span.selected').text(0);
+	this.$panel.find('span.total').text(this.total);
+	this.$panel.find('span.selected').text(0);
 	this.$panel.find('div.content').width(this.total*79);
 
 	this.prepareImage(0, photos);
@@ -655,20 +668,20 @@ PanelControl.prototype.prepareImage=function(startidx,photos){
 		var photo=photos[i];
 		var img=this.imgs[idx];
 		if(!img) {
-			img=this.imgs[idx]=$('<img style="position:absolute;width:75px;height:75px;"></img>').css('left',idx*79+1).appendTo(content).load(this.onImageLoaded).click(this.onPhotoClick).get(0);
+			img=this.imgs[idx]=$('<img style="position:absolute;width:75px;height:75px;"></img>').css('left',idx*79+1).appendTo(content).click(this.onPhotoClick).get(0);
 			img.idx=idx;
 			img.ctrl=this;
 		}
 		img.photo=photo;
 		photo.img=null;
 		this.photos[idx]=photo;
-		$(img).hide();
+		$(img).attr({title:'Loading...',src:pics.img_loading});
 	}
 };
 PanelControl.prototype.slide=function(dif,pos){
 	var width_wrap = this.$panel.find('div.contentwrap').width();
-	var show_count = parseInt((width_wrap+78)/79);
-	var rel_count = parseInt(width_wrap/79);
+	var show_count = parseInt((width_wrap+78)/79,10);
+	var rel_count = parseInt(width_wrap/79,10);
 	var roll_len = rel_count-1;
 
 	var total_idx = this.total-1;
@@ -677,14 +690,14 @@ PanelControl.prototype.slide=function(dif,pos){
 	
 	switch(dif) {
 	case 0:
-		if(pos!=null) begin_idx=pos;
+		if(!!pos) { begin_idx=pos; }
 	
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
 	
 	case 1:
-		if(total_idx-begin_idx+1 <= rel_count) return;
+		if(total_idx-begin_idx+1 <= rel_count) { return; }
 
 		begin_idx+=rel_count;
 		if(total_idx-begin_idx+1 <= rel_count) {
@@ -696,28 +709,28 @@ PanelControl.prototype.slide=function(dif,pos){
 		break;
 
 	case -1:
-		if(begin_idx == 0) return;
+		if(begin_idx === 0) { return; }
 		
 		begin_idx-=rel_count;
-		if(begin_idx <= 0) begin_idx = 0;
+		if(begin_idx <= 0) { begin_idx = 0; }
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
 
 	case Infinity:
-		if(total_idx-begin_idx+1 <= rel_count) return;
+		if(total_idx-begin_idx+1 <= rel_count) { return; }
 
 		end_idx=total_idx;
 		begin_idx=end_idx-(rel_count-1);
-		if(begin_idx<0) begin_idx=0;
+		if(begin_idx<0) { begin_idx=0; }
 		break;
 
 	case -Infinity:
-		if(begin_idx == 0) return;
+		if(begin_idx === 0) { return; }
 
 		begin_idx=0;
 		end_idx=begin_idx+(show_count-1);
-		if(end_idx>total_idx) end_idx=total_idx;
+		if(end_idx>total_idx) { end_idx=total_idx; }
 		break;
 	}
 	this.photos.show_idx=begin_idx;
@@ -732,7 +745,7 @@ PanelControl.prototype.slide=function(dif,pos){
 	}
 
 	var rang_count = (end_idx-begin_idx+1);
-	if(rang_count > rel_count) rang_count = rel_count;
+	if(rang_count > rel_count) { rang_count = rel_count; }
 
 	this.$panel.find('div.progressbar').animate({width:rang_count*100/(total_idx+1)+'%', left:begin_idx*100/(total_idx+1)+'%'}, 'fast');
 	this.$panel.find('div.content').animate({left:begin_idx*(-79)},'fast');
@@ -742,7 +755,7 @@ PanelControl.prototype.onPhotoClick=function(){
 	this.ctrl.$panel.find('img.selected').removeClass('selected');
 	$(this).addClass('selected');
 
-	if(this.ctrl.gmap) this.ctrl.gmap.onPanelPhotoClick(this.idx);
+	if(this.ctrl.gmap && this.ctrl.gmap.onPanelPhotoClick) { this.ctrl.gmap.onPanelPhotoClick(this.idx); }
 };
 
 
@@ -753,31 +766,31 @@ PanelControl.prototype.waiting=function(api,iswaiting){
 	} else {
 		this.wait[api.name]=false;
 		var t=false;
-		for(var elem in this.wait)
-			if(this.wait[elem]) t=true;
-		if(!t) this.$panel.find('td.loading').removeClass('loadingnow');
+		for(var elem in this.wait) { if(this.wait[elem]) {
+			t=true;
+		}}
+		if(!t) { this.$panel.find('td.loading').removeClass('loadingnow'); }
 	}
 };
 PanelControl.prototype.getTime=function(){ 
 	var year=this.$panel.find('select.year_select').val();
 
-	if(year == 'all') {
-		var dmax=new Date();
-		y=dmax.getFullYear();
-		m=dmax.getMonth()+1;
-		d=dmax.getDate();
-		dmax=y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d+' 23:59:59';
-		return {begin:'1970-01-01 00:00:00', end:dmax};
+	if(year === 'all') {
+		var ddmax=new Date();
+		var yy=ddmax.getFullYear();
+		var mm=ddmax.getMonth()+1;
+		var dd=ddmax.getDate();
+		return {begin:'1970-01-01 00:00:00', end:yy+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd+' 23:59:59'};
 	}
 	
 	var datemin=null;
-	if(year == 'lastmonth') {
+	if(year === 'lastmonth') {
 		datemin=new Date();
 		datemin.setMonth(datemin.getMonth()-1);
-	} else if(year == 'lastweek') {
+	} else if(year === 'lastweek') {
 		datemin=new Date();
 		datemin.setDate(datemin.getDate()-7);
-	} else if(year == 'yesterday') {
+	} else if(year === 'yesterday') {
 		datemin=new Date();
 		datemin.setDate(datemin.getDate()-1);
 	}
@@ -796,15 +809,12 @@ PanelControl.prototype.getTime=function(){
 	
 	// year is number
 	var month=this.$panel.find('select.month_select').val();
-	if(month == 'all') {
+	if(month === 'all') {
 		return {begin:year+'-01-01', end:year+'-12-31 23:59:59'};
 	} else {
 		var day=this.$panel.find('select.day_select').val();
-		if(day == 'all') {
-			return {begin:year+'-'+month+'-01', end:year+'-'+month+'-31 23:59:59'};
-		} else {
-			return {begin:year+'-'+month+'-'+day, end:year+'-'+month+'-'+day+' 23:59:59'};
-		}
+		if(day === 'all') { return {begin:year+'-'+month+'-01', end:year+'-'+month+'-31 23:59:59'}; }
+		else {             return {begin:year+'-'+month+'-'+day, end:year+'-'+month+'-'+day+' 23:59:59'}; }
 	}
 };
 PanelControl.prototype.getSort=function(){ return this.$panel.find('select.sort_select').val(); };
@@ -817,15 +827,14 @@ PanelControl.prototype.setInfo=function(str){ this.$panel.find('span.info').text
 
 // PhotosMap, for base class
 var PhotosMap=function(container, opts){
-	PhotosMap.superconstructor.apply(this, arguments);
+	arguments.callee.superconstructor.apply(this, arguments);
 	this.photos=[];
 
 	google.maps.Event.addListener(this, 'infowindowopen', this.onInfoWindowOpen);
 	google.maps.Event.addListener(this, 'infowindowclose', this.onInfoWindowClose);
 
 	var mt=this.getMapTypes();
-	for(var i=0; i<mt.length; i++)
-		mt[i].getMinimumResolution=this.getMinimumResolution;
+	for(var i=0; i<mt.length; i++) { mt[i].getMinimumResolution=this.getMinimumResolution; }
 };
 extend(PhotosMap, google.maps.Map2);
 PhotosMap.prototype.getMinimumResolution=function() { return 3; };
@@ -865,16 +874,15 @@ PhotosMap.prototype.groupPhotos=function() {
 			if( b.containsLatLng(pos)) {
 				isMerged=true;
 				b.photos.push(photo);
-				if(b.firstdate>photo.firstdate)
-					b.firstdate=photo.firstdate;
+				if(b.firstdate>photo.firstdate) { b.firstdate=photo.firstdate; }
 				break;
 			}
 		}
 		if(!isMerged) {
-			var b = new google.maps.LatLngBounds(new google.maps.LatLng(pos.lat()-delta, pos.lng()-delta), new google.maps.LatLng(pos.lat()+delta, pos.lng()+delta));
-			b.photos=[photo];
-			b.firstdate=photo.datetaken;
-			temp_bounds.push(b);
+			var bb = new google.maps.LatLngBounds(new google.maps.LatLng(pos.lat()-delta, pos.lng()-delta), new google.maps.LatLng(pos.lat()+delta, pos.lng()+delta));
+			bb.photos=[photo];
+			bb.firstdate=photo.datetaken;
+			temp_bounds.push(bb);
 		}
 	}
 	return temp_bounds;
@@ -882,9 +890,9 @@ PhotosMap.prototype.groupPhotos=function() {
 PhotosMap.prototype.showPhotoGroups=function(pgroups) {
 	for (var i=0,len=pgroups.length; i<len ; ++i) {
 		var pgroup = pgroups[i];
-		if(pgroup.photos.length == 0) continue;
+		if(pgroup.photos.length === 0) { continue; }
 
-		if(pgroup.maker) this.removeOverlay(pgroup.maker);
+		if(pgroup.maker) { this.removeOverlay(pgroup.maker); }
 		pgroup.maker=PhotoGroupMarker.getInstance(pgroup);
 		pgroup.maker.setLatLng(pgroup.getCenter());
 		this.addOverlay(pgroup.maker);
@@ -892,12 +900,10 @@ PhotosMap.prototype.showPhotoGroups=function(pgroups) {
 };
 PhotosMap.prototype.onMarkerClick=function(marker,photos){
 	this.currSelectMarker=marker;
-	this.panelctrl && this.panelctrl.setPhotos && this.panelctrl.setPhotos(photos);
+	if(this.panelctrl && this.panelctrl.setPhotos) { this.panelctrl.setPhotos(photos); }
 };
 PhotosMap.prototype.onPanelPhotoClick=function(idx){
-	if(this.currSelectMarker) {
-		this.currSelectMarker.showInfoWindow(idx);
-	}
+	if(this.currSelectMarker) { this.currSelectMarker.showInfoWindow(idx); }
 };
 PhotosMap.prototype.onInfoWindowOpen=function(){
 	this.suspenddragevent=true;
@@ -906,14 +912,14 @@ PhotosMap.prototype.onInfoWindowOpen=function(){
 PhotosMap.prototype.onInfoWindowClose=function(){
 	this.returnToSavedPosition();
 	this.suspenddragevent=false;
-	this.panelctrl && this.panelctrl.hide && this.panelctrl.hide();
+	if(this.panelctrl && this.panelctrl.hide) { this.panelctrl.hide(); }
 };
 
 
 
 // BrowseMap : PhotosMap
 var BrowseMap=function(container, opts){
-	BrowseMap.superconstructor.call(this, container, opts);
+	arguments.callee.superconstructor.apply(this, arguments);
 	this.disable_refresh=false;
 	this.lastcenter=null;
 	this.pageCurr=1;
@@ -942,7 +948,7 @@ var BrowseMap=function(container, opts){
 	if(latlngstr) {
 		var a = latlngstr.split(',');
 		init_latlng=new google.maps.LatLng(parseFloat(a[0]),parseFloat(a[1]));
-		init_zoom=parseInt($.cookie('init_zoom'));
+		init_zoom=parseInt($.cookie('init_zoom'),10);
 	} else {
 		init_latlng=new google.maps.LatLng(40,-90);
 		init_zoom=4;
@@ -956,7 +962,7 @@ BrowseMap.prototype.onzoomend=function(){
 	this.refreshView();
 };
 BrowseMap.prototype.ondragend=function(){
-	if(this.suspenddragevent) return;
+	if(this.suspenddragevent) { return; }
 	var lastcenter=this.lastcenter;
 	var bound=this.getBounds();
 	var center=bound.getCenter();
@@ -966,15 +972,18 @@ BrowseMap.prototype.ondragend=function(){
 		var dy  = Math.abs(center.lat() - lastcenter.lat());
 		var bx = span.lng();
 		var by = span.lat();
-		if ((dx < 0.15*bx) && (dy < 0.15*by)) return;
+		if ((dx < 0.15*bx) && (dy < 0.15*by)) { return; }
 	}
 	this.pageCurr=this.pageTotal=1;
 	this.refreshView();
 };
 BrowseMap.prototype.refreshView=function(nodelay, timestamp){
-	if(this.disable_refresh) return;
-	if(!timestamp) timestamp = this.search_timestamp = new Date().getTime();
-	if(this.search_timestamp != timestamp) return;
+	if(this.disable_refresh) { return; }
+	if(!timestamp) {
+		this.search_timestamp = new Date().getTime();
+		timestamp = this.search_timestamp;
+	}
+	if(this.search_timestamp !== timestamp) { return; }
 
 	var gmap = this;
 	if(!nodelay) {
@@ -1004,10 +1013,12 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 		e-=wid/5;
 		n-=hig/5;
 		s+=hig/5;
-		if(w > 180) w-=360;
-		if(e <= -180) e+=360;
-		if(e < w)
-			((180+e) > (180-w)) ? w=-180 : e=180;
+		if(w > 180) { w-=360; }
+		if(e <= -180) { e+=360; }
+		if(e < w) {
+			if((180+e) > (180-w)) { w=-180; }
+			else { e=180; }
+		}
 	}
 
 	//var points = [new gobj.GLatLng(n,e),new gobj.GLatLng(n,w),new gobj.GLatLng(s,w),new gobj.GLatLng(s,e),new gobj.GLatLng(n,e)];
@@ -1018,19 +1029,18 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 	searchOption.sort=this.getPanelControl().getSort();
 
 	var t = this.getPanelControl().getTime();
-	if(t.begin) searchOption.min_taken_date=t.begin;
-	if(t.end)   searchOption.max_taken_date=t.end;
+	if(t.begin) { searchOption.min_taken_date=t.begin; }
+	if(t.end) { searchOption.max_taken_date=t.end; }
 
 	var searchtxt = this.getPanelControl().getSearchText();
-	if(searchtxt!='')
-		searchOption.text=searchtxt;
+	if(!!searchtxt) { searchOption.text=searchtxt; }
 
 	flickr.callapi('flickr.photos.search', searchOption, this, this.photos_search_onLoad, {api:flickr, search_timestamp:this.search_timestamp});
 	this.getPanelControl().waiting(flickr, true);
 	
 	var option={from:(this.pageCurr-1)*PER_PAGE, to:this.pageCurr*PER_PAGE, minx:w, miny:s, maxx:e, maxy:n};
 	var sort=this.getPanelControl().getSort();
-    if(sort == 'interestingness-desc' || sort == 'interestingness-asc' || sort == 'relevance') {
+    if(sort === 'interestingness-desc' || sort === 'interestingness-asc' || sort === 'relevance') {
 		option.order = 'popularity';
 		option.set = 'public';
 	} else {
@@ -1047,18 +1057,17 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 
 
 BrowseMap.prototype.photos_search_onLoad=function(rsp, params){
-	if(this.search_timestamp != params.search_timestamp) return;
+	if(this.search_timestamp !== params.search_timestamp) { return; }
 try {
 	var api=params.api;
-	if(!api.check(rsp)) return;
+	if(!api.check(rsp)) { return; }
 
 	var total=api.parseTotalPage(rsp);
-	if(total > this.pageTotal)
-		this.pageTotal = total;
+	if(total > this.pageTotal) { this.pageTotal = total; }
 
 	this.getPanelControl().setInfo(this.pageCurr+' / '+this.pageTotal);
 
-	if(!this.photos.search_timestamp || this.photos.search_timestamp!=this.search_timestamp) {
+	if(!this.photos.search_timestamp || this.photos.search_timestamp!==this.search_timestamp) {
 		this.photos=[]; // clear previous photo data
 		this.photos.search_timestamp=this.search_timestamp;
 	}
@@ -1070,7 +1079,7 @@ try {
 	this.getPanelControl().waiting(api, false);
 }};
 BrowseMap.prototype.regroupphotos=function(){
-	if(!this.photos) return;
+	if(!this.photos) { return; }
 
 	var pgroups=this.groupPhotos();
 
@@ -1079,12 +1088,12 @@ BrowseMap.prototype.regroupphotos=function(){
 	this.showPhotoGroups(pgroups);
 };
 BrowseMap.prototype.prevPage=function(){
-	if( this.pageCurr <= 1) return;
+	if( this.pageCurr <= 1) { return; }
 	this.pageCurr--;
 	this.refreshView(true);
 };
 BrowseMap.prototype.nextPage=function(){
-	if( this.pageCurr >= this.pageTotal) return;
+	if( this.pageCurr >= this.pageTotal) { return; }
 	this.pageCurr++;
 	this.refreshView(true);
 };
@@ -1108,11 +1117,12 @@ try{
 google.load('maps',  '2.x');
 
 function initialize() {
-	if (!google.maps.BrowserIsCompatible()) return;
+	if (!google.maps.BrowserIsCompatible()) { return; }
 
 	var sty=document.createElement('style');
 	sty.type='text/css';
-	sty.styleSheet ? sty.styleSheet.cssText=STYLE /* ie */ : sty.appendChild(document.createTextNode(STYLE));
+	if(sty.styleSheet) { sty.styleSheet.cssText=CSS_STYLE; }
+	else { sty.appendChild(document.createTextNode(CSS_STYLE)); }
 	document.getElementsByTagName('head')[0].appendChild(sty);
 
 	gmps.init();
@@ -1123,3 +1133,5 @@ function initialize() {
 }
 
 google.setOnLoadCallback(initialize);
+
+})();
