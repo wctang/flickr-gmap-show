@@ -824,7 +824,6 @@ PanelControl.prototype.setInfo=function(txt){
 	this.$panel.find('span.info').text(txt);
 };
 PanelControl.prototype.setPage=function(curr,total){
-	console.log(curr,total);
 	if(curr !==null) { this.pageCurr=curr; }
 	if(total!==null) {
 		if(total ===-1) { this.pageTotal=-1;
