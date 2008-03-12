@@ -217,7 +217,7 @@ var mappeo={}; // http://mappeo.net/welcome/api
 var picasa={
 	name:'picasa',
 	check: function(rsp) { return true; },
-	parseTotalPage: function(rsp) { return parseInt(parseInt(rsp.feed.gphoto$crowded_length.$t,10)/PER_PAGE,10); },
+	parseTotalPage: function(rsp) { return Math.ceil(parseInt(rsp.feed.gphoto$crowded_length.$t,10)/PER_PAGE); },
 	parse: function(photos,rsp) {
 		if(!rsp.feed.entry) { return; }
 		for (var i=0,len=rsp.feed.entry.length; i<len; i++) {
@@ -273,7 +273,7 @@ var picasa={
 var panoramio={
 	name:'panoramio',
 	check: function(rsp) { return true; },
-	parseTotalPage: function(rsp) { return parseInt(rsp.count/PER_PAGE,10); },
+	parseTotalPage: function(rsp) { return Math.ceil(rsp.count/PER_PAGE); },
 	parse: function(photos,rsp) {
 		for (var i=0,len=rsp.photos.length; i<len; i++) {
 			var photo=rsp.photos[i];
@@ -1140,7 +1140,7 @@ BrowseMap.prototype.refreshView=function(nodelay, timestamp){
 	panoramio.callapi(option, this, this.photos_search_onLoad, {api:panoramio, search_timestamp:this.search_timestamp});
 	this.getPanelControl().waiting(panoramio, true);
 
-	if(!picasa.lastTotal || pageCurr <= picasa.lastTotal) {
+	if(picasa.lastTotal===undefined || pageCurr <= picasa.lastTotal) {
 		var optt={'lower-left':s+','+w, 'upper-right':n+','+e, 'start-index':((pageCurr-1)*PER_PAGE)+1,'max-results':PER_PAGE};
 		picasa.callapi(optt, this, this.photos_search_onLoad, {api:picasa, search_timestamp:this.search_timestamp});
 		this.getPanelControl().waiting(picasa, true);
