@@ -8,7 +8,7 @@ opendir(DIRHANDLE, $fxprofile);
 
 foreach $file (@files) {
 	next if ($file eq '.' || $file eq '..');
-	my $gmdir="$fxprofile$file/gm_scripts";
+	my $gmdir="$fxprofile$file/gm_scripts/flickr_gmap_show";
 	next if not (-d $gmdir);
 	
 	copy($from, $gmdir);
