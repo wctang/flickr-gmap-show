@@ -1,10 +1,11 @@
 // Flickr Gmap Show
-// v3.3
+// v3.4
 // Copyright (c) 2008, wctang (Tang Wei-Ching).
 // Released under the GPL license
 // http://www.gnu.org/copyleft/gpl.html
 //
 // Change Log:
+// v3.4  08/08/14 Minor update for flickr update.
 // v3.3  08/05/28 Update library version.
 // v3.2  08/03/11 Remove BrowseControl and PhotoSetControl.
 // v3.1  08/02/29 Support firefox 3. Add location history.
@@ -24,7 +25,7 @@
 // @name          Flickr Gmap Show
 // @namespace     http://code.google.com/p/flickr-gmap-show/
 // @description   Show Flickr geotagged photos with Google Map.
-// @version       3.3
+// @version       3.4
 // @author        wctang <wctang@gmail.com>
 // @source        http://userscripts.org/scripts/show/9450
 // @identifier    http://userscripts.org/scripts/source/9450.user.js
@@ -42,8 +43,8 @@ var SCRIPT = {
 	description: 'Show Flickr geotagged photos with Google Map.',
 	source: 'http://userscripts.org/scripts/show/9450',
 	identifier: 'http://userscripts.org/scripts/source/9450.user.js',
-	version: '3.3',
-	date: (new Date(2008, 5, 28)).valueOf() // update date
+	version: '3.4',
+	date: (new Date(2008, 8, 14)).valueOf() // update date
 };
 
 var unsafewin = (typeof unsafeWindow != 'undefined') ? unsafeWindow : window;
@@ -305,7 +306,7 @@ function prepare() {
 	loadscript(js_gmap+k,null,function(){
 		unsafewin.grab_win = (function(w) { google=w.google; }); // unsafe!!, pass real window to sandbox...
 		location.href = 'javascript:void(window.grab_win(window));'; // call
-		unsafewin.google.load('maps', '2');
+		unsafewin.google.load('maps', '2', {'language':unsafewin.navigator.language});
 		unsafewin.google.load('jquery', '1.2');
 	});
 	loadscript(js_analytics,null,function(){
@@ -444,17 +445,14 @@ function initialize() {
 
 	var paras,pp;
 	if(       /^http:\/\/(?:www.*\.)?flickr\.com\/photos\/([a-zA-Z0-9\-\_@]+)\/(\d+)(?:\/.*)?$/.exec(location.href)) {
-		var maplnk = document.getElementById('a_link_to_map');
-		if(maplnk) {
-			maplnk.setAttribute('photo_id',RegExp.$2);
-			maplnk.setAttribute('onclick','return false;');
-			maplnk.addEventListener('click',launch,false);
-		}
-		var edtlnk = document.getElementById('a_place_on_map_old');
-		if(edtlnk) {
-			edtlnk.setAttribute('photo_id',RegExp.$2);
-			edtlnk.setAttribute('onclick','return false;');
-			edtlnk.addEventListener('click',launch,false);
+		var span = document.getElementById('div_taken_in_links');
+		if(span) {
+			var lnks = span.getElementsByTagName('a');
+			for(var ln in lnks) {
+				lnks[ln].setAttribute('photo_id',RegExp.$2);
+				lnks[ln].setAttribute('onclick','return false;');
+				lnks[ln].addEventListener('click',launch,false);
+			}
 		}
 	} else if(/^http:\/\/(?:www.*\.)?flickr\.com\/photos\/([a-zA-Z0-9\-\_@]+)\/sets\/(\d+)(?:\/.*)?$/.exec(location.href)) {
 		paras = document.getElementsByTagName('p');
