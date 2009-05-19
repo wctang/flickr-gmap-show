@@ -121,8 +121,8 @@ owner: function(photo) {return photo.author;},
 ownerurl: function(photo) {return 'http://picasaweb.google.com/'+photo.user;},
 date: function(photo) { return photo.timestamp.toDateString(); },
 parse : function(photo) {
-  var thumbNodes = google.feeds.getElementsByTagNameNS(photo.xmlNode, 'http://search.yahoo.com/mrss/', 'thumbnail');
-  var content = google.feeds.getElementsByTagNameNS(photo.xmlNode, 'http://search.yahoo.com/mrss/', 'content');
+  var thumbNodes = photo.xmlNode.getElementsByTagName('media:thumbnail');
+  var content = photo.xmlNode.getElementsByTagName('media:content');
 
   var iconurl = {};
   iconurl.url = thumbNodes[0]?thumbNodes[0].getAttributeNode('url').firstChild.nodeValue:null;
@@ -149,7 +149,7 @@ parse : function(photo) {
     fullurl.height = parseInt(content[0].getAttributeNode('height').firstChild.nodeValue);
   }
   var pageurl=photo.link;
-  var timestamp=new Date(parseInt(photo.xmlNode.getElementsByTagName('timestamp')[0].firstChild.nodeValue));
+  var timestamp=new Date(parseInt(photo.xmlNode.getElementsByTagName('gphoto:timestamp')[0].firstChild.nodeValue));
   return {title:photo.title,api:picasa,iconurl:iconurl,thumburl:thumburl,mediumurl:mediumurl,pageurl:pageurl,fullurl:fullurl,timestamp:timestamp};
 },
 callapi : function(methodname, args, obj, callback, params) {
@@ -543,9 +543,9 @@ try {
   if(rsp.error) { alert(rsp.error.message); return; }
 
   var photos=rsp.feed.entries;
-  this.pageCurr=((parseInt(rsp.xmlDocument.firstChild.getElementsByTagName('startIndex')[0].firstChild.nodeValue)-1)/PER_PAGE)+1;
-  this.pageTotal=Math.ceil(parseInt(rsp.xmlDocument.firstChild.getElementsByTagName('totalResults')[0].firstChild.nodeValue)/PER_PAGE);
-  var user = rsp.xmlDocument.firstChild.getElementsByTagName('user')[0].firstChild.nodeValue;
+  this.pageCurr=((parseInt(rsp.xmlDocument.firstChild.getElementsByTagName('openSearch:startIndex')[0].firstChild.nodeValue)-1)/PER_PAGE)+1;
+  this.pageTotal=Math.ceil(parseInt(rsp.xmlDocument.firstChild.getElementsByTagName('openSearch:totalResults')[0].firstChild.nodeValue)/PER_PAGE);
+  var user = rsp.xmlDocument.firstChild.getElementsByTagName('gphoto:user')[0].firstChild.nodeValue;
 
   if(this.pageTotal<2) {
     $(this.options).hide();
@@ -557,7 +557,7 @@ try {
   for (var i=0,len=photos.length; i<len; i++) {
     var photo=photos[i];
     
-    var where = photo.xmlNode.getElementsByTagName('where');
+    var where = photo.xmlNode.getElementsByTagName('georss:where');
     if(!where||!where.length) { continue; }
     
     var point = where[0].firstChild.textContent||where[0].firstChild.text;
