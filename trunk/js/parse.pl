@@ -10,7 +10,7 @@ sub openf {
 	close(DAT);
 	
 	foreach $line (@codedata) {
-		if($line =~ /^\/\*include (.*) \*\/$/) {
+		if($line =~ /^\/\*include (.*) \*\//) {
 			openf($1,$OUTPUT);
 		} else {
 			print $OUTPUT $line;
